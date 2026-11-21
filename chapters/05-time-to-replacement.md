@@ -254,7 +254,7 @@ Andersen, P. K., and Gill, R. D. (1982). “Cox’s regression model for countin
 
 Austin, P. C., Lee, D. S., and Fine, J. P. (2016). “Introduction to the analysis of survival data in the presence of competing risks.” 『Circulation』 133(6), 601–609.
 
-Cox, D. R. (1972). “Regression models and life-tables.” 『Journal of the Royal Statistical Society: Series B』 34(2), 187–220.
+Cox, D. R. (1972). “Regression models and life-tables.” 『Journal of the Royal Statistical Society: Series B (Methodological)』 34(2), 187–202.
 
 Efron, B. (1977). “The efficiency of Cox’s likelihood function for censored data.” 『Journal of the American Statistical Association』 72(359), 557–565.
 
@@ -280,7 +280,7 @@ Rizopoulos, D. (2011). “Dynamic predictions and prospective accuracy in joint 
 
 Rizopoulos, D. (2012). 『Joint Models for Longitudinal and Time-to-Event Data: With Applications in R』. Chapman and Hall/CRC.
 
-Rizopoulos, D., Miranda-Afonso, P., and Papageorgiou, G. (2026). 『JMbayes2: Extended Joint Models for Longitudinal and Time-to-Event Data』. R package version 0.6-5.
+Rizopoulos, D., Miranda-Afonso, P., and Papageorgiou, G. (2026). 『JMbayes2: Extended Joint Models for Longitudinal and Time-to-Event Data』. R package version 0.6-5. https://doi.org/10.32614/CRAN.package.JMbayes2
 
 van Houwelingen, H. C. (2007). “Dynamic prediction by landmarking in event history analysis.” 『Scandinavian Journal of Statistics』 34(1), 70–85.
 
