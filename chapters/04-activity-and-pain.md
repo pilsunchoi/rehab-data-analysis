@@ -174,18 +174,18 @@ PASE의 신뢰도를 이 데이터로 직접 추정할 수는 없다. 같은 주
 
 Allison, P. D. (2009). 『Fixed Effects Regression Models』. Sage.
 
-Fransen, M., McConnell, S., Harmer, A. R., Van der Esch, M., Simic, M., and Bennell, K. L. (2015). “Exercise for osteoarthritis of the knee: A Cochrane systematic review.” 『British Journal of Sports Medicine』 49(24), 1554–1557.
+Fransen, M., McConnell, S., Harmer, A. R., Van der Esch, M., Simic, M., and Bennell, K. L. (2015). “Exercise for osteoarthritis of the knee: A Cochrane systematic review.” *British Journal of Sports Medicine* 49(24), 1554–1557.
 
 Fuller, W. A. (1987). 『Measurement Error Models』. Wiley.
 
-Griliches, Z., and Hausman, J. A. (1986). “Errors in variables in panel data.” 『Journal of Econometrics』 31(1), 93–118.
+Griliches, Z., and Hausman, J. A. (1986). “Errors in variables in panel data.” *Journal of Econometrics* 31(1), 93–118.
 
-Hamaker, E. L., Kuiper, R. M., and Grasman, R. P. P. P. (2015). “A critique of the cross-lagged panel model.” 『Psychological Methods』 20(1), 102–116.
+Hamaker, E. L., Kuiper, R. M., and Grasman, R. P. P. P. (2015). “A critique of the cross-lagged panel model.” *Psychological Methods* 20(1), 102–116.
 
 Hernán, M. A., and Robins, J. M. (2020). 『Causal Inference: What If』. Chapman and Hall/CRC.
 
-Mundlak, Y. (1978). “On the pooling of time series and cross section data.” 『Econometrica』 46(1), 69–85.
+Mundlak, Y. (1978). “On the pooling of time series and cross section data.” *Econometrica* 46(1), 69–85.
 
-Washburn, R. A., Smith, K. W., Jette, A. M., and Janney, C. A. (1993). “The Physical Activity Scale for the Elderly (PASE): Development and evaluation.” 『Journal of Clinical Epidemiology』 46(2), 153–162.
+Washburn, R. A., Smith, K. W., Jette, A. M., and Janney, C. A. (1993). “The Physical Activity Scale for the Elderly (PASE): Development and evaluation.” *Journal of Clinical Epidemiology* 46(2), 153–162.
 
 Wooldridge, J. M. (2010). 『Econometric Analysis of Cross Section and Panel Data』 (2nd ed.). MIT Press.

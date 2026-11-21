@@ -269,11 +269,11 @@ $\exp(\beta_k)$는 다른 특성이 같을 때 $x_k$가 한 단위 클 때의 �
 
 ## 참고문헌
 
-Bates, D., Mächler, M., Bolker, B., and Walker, S. (2015). “Fitting linear mixed-effects models using lme4.” 『Journal of Statistical Software』 67(1), 1–48.
+Bates, D., Mächler, M., Bolker, B., and Walker, S. (2015). “Fitting linear mixed-effects models using lme4.” *Journal of Statistical Software* 67(1), 1–48.
 
-Bellamy, N., Buchanan, W. W., Goldsmith, C. H., Campbell, J., and Stitt, L. W. (1988). “Validation study of WOMAC: A health status instrument for measuring clinically important patient relevant outcomes to antirheumatic drug therapy in patients with osteoarthritis of the hip or knee.” 『The Journal of Rheumatology』 15(12), 1833–1840.
+Bellamy, N., Buchanan, W. W., Goldsmith, C. H., Campbell, J., and Stitt, L. W. (1988). “Validation study of WOMAC: A health status instrument for measuring clinically important patient relevant outcomes to antirheumatic drug therapy in patients with osteoarthritis of the hip or knee.” *The Journal of Rheumatology* 15(12), 1833–1840.
 
-Kellgren, J. H., and Lawrence, J. S. (1957). “Radiological assessment of osteo-arthrosis.” 『Annals of the Rheumatic Diseases』 16(4), 494–502.
+Kellgren, J. H., and Lawrence, J. S. (1957). “Radiological assessment of osteo-arthrosis.” *Annals of the Rheumatic Diseases* 16(4), 494–502.
 
 Kish, L. (1965). 『Survey Sampling』. Wiley.
 
@@ -281,10 +281,10 @@ Little, R. J. A., and Rubin, D. B. (2019). 『Statistical Analysis with Missing 
 
 Nevitt, M. C., Felson, D. T., and Lester, G. (2006). 『The Osteoarthritis Initiative: Protocol for the Cohort Study』 (Version 1.1). National Institute of Arthritis and Musculoskeletal and Skin Diseases.
 
-Rubin, D. B. (1976). “Inference and missing data.” 『Biometrika』 63(3), 581–592.
+Rubin, D. B. (1976). “Inference and missing data.” *Biometrika* 63(3), 581–592.
 
-Shrout, P. E., and Fleiss, J. L. (1979). “Intraclass correlations: Uses in assessing rater reliability.” 『Psychological Bulletin』 86(2), 420–428.
+Shrout, P. E., and Fleiss, J. L. (1979). “Intraclass correlations: Uses in assessing rater reliability.” *Psychological Bulletin* 86(2), 420–428.
 
-Terwee, C. B., Bot, S. D. M., de Boer, M. R., van der Windt, D. A. W. M., Knol, D. L., Dekker, J., Bouter, L. M., and de Vet, H. C. W. (2007). “Quality criteria were proposed for measurement properties of health status questionnaires.” 『Journal of Clinical Epidemiology』 60(1), 34–42.
+Terwee, C. B., Bot, S. D. M., de Boer, M. R., van der Windt, D. A. W. M., Knol, D. L., Dekker, J., Bouter, L. M., and de Vet, H. C. W. (2007). “Quality criteria were proposed for measurement properties of health status questionnaires.” *Journal of Clinical Epidemiology* 60(1), 34–42.
 
-Washburn, R. A., Smith, K. W., Jette, A. M., and Janney, C. A. (1993). “The Physical Activity Scale for the Elderly (PASE): Development and evaluation.” 『Journal of Clinical Epidemiology』 46(2), 153–162.
+Washburn, R. A., Smith, K. W., Jette, A. M., and Janney, C. A. (1993). “The Physical Activity Scale for the Elderly (PASE): Development and evaluation.” *Journal of Clinical Epidemiology* 46(2), 153–162.

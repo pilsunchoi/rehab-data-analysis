@@ -360,22 +360,22 @@ if (!is.null(lc)) {
 
 ## 참고문헌
 
-Barnett, A. G., van der Pols, J. C., and Dobson, A. J. (2005). "Regression to the mean: What it is and how to deal with it." 『International Journal of Epidemiology』 34(1), 215–220.
+Barnett, A. G., van der Pols, J. C., and Dobson, A. J. (2005). "Regression to the mean: What it is and how to deal with it." *International Journal of Epidemiology* 34(1), 215–220.
 
-Bauer, D. J., and Curran, P. J. (2003). "Distributional assumptions of growth mixture models: Implications for overextraction of latent trajectory classes." 『Psychological Methods』 8(3), 338–363.
+Bauer, D. J., and Curran, P. J. (2003). "Distributional assumptions of growth mixture models: Implications for overextraction of latent trajectory classes." *Psychological Methods* 8(3), 338–363.
 
-Collins, J. E., Katz, J. N., Dervan, E. E., and Losina, E. (2014). "Trajectories and risk profiles of pain in persons with radiographic, symptomatic knee osteoarthritis: Data from the Osteoarthritis Initiative." 『Osteoarthritis and Cartilage』 22(5), 622–630.
+Collins, J. E., Katz, J. N., Dervan, E. E., and Losina, E. (2014). "Trajectories and risk profiles of pain in persons with radiographic, symptomatic knee osteoarthritis: Data from the Osteoarthritis Initiative." *Osteoarthritis and Cartilage* 22(5), 622–630.
 
-Laird, N. M., and Ware, J. H. (1982). "Random-effects models for longitudinal data." 『Biometrics』 38(4), 963–974.
+Laird, N. M., and Ware, J. H. (1982). "Random-effects models for longitudinal data." *Biometrics* 38(4), 963–974.
 
 Little, R. J. A., and Rubin, D. B. (2019). 『Statistical Analysis with Missing Data』 (3rd ed.). Wiley.
 
 Nagin, D. S. (2005). 『Group-Based Modeling of Development』. Harvard University Press.
 
-Proust-Lima, C., Philipps, V., and Liquet, B. (2017). "Estimation of extended mixed models using latent classes and latent processes: The R package lcmm." 『Journal of Statistical Software』 78(2), 1–56.
+Proust-Lima, C., Philipps, V., and Liquet, B. (2017). "Estimation of extended mixed models using latent classes and latent processes: The R package lcmm." *Journal of Statistical Software* 78(2), 1–56.
 
-Robinson, G. K. (1991). "That BLUP is a good thing: The estimation of random effects." 『Statistical Science』 6(1), 15–32.
+Robinson, G. K. (1991). "That BLUP is a good thing: The estimation of random effects." *Statistical Science* 6(1), 15–32.
 
-Self, S. G., and Liang, K.-Y. (1987). "Asymptotic properties of maximum likelihood estimators and likelihood ratio tests under nonstandard conditions." 『Journal of the American Statistical Association』 82(398), 605–610.
+Self, S. G., and Liang, K.-Y. (1987). "Asymptotic properties of maximum likelihood estimators and likelihood ratio tests under nonstandard conditions." *Journal of the American Statistical Association* 82(398), 605–610.
 
 Verbeke, G., and Molenberghs, G. (2000). 『Linear Mixed Models for Longitudinal Data』. Springer.
