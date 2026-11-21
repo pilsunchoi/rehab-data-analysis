@@ -56,7 +56,7 @@ cd chapters
 quarto render 01-data-and-measures.qmd
 ```
 
-3장의 잠재계층 궤적과 5장의 결합모형은 적합에 몇 시간이 걸려 장 안에서 하지 않는다. 먼저 `Rscript R/fit-lcmm.R`과 `Rscript R/fit-jm.R`로 적합하면 요약이 `outputs/lcmm-02.rds`와 `outputs/jm-01.rds`에 저장되고, 장은 그 파일을 읽는다. 파일이 없으면 그 절은 안내만 남기고 나머지는 그대로 돈다.
+3장의 잠재계층 궤적(몇 시간)과 5장의 결합모형(무릎 4,000개로 20분 안팎)은 적합이 오래 걸려 장 안에서 하지 않는다. 먼저 `Rscript R/fit-lcmm.R`과 `Rscript R/fit-jm.R`로 적합하면 요약이 `outputs/lcmm-02.rds`와 `outputs/jm-01.rds`에 저장되고, 장은 그 파일을 읽는다. 파일이 없으면 그 절은 안내만 남기고 나머지는 그대로 돈다.
 
 OAI 데이터가 없어도 장은 끝까지 돈다. `data/raw/`가 비어 있으면 같은 파일·열·부호 꼴의 모의 데이터를 만들어 읽고, 문서 첫머리에 그 사실을 적는다. 모의 데이터의 수치는 해석하지 않는다.
 
