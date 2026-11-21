@@ -1,16 +1,16 @@
 # OAI(Osteoarthritis Initiative) 공개 임상 데이터를 읽어 분석용 표로 만든다.
 #
-# 변수 이름의 꼴과 확인 상태는 docs/oai-variables.md에 있다. 이 파일의
+# 변수 이름의 형식과 확인 상태는 docs/oai-variables.md에 있다. 이 파일의
 # VISIT_MONTHS와 VARIABLES는 그 문서의 3장·4장과 같은 값이어야 한다.
 #
 # 공개 함수
 #   read_oai_txt      세로막대 구분 ASCII 파일 하나를 읽는다
-#   resolve_columns   변수 꼴을 실제 열 이름과 대조한다
+#   resolve_columns   변수 형식을 실제 열 이름과 대조한다
 #   outcome_columns   Outcomes99.txt의 V99E 열
 #   read_oai_cols     파일에서 필요한 열만 읽는다
 #   build_analysis    원데이터 폴더에서 분석용 표 세 개를 만든다
 #   cohort_data       1장용 표: 사람, 무릎, 무릎·방문(치환술 뒤 측정 표시)
-#   make_synthetic    OAI와 같은 꼴의 모의 데이터를 만든다
+#   make_synthetic    OAI와 같은 형식의 시뮬레이션 데이터를 만든다
 
 suppressPackageStartupMessages(library(data.table))
 
@@ -128,7 +128,7 @@ require_column <- function(columns, concept, v = "00", s = "R") {
   col
 }
 
-# 넓은 꼴(오른쪽·왼쪽 열)을 무릎 하나에 한 줄로 바꾼다
+# 넓은 형식(오른쪽·왼쪽 열)을 무릎 하나에 한 줄로 바꾼다
 wide_to_knee <- function(dt, concepts, v) {
   parts <- lapply(names(SIDES), function(s) {
     cols <- vapply(concepts, function(cn) match_column(names(dt), cn, v, s), "")
@@ -249,7 +249,7 @@ activity_table <- function(raw_dir) {
     if (v == "00") x[, age := as.numeric(dt[[require_column(h, "age")]])]
     x
   }), fill = TRUE)
-  if (!nrow(pv)) stop("PASE 열이 없다. 모의 데이터라면 make_synthetic()으로 다시 만든다.")
+  if (!nrow(pv)) stop("PASE 열이 없다. 시뮬레이션 데이터라면 make_synthetic()으로 다시 만든다.")
   pv[, pain := pmax(pain_r, pain_l, na.rm = TRUE)]
   pv <- merge(pv, pv[visit == "00", .(ID, age0 = age, bmi0 = bmi_t)], by = "ID")
   pv <- merge(pv[, age := NULL], person, by = "ID")
@@ -276,7 +276,7 @@ read_oai_cols <- function(path, pattern) {
 #   person  사람 하나에 한 줄. 하위 코호트, 기관, 기준 특성, 마지막 접촉 방문(개월), 사망 판정과 시각(개월)
 #   knees   무릎 하나에 한 줄. 기준 KL, 치환술 여부와 시각(개월)
 #   kv      무릎·방문 하나에 한 줄. WOMAC 통증·기능·뻣뻣함, 치환술 뒤 측정 표시(after_tkr)
-# 하위 코호트, 기관, 마지막 접촉, 사망 열이 없는 데이터(옛 모의 데이터)에서는 그 값이 NA다.
+# 하위 코호트, 기관, 마지막 접촉, 사망 열이 없는 데이터(옛 시뮬레이션 데이터)에서는 그 값이 NA다.
 cohort_data <- function(raw_dir) {
   enr <- read_oai_txt(find_file(raw_dir, "Enrollees.txt"))
   opt <- function(dt, col) if (col %in% names(dt)) dt[[col]] else NA
@@ -335,7 +335,7 @@ cohort_data <- function(raw_dir) {
 
 # ---------------------------------------------------------------- 공용 준비
 
-# data/raw에 OAI 파일이 있으면 그것을, 없으면 모의 데이터를 쓴다
+# data/raw에 OAI 파일이 있으면 그것을, 없으면 시뮬레이션 데이터를 쓴다
 pick_data <- function(root) {
   raw <- file.path(root, "data", "raw")
   if (dir.exists(raw) && !is.na(find_file(raw, "AllClinical00.txt")))
@@ -367,9 +367,9 @@ pain_long <- function(knees, long) {
 }
 
 
-# ---------------------------------------------------------------- 모의 데이터
+# ---------------------------------------------------------------- 시뮬레이션 데이터
 
-# OAI와 같은 파일·열·부호 꼴의 모의 데이터를 만든다.
+# OAI와 같은 파일·열·부호 형식의 시뮬레이션 데이터를 만든다.
 # 참값: 기능 점수는 KL 등급에 따라 수준과 기울기가 다른 선형 궤적이고,
 # 치환술 위험은 그 시점의 참 기능 점수와 KL 등급에 따라 오른다.
 # 수치는 그럴듯하게 고른 것이며 OAI에서 추정한 값이 아니다.
@@ -405,7 +405,7 @@ make_synthetic <- function(out_dir, n = 1500, seed = 20261118) {
 
   # 방문 파일
   sub <- runif(n) < 0.3                                              # 18·30개월 일부 대상자
-  for (v in names(VISIT_MONTHS)[VISIT_MONTHS <= 96]) {                # 모의 데이터는 96개월까지
+  for (v in names(VISIT_MONTHS)[VISIT_MONTHS <= 96]) {                # 시뮬레이션 데이터는 96개월까지
     m <- VISIT_MONTHS[[v]]
     dt <- data.table(ID = ids)
     if (v == "00") dt[, `:=`(V00AGE = age, P01BMI = bmi)]
@@ -418,7 +418,7 @@ make_synthetic <- function(out_dir, n = 1500, seed = 20261118) {
       dt[, (sprintf("V%sWOMADL%s", v, k$side)) := ifelse(ok, as.character(obs), miss)]
       dt[, (sprintf("V%sWOMKP%s", v, k$side)) := ifelse(ok, as.character(pain), miss)]
     }
-    # PASE와 방문별 BMI. 주 난수 흐름을 건드리지 않도록 따로 씨앗을 준다(기존 모의 값이 바뀌지 않는다).
+    # PASE와 방문별 BMI. 주 난수 흐름을 건드리지 않도록 따로 씨앗을 준다(기존 시뮬레이션 값이 바뀌지 않는다).
     # 참값: 활동량은 사람마다 수준이 다르고 해마다 2점 줄며, 그 방문의 통증 1점에 3점 줄어든다.
     # 활동량이 통증에 주는 효과는 없다.
     if (!v %in% c("02", "04")) {

@@ -31,10 +31,10 @@ rehab-data-analysis/
 │   ├── index.html                            소개 대시보드(GitHub Pages)
 │   ├── img/                                  대시보드의 그림(장의 그림을 복사)
 │   ├── book-plan.md                          장 구성 계획
-│   ├── oai-variables.md                      받을 파일, 변수 이름의 꼴, 사건 정의
+│   ├── oai-variables.md                      받을 파일, 변수 이름의 형식, 사건 정의
 │   └── stroke-data-sources.md                뇌졸중 재활 데이터 후보와 접근 조건
 ├── R/
-│   ├── oai.R                                 OAI 파일 읽기, 분석용 표, 모의 데이터
+│   ├── oai.R                                 OAI 파일 읽기, 분석용 표, 시뮬레이션 데이터
 │   ├── postrender-md.R                       렌더된 MD를 GitHub용으로 손질(물결 이스케이프)
 │   ├── fit-jm.R                              결합모형 적합(수십 분), 요약을 outputs/에 저장
 │   └── fit-lcmm.R                            통증 궤적 계층 적합(몇 시간), 요약을 outputs/에 저장
@@ -42,7 +42,7 @@ rehab-data-analysis/
 ├── outputs/                                  오래 걸리는 적합의 요약(공개하지 않는다)
 └── data/                                     공개하지 않는다
     ├── raw/                                  OAI에서 받은 파일(이름을 바꾸지 않는다)
-    └── synthetic/                            모의 데이터
+    └── synthetic/                            시뮬레이션 데이터
 ```
 
 `archive/`의 세 편은 장 구성을 정하기 전에 쓴 첫 분석이다. 그 내용은 2\~5장으로 옮겨 다시 쓴다(`docs/book-plan.md` 2장).
@@ -58,7 +58,7 @@ quarto render 01-data-and-measures.qmd
 
 3장의 잠재계층 궤적(몇 시간)과 5장의 결합모형(무릎 4,000개로 20분 안팎)은 적합이 오래 걸려 장 안에서 하지 않는다. 먼저 `Rscript R/fit-lcmm.R`과 `Rscript R/fit-jm.R`로 적합하면 요약이 `outputs/lcmm-02.rds`와 `outputs/jm-01.rds`에 저장되고, 장은 그 파일을 읽는다. 파일이 없으면 그 절은 안내만 남기고 나머지는 그대로 돈다.
 
-OAI 데이터가 없어도 장은 끝까지 돈다. `data/raw/`가 비어 있으면 같은 파일·열·부호 꼴의 모의 데이터를 만들어 읽고, 문서 첫머리에 그 사실을 적는다. 모의 데이터의 수치는 해석하지 않는다.
+OAI 데이터가 없어도 장은 끝까지 돈다. `data/raw/`가 비어 있으면 같은 파일·열·부호 형식의 시뮬레이션 데이터를 만들어 읽고, 문서 첫머리에 그 사실을 적는다. 시뮬레이션 데이터의 수치는 해석하지 않는다.
 
 필요한 패키지는 다음과 같다.
 

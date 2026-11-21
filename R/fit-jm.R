@@ -12,7 +12,7 @@ suppressPackageStartupMessages({
   library(data.table); library(survival); library(nlme); library(JMbayes2)
 })
 args <- commandArgs(trailingOnly = TRUE)
-# 기본값은 모의 데이터에서 수렴한 반복 수다(6000회에서는 value·slope의 Rhat이 1.1을 넘었다)
+# 기본값은 시뮬레이션 데이터에서 수렴한 반복 수다(6000회에서는 value·slope의 Rhat이 1.1을 넘었다)
 N_ITER   <- if (length(args) >= 1) as.integer(args[1]) else 15000L
 N_BURNIN <- if (length(args) >= 2) as.integer(args[2]) else 3000L
 N_KNEES  <- if (length(args) >= 3) as.integer(args[3]) else 4000L      # 0이면 무릎 전체
