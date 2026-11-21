@@ -1,0 +1,392 @@
+<!doctype html>
+<html lang="ko">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>재활 데이터 분석</title>
+<meta name="description" content="공개된 재활 관련 자료를 내용 중심으로 분석한다. 첫 주제는 무릎 골관절염(Osteoarthritis Initiative).">
+<style>
+  :root{
+    --bg:#f6f7f9; --panel:#ffffff; --ink:#1b2430; --muted:#5b6673;
+    --line:#e3e7ec; --brand:#1f6feb; --brand-soft:#eaf1fe;
+    --ok:#137a3f; --ok-soft:#e6f4ec; --warn:#8a5b00; --warn-soft:#fdf3df;
+    --info:#4b4f8a; --info-soft:#ecedf7; --code:#0f172a;
+    --radius:12px; --shadow:0 1px 2px rgba(16,24,40,.06),0 1px 3px rgba(16,24,40,.10);
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0}
+  body{
+    background:var(--bg); color:var(--ink);
+    word-break:keep-all; overflow-wrap:break-word;
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Malgun Gothic","Apple SD Gothic Neo",Roboto,sans-serif;
+    line-height:1.6; -webkit-text-size-adjust:100%;
+  }
+  .wrap{max-width:960px; margin:0 auto; padding:0 16px}
+  a{color:var(--brand); text-decoration:none}
+  a:hover{text-decoration:underline}
+  code{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:.9em}
+
+  /* header — 헤더 색은 대시보드마다 다르다. 이 저서는 연한 청록 */
+  header.top{background:#dcf1f1; border-bottom:1px solid #b5dcdc}
+  .brand{display:flex;flex-wrap:wrap;align-items:baseline;gap:10px;padding:22px 0 6px}
+  .brand h1{font-size:1.95rem;font-weight:700;margin:0;letter-spacing:-.01em}
+  .brand .tag{color:#1d6b6b;font-size:1.17rem;font-weight:700}
+  .brand .wip{display:inline-block;padding:1px 10px;border-radius:999px;background:#efedf9;color:#4a3aa7;font-size:.8rem;font-weight:700;vertical-align:3px}
+  .lede{color:var(--muted);margin:0 0 16px;font-size:.98rem}
+
+  /* tabs */
+  nav.tabs{position:sticky;top:0;z-index:20;background:rgba(255,255,255,.94);
+    backdrop-filter:saturate(1.4) blur(6px); border-bottom:1px solid var(--line)}
+  .tabrow{display:flex;gap:4px;overflow-x:auto;padding:8px 0;scrollbar-width:none}
+  .tabrow::-webkit-scrollbar{display:none}
+  .tabrow button{
+    flex:0 0 auto; border:1px solid transparent; background:transparent; color:var(--ink);
+    font:inherit; font-weight:700; font-size:.98rem; padding:11px 14px; border-radius:999px; cursor:pointer; white-space:nowrap;
+  }
+  .tabrow button:hover{background:var(--brand-soft)}
+  .tabrow button[aria-selected="true"]{color:var(--brand);background:var(--brand-soft);border-color:#d4e2fb}
+
+  main{padding:22px 0 8px}
+  section[role=tabpanel]{display:none;animation:fade .18s ease}
+  section[role=tabpanel].active{display:block}
+  @keyframes fade{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
+  h2.h{font-size:1.56rem;margin:2px 0 6px}
+  .sub{color:var(--muted);margin:6px 0 14px;font-size:.95rem}
+  .sub.lead{color:var(--ink);font-weight:600;font-size:1.02rem;margin:0 0 18px}
+  h3{font-size:1.2rem;margin:30px 0 8px;letter-spacing:-.01em}
+  section[role=tabpanel] > h3{border-top:1px solid var(--line);padding-top:24px}
+  section[role=tabpanel] > h3:first-of-type{border-top:none;padding-top:0;margin-top:22px}
+  p{margin:8px 0}
+
+  .panel{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);padding:16px;margin:14px 0}
+  .panel > :first-child{margin-top:0}
+  .panel > :last-child{margin-bottom:0}
+
+  .stats{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin:14px 0}
+  .stat{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:14px;box-shadow:var(--shadow)}
+  .stat .n{font-size:1.5rem;font-weight:700;letter-spacing:-.02em;line-height:1.2}
+  .stat .k{color:var(--muted);font-size:.82rem;margin-top:2px}
+  @media (max-width:560px){ .stats{grid-template-columns:repeat(2,1fr)} }
+
+  .tblwrap{overflow-x:auto;border:1px solid var(--line);border-radius:10px;margin:14px 0;background:var(--panel)}
+  table{border-collapse:collapse;width:100%;min-width:440px;font-size:.9rem}
+  caption{caption-side:top;text-align:left;font-weight:700;padding:10px 12px 2px;font-size:.93rem}
+  th,td{text-align:left;padding:8px 12px;border-bottom:1px solid var(--line);vertical-align:top}
+  thead th{background:#f2f5f9;color:var(--muted);font-weight:700;white-space:nowrap}
+  tbody tr:last-child td{border-bottom:none}
+  td.r,th.r{text-align:right;white-space:nowrap}
+  td.s{font-size:.84rem;color:var(--muted)}
+
+  .pill{display:inline-block;padding:2px 9px;border-radius:999px;font-size:.78rem;font-weight:700;line-height:1.7}
+  .pill.ok{background:var(--ok-soft);color:var(--ok)}
+  .pill.warn{background:var(--warn-soft);color:var(--warn)}
+  .pill.info{background:var(--info-soft);color:var(--info)}
+
+  .note{background:var(--info-soft);border:1px solid #dcdef2;border-left:3px solid var(--info);
+    border-radius:10px;padding:10px 14px;margin:14px 0;font-size:.9rem}
+  .note b{color:var(--info)}
+  .note.warn{background:var(--warn-soft);border-color:#f0e2c0;border-left-color:var(--warn)}
+  .note.warn b{color:var(--warn)}
+
+  figure.fig{margin:14px 0;background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:12px;box-shadow:var(--shadow)}
+  figure.fig svg{display:block;width:100%;height:auto}
+  figure.fig figcaption{color:var(--muted);font-size:.84rem;margin-top:8px}
+
+  /* 연구 카드 */
+  .group{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
+  .group .k{color:var(--muted);font-size:.9rem;font-weight:400}
+  .study{display:grid;grid-template-columns:56px 1fr;gap:18px;border:1px solid var(--line);background:var(--panel);border-radius:var(--radius);padding:20px 22px;margin:14px 0;box-shadow:var(--shadow)}
+  .study-num{font-size:2.3rem;line-height:1;color:var(--brand);font-weight:700}
+  .study-body>:first-child{margin-top:0}
+  .study-title{font-size:1.1rem;line-height:1.3;margin:0 0 4px;font-weight:700;border:none;padding:0}
+  .study-title .pill{margin-left:10px;vertical-align:2px;font-size:.74rem}
+  .study-sub{color:var(--muted);margin:0 0 12px;font-size:.95rem}
+  .study-desc{margin:0 0 12px;line-height:1.6;font-size:.96rem}
+  .study-points{list-style:disc;padding-left:20px;margin:0 0 16px}
+  .study-points li{margin:6px 0;line-height:1.55;font-size:.94rem}
+  .study-points li::marker{color:var(--brand)}
+  .study-figs{margin:0 0 16px}
+  .study-figs img{display:block;max-width:100%;max-height:260px;border:1px solid var(--line);border-radius:8px;background:#fff}
+  .study-links{display:flex;flex-wrap:wrap;gap:8px 20px;border-top:1px solid var(--line);padding-top:13px}
+  .study-links a{font-weight:600;font-size:.92rem}
+  .study-links a::after{content:" \2197"}
+  .study-links .lbl{color:var(--muted);font-size:.86rem;font-weight:600}
+  @media (max-width:560px){
+    .study{grid-template-columns:1fr;padding:16px;gap:2px}
+    .study-num{font-size:1.9rem;margin-bottom:2px}
+  }
+
+  .empty{border:1px dashed #cdd4dd;border-radius:var(--radius);background:#fff;padding:22px;text-align:center;color:var(--muted);margin:16px 0;font-size:.92rem}
+
+  footer{border-top:1px solid var(--line);margin-top:26px;padding:20px 0 40px;color:var(--muted);font-size:.84rem;background:#fff}
+  footer p{margin:6px 0}
+
+  @media (max-width:560px){
+    table{min-width:0;font-size:.85rem}
+    th,td{padding:7px 9px;overflow-wrap:anywhere}
+    thead th{white-space:normal}
+  }
+  @media (max-width:420px){
+    .brand h1{font-size:1.625rem}
+    .stat .n{font-size:1.28rem}
+    h2.h{font-size:1.4rem}
+  }
+</style>
+
+<header class="top">
+  <div class="wrap">
+    <div class="brand">
+      <h1>재활 데이터 분석</h1>
+      <span class="tag">공개 코호트로 읽는 재활의 내용</span>
+      <span class="wip">집필 중</span>
+    </div>
+    <p class="lede">재활과 관련된 공개 자료를 방법보다 내용을 앞세워 분석한다. 기능과 통증이 시간에 따라 어떻게 변하는지, 무엇이 그 변화와 함께 움직이는지, 언제 수술에 이르는지를 본다. 첫 주제는 무릎 골관절염이고, 자료는 미국 국립보건원(NIH)이 지원한 <a href="https://nda.nih.gov/oai" target="_blank" rel="noopener">Osteoarthritis Initiative(OAI)</a>다. 뇌졸중 등 다른 주제는 자료가 갖춰지는 대로 탭을 더한다.</p>
+  </div>
+</header>
+
+<nav class="tabs">
+  <div class="wrap">
+    <div class="tabrow" role="tablist" aria-label="대시보드 탭">
+      <button role="tab" aria-selected="true"  aria-controls="tab-knee"     id="t-knee">무릎 골관절염</button>
+      <button role="tab" aria-selected="false" aria-controls="tab-research" id="t-research">연구</button>
+    </div>
+  </div>
+</nav>
+
+<main>
+  <div class="wrap">
+
+  <!-- ============ 무릎 골관절염 ============ -->
+  <section role="tabpanel" id="tab-knee" aria-labelledby="t-knee" class="active">
+    <h2 class="h">무릎 골관절염</h2>
+    <p class="sub lead">어떤 병이고, 재활에서 왜 중요하며, 우리가 쓰는 자료는 무엇인가.</p>
+
+    <h3>어떤 병인가</h3>
+    <div class="panel">
+      <p><b>관절 전체의 병.</b> 골관절염은 뼈 끝을 덮은 관절 연골이 닳는 데서 시작해, 그 아래 뼈(연골하골), 관절을 싸는 활막, 인대와 근육까지 함께 변하는 만성 질환이다. 무릎은 골관절염이 가장 흔한 관절이다.</p>
+      <p><b>증상.</b> 걷거나 계단을 오를 때의 통증, 아침이나 오래 앉았다 일어날 때의 짧은 뻣뻣함, 그리고 일상 동작의 제한이다. 통증은 좋아졌다 나빠지기를 되풀이하며 사람마다 경과가 크게 다르다.</p>
+      <p><b>위험 요인.</b> 나이, 여성, 비만, 과거의 무릎 손상, 관절에 무리가 가는 직업이 알려져 있다. 비만과 근력처럼 바꿀 수 있는 요인이 있다는 점이 재활의 출발점이다.</p>
+      <p><b>치료의 순서.</b> 진료지침은 운동치료, 체중 조절, 교육을 첫 단계로 둔다. 그다음이 약물과 주사이고, 이것으로 조절되지 않는 말기 관절은 인공관절 치환술로 바꾼다. 수술 전 대부분의 기간이 물리치료와 재활의 영역이다.</p>
+    </div>
+
+    <figure class="fig">
+      <svg viewBox="0 0 660 330" role="img" aria-labelledby="kneeTitle kneeDesc" font-family="-apple-system,'Segoe UI','Malgun Gothic',sans-serif">
+        <title id="kneeTitle">건강한 무릎과 골관절염 무릎의 모식도</title>
+        <desc id="kneeDesc">왼쪽은 연골이 고르고 관절 간격이 넓은 건강한 무릎, 오른쪽은 안쪽 연골이 닳아 관절 간격이 좁아지고 골극과 연골하골 경화가 생긴 골관절염 무릎이다.</desc>
+        <defs>
+          <g id="femur">
+            <path d="M115,18 L185,18 L192,105 C228,116 250,138 250,163 C250,183 232,191 208,189 C190,187 178,178 150,178 C122,178 110,187 92,189 C68,191 50,183 50,163 C50,138 72,116 108,105 Z" fill="#f4ecdb" stroke="#a8946a" stroke-width="2"/>
+          </g>
+        </defs>
+
+        <!-- 건강한 무릎 -->
+        <g transform="translate(10,20)">
+          <text x="150" y="0" text-anchor="middle" font-size="16" font-weight="700" fill="#1b2430">건강한 무릎</text>
+          <use href="#femur"/>
+          <path d="M56,176 C68,193 92,194 114,186" fill="none" stroke="#4d8fd1" stroke-width="7" stroke-linecap="round"/>
+          <path d="M186,186 C208,194 232,193 244,176" fill="none" stroke="#4d8fd1" stroke-width="7" stroke-linecap="round"/>
+          <path d="M45,212 L255,212 L250,228 C236,238 206,242 196,252 L196,300 L104,300 L104,252 C94,242 64,238 50,228 Z" fill="#f4ecdb" stroke="#a8946a" stroke-width="2"/>
+          <line x1="56" y1="207" x2="138" y2="207" stroke="#4d8fd1" stroke-width="7" stroke-linecap="round"/>
+          <line x1="162" y1="207" x2="244" y2="207" stroke="#4d8fd1" stroke-width="7" stroke-linecap="round"/>
+          <text x="150" y="70" text-anchor="middle" font-size="13" fill="#5b6673">대퇴골</text>
+          <text x="150" y="285" text-anchor="middle" font-size="13" fill="#5b6673">경골</text>
+          <!-- 관절 간격 -->
+          <line x1="85" y1="192" x2="85" y2="203" stroke="#1b2430" stroke-width="1.2"/>
+          <line x1="20" y1="197" x2="80" y2="197" stroke="#1b2430" stroke-width="1" stroke-dasharray="3 2"/>
+          <text x="18" y="190" text-anchor="start" font-size="12" fill="#1b2430">관절 간격</text>
+          <text x="262" y="198" font-size="12" fill="#2f6fb0">연골</text>
+        </g>
+
+        <!-- 골관절염 무릎 -->
+        <g transform="translate(345,20)">
+          <text x="150" y="0" text-anchor="middle" font-size="16" font-weight="700" fill="#1b2430">골관절염 무릎</text>
+          <use href="#femur"/>
+          <!-- 골극(대퇴) -->
+          <path d="M50,160 L36,172 L52,175 Z" fill="#e6d6b4" stroke="#a8946a" stroke-width="1.5"/>
+          <!-- 닳은 안쪽 연골(왼쪽), 비교적 남은 바깥 연골 -->
+          <path d="M60,180 C70,190 80,190 88,189 M98,188 C104,187 110,186 114,185" fill="none" stroke="#4d8fd1" stroke-width="2.5" stroke-linecap="round"/>
+          <path d="M186,186 C208,194 232,193 244,176" fill="none" stroke="#4d8fd1" stroke-width="5" stroke-linecap="round"/>
+          <!-- 경골: 안쪽이 올라와 간격이 좁다 -->
+          <path d="M45,196 L140,198 L160,210 L255,212 L250,228 C236,238 206,242 196,252 L196,300 L104,300 L104,252 C94,242 64,238 50,228 Z" fill="#f4ecdb" stroke="#a8946a" stroke-width="2"/>
+          <!-- 골극(경골) -->
+          <path d="M45,196 L30,188 L46,206 Z" fill="#e6d6b4" stroke="#a8946a" stroke-width="1.5"/>
+          <!-- 연골하골 경화 -->
+          <path d="M52,201 L136,203" stroke="#8a6d3b" stroke-width="5" stroke-linecap="round" opacity=".75"/>
+          <line x1="58" y1="194" x2="134" y2="196" stroke="#4d8fd1" stroke-width="2" stroke-linecap="round" stroke-dasharray="10 6"/>
+          <line x1="164" y1="207" x2="244" y2="207" stroke="#4d8fd1" stroke-width="5" stroke-linecap="round"/>
+          <text x="150" y="70" text-anchor="middle" font-size="13" fill="#5b6673">대퇴골</text>
+          <text x="150" y="285" text-anchor="middle" font-size="13" fill="#5b6673">경골</text>
+          <!-- 설명 -->
+          <text x="6" y="150" font-size="12" fill="#a3324f">골극</text>
+          <line x1="22" y1="154" x2="38" y2="168" stroke="#a3324f" stroke-width="1"/>
+          <line x1="22" y1="154" x2="32" y2="188" stroke="#a3324f" stroke-width="1"/>
+          <text x="90" y="232" text-anchor="middle" font-size="12" fill="#8a5b00">연골하골 경화</text>
+          <text x="0" y="262" font-size="12" fill="#2f6fb0">안쪽 연골이 닳아</text>
+          <text x="0" y="278" font-size="12" fill="#2f6fb0">간격이 좁다</text>
+          <text x="262" y="198" font-size="12" fill="#2f6fb0">바깥 연골</text>
+        </g>
+      </svg>
+      <figcaption>앞에서 본 오른쪽 무릎의 모식도(직접 그림, 비례는 맞지 않는다). X선에는 연골이 보이지 않으므로 연골이 닳은 정도를 관절 간격으로 읽는다. 골극과 관절 간격으로 등급을 매긴 것이 아래의 KL 등급이다.</figcaption>
+    </figure>
+
+    <h3>무엇으로 재는가</h3>
+    <p>이 저서의 분석은 구조, 증상, 활동, 사건의 네 층을 잰 값을 쓴다. 구조와 증상은 생각보다 덜 맞물린다. X선 손상이 큰데 아프지 않은 무릎도, 손상이 거의 없는데 아픈 무릎도 흔하다(<a href="#" onclick="showTab('research');return false">연구</a> 2).</p>
+    <div class="tblwrap">
+      <table>
+        <caption>측정의 네 층</caption>
+        <thead><tr><th>층</th><th>척도</th><th>값</th><th>무엇을 보나</th></tr></thead>
+        <tbody>
+          <tr><td>구조</td><td>Kellgren-Lawrence(KL) 등급</td><td>0~4</td><td>X선의 골극과 관절 간격. 0 정상, 1 의심, 2 골극 확실, 3 간격이 좁아짐, 4 간격이 크게 좁아지고 뼈가 변형</td></tr>
+          <tr><td>증상</td><td>WOMAC 통증</td><td>0~20</td><td>걷기, 계단, 밤, 휴식, 체중 부하 때의 통증 5문항. 클수록 나쁨</td></tr>
+          <tr><td>증상</td><td>WOMAC 기능</td><td>0~68</td><td>일상 동작 17문항의 어려움. 클수록 나쁨</td></tr>
+          <tr><td>활동</td><td>PASE</td><td>0 이상</td><td>지난 7일의 걷기, 운동, 집안일, 일을 자기 보고로 합한 신체활동 점수. 클수록 활동적</td></tr>
+          <tr><td>사건</td><td>인공관절 치환술</td><td>날짜</td><td>의무기록으로 판정한 치환술과 그 날짜</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3>우리가 쓰는 자료 — Osteoarthritis Initiative</h3>
+    <div class="panel">
+      <p><b>무엇인가.</b> 무릎 골관절염이 있거나 생길 위험이 있는 45~79세 4,796명을 2004~2006년에 미국 네 곳의 임상센터에서 모아, 해마다 다시 부른 전향적 코호트다. 방문마다 문진(통증, 기능, 활동), 신체 계측, 무릎 X선과 MRI를 했고, 치환술은 의무기록으로 판정했다.</p>
+      <p><b>왜 이 자료인가.</b> 같은 사람의 두 무릎을 16년 가까이 따라가며 구조, 증상, 활동, 수술을 함께 잰 공개 자료는 드물다. 궤적과 사건을 함께 다루는 재활의 질문에 맞는다.</p>
+      <p><b>어디서 받나.</b> 미국 국립정신보건원 데이터 보관소(<a href="https://nda.nih.gov/oai" target="_blank" rel="noopener">NIMH Data Archive</a>)에서 로그인하고 이용 약관에 동의하면 받을 수 있다.</p>
+    </div>
+
+    <div class="stats">
+      <div class="stat"><div class="n">4,796</div><div class="k">등록자 (45~79세)</div></div>
+      <div class="stat"><div class="n">8,917</div><div class="k">분석한 무릎</div></div>
+      <div class="stat"><div class="n">884</div><div class="k">판정된 치환술 무릎</div></div>
+      <div class="stat"><div class="n">15</div><div class="k">방문 (0~192개월)</div></div>
+      <div class="stat"><div class="n">90,667</div><div class="k">무릎 통증 관측</div></div>
+      <div class="stat"><div class="n">168개월</div><div class="k">무릎당 추적 (중앙값)</div></div>
+    </div>
+    <p class="sub">등록자 수는 OAI의 설계 값이고, 나머지는 2026-11-20에 받은 판을 분석 문서가 읽어 낸 값이다. 분석한 무릎은 기준 KL 등급과 기준 WOMAC 기능이 있고 등록 전에 치환술을 받지 않은 무릎이다.</p>
+
+    <h3>분석 단위와 정의</h3>
+    <div class="tblwrap">
+      <table>
+        <caption>공통 정의</caption>
+        <thead><tr><th>항목</th><th>정의</th></tr></thead>
+        <tbody>
+          <tr><td>분석 단위</td><td>통증·기능·치환술은 무릎. 한 사람의 두 무릎은 군집으로 다룬다. 활동량(PASE)은 사람 단위로 재므로 그 분석은 사람·방문 단위</td></tr>
+          <tr><td>사건</td><td>판정이 확정된 치환술만 센다. 자기 보고만 있는 것은 세지 않는다</td></tr>
+          <tr><td>시간 원점</td><td>등록 방문(V00)</td></tr>
+          <tr><td>치환술 뒤</td><td>그 무릎의 이후 측정은 쓰지 않는다. 수술 뒤의 점수는 다른 관절을 재는 셈이다</td></tr>
+          <tr><td>사망</td><td>지금은 중도절단으로 둔다. 경쟁 위험으로 다루는 것은 남은 일이다</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p>받은 파일, 변수 이름, 부호, 방문 일정은 <a href="https://github.com/pilsunchoi/rehab-data-analysis/blob/main/docs/oai-variables.md" target="_blank" rel="noopener">OAI 변수 목록</a>에 확인 날짜와 함께 적었다.</p>
+
+    <div class="note warn"><b>원자료는 이 저장소에 없다.</b> OAI 이용 약관에 따라 자료를 다시 배포하지 않는다. 대신 분석 코드가 원자료와 같은 파일, 열 이름, 부호 꼴의 모의 데이터를 만들어 자료 없이도 끝까지 돈다. 모의 데이터로 낸 수치는 해석하지 않는다.</div>
+  </section>
+
+  <!-- ============ 연구 ============ -->
+  <section role="tabpanel" id="tab-research" aria-labelledby="t-research">
+    <h2 class="h">연구</h2>
+    <p class="sub lead">주제별로 분석을 모았다. 각 카드는 렌더된 결과 문서와, 그 결과를 만드는 원본(R 코드가 든 Quarto 문서)으로 이어진다.</p>
+    <div class="note">결과 문서는 표와 그림이 담긴 채 올라가 있어 그대로 읽을 수 있다. 본문의 수치는 손으로 옮기지 않고 코드가 출력한 것이다. 내용은 다듬는 중이며 카드의 요약은 2026-11-21 기준이다.</div>
+
+    <h3 class="group">무릎 골관절염 <span class="k">Osteoarthritis Initiative</span></h3>
+
+    <article class="study">
+      <div class="study-num">1</div>
+      <div class="study-body">
+        <h4 class="study-title">무릎 기능의 궤적과 인공관절 치환술<span class="pill warn">진행 중</span></h4>
+        <p class="study-sub">WOMAC 기능 점수의 변화가 치환술 위험을 얼마나 예측하는가 · 무릎 8,917개, 치환술 884건</p>
+        <p class="study-desc">기능이 나빠지는 속도가 수술을 예고하는지 본다. 기준 시점의 값, 직전 방문의 값, 무릎별 연간 기울기를 차례로 Cox 모형에 넣어 비교하고, 그 한계를 함께 푸는 종단–생존 결합모형으로 나아간다.</p>
+        <ul class="study-points">
+          <li>구조 손상이 가장 강한 예측 인자다. 기준 KL 4 무릎은 추적 중 절반 이상(54%)이 치환술을 받았고, KL 0 무릎은 2%였다.</li>
+          <li>같은 KL 등급 안에서도 기능이 중요하다. 직전 방문의 WOMAC 기능 10점당 치환술 위험비는 1.77이고, 무릎별 연간 악화 1점당 위험비는 2.14였다.</li>
+          <li>기준 기능 점수가 0인 무릎이 36%다. 정규 오차를 가정한 궤적 모형은 이 바닥 효과를 다루지 못한다.</li>
+          <li>결합모형(JMbayes2)은 아직 모의 데이터로만 적합했다. 원자료 적합이 다음 단계다.</li>
+        </ul>
+        <div class="study-figs"><img src="img/study01_trajectory.png" alt="왼쪽: KL 등급별 WOMAC 기능 평균 궤적. 오른쪽: 치환술 무릎의 수술 전 기능 궤적과 1년 구간 평균" loading="lazy"></div>
+        <div class="study-links">
+          <a href="https://github.com/pilsunchoi/rehab-data-analysis/blob/main/analysis/01-function-trajectory-tkr.md" target="_blank" rel="noopener">문서 읽기</a>
+          <a href="https://github.com/pilsunchoi/rehab-data-analysis/blob/main/analysis/01-function-trajectory-tkr-method.md" target="_blank" rel="noopener">부록: 방법 해설</a>
+          <a href="https://github.com/pilsunchoi/rehab-data-analysis/blob/main/analysis/01-function-trajectory-tkr.qmd" target="_blank" rel="noopener">R 코드</a>
+          <a href="https://github.com/pilsunchoi/rehab-data-analysis/blob/main/R/fit-jm.R" target="_blank" rel="noopener">결합모형 적합</a>
+        </div>
+      </div>
+    </article>
+
+    <article class="study">
+      <div class="study-num">2</div>
+      <div class="study-body">
+        <h4 class="study-title">무릎 통증의 궤적<span class="pill ok">1차 완료</span></h4>
+        <p class="study-sub">구조와 통증의 어긋남, 통증과 기능, 통증 궤적의 세 갈래 · 통증 관측 90,667개</p>
+        <p class="study-desc">통증은 X선 손상을 얼마나 따라가는가, 그리고 16년의 통증 경과에는 어떤 전형이 있는가. 잠재계층 혼합모형으로 궤적의 갈래를 나누고, 갈래마다 기준 특성과 치환술을 본다.</p>
+        <ul class="study-points">
+          <li>구조와 통증은 느슨하게만 맞물린다. KL 3~4인데 통증이 없는 무릎이 26%, KL 0~1인데 통증이 5점 이상인 무릎이 13%였고, 둘의 순위 상관은 0.27이다.</li>
+          <li>통증과 기능은 함께 움직인다. 무릎 사이 상관은 0.85, 같은 무릎 안에서 평균을 뺀 값끼리의 상관도 0.75다.</li>
+          <li>궤적은 세 갈래로 나뉜다. 83%는 낮게 유지되고, 11%는 중간에서 시작해 8년 무렵까지 악화되며, 5%는 높게 시작해 호전된다. 갈래는 기준 통증의 높이보다 방향에서 갈린다.</li>
+          <li>악화하는 갈래는 KL 등급을 보정해도 치환술 위험비가 2.96이다. 다만 계층을 추적 전체로 정했으므로 예측이 아니라 기술 통계로 읽는다.</li>
+        </ul>
+        <div class="study-figs"><img src="img/study02_pain_classes.png" alt="통증 궤적 3계층 모형의 평균 궤적과 계층 수별 비교" loading="lazy"></div>
+        <div class="study-links">
+          <a href="https://github.com/pilsunchoi/rehab-data-analysis/blob/main/analysis/02-knee-pain-trajectory.md" target="_blank" rel="noopener">문서 읽기</a>
+          <a href="https://github.com/pilsunchoi/rehab-data-analysis/blob/main/analysis/02-knee-pain-trajectory.qmd" target="_blank" rel="noopener">R 코드</a>
+          <a href="https://github.com/pilsunchoi/rehab-data-analysis/blob/main/R/fit-lcmm.R" target="_blank" rel="noopener">계층 적합</a>
+        </div>
+      </div>
+    </article>
+
+    <article class="study">
+      <div class="study-num">3</div>
+      <div class="study-body">
+        <h4 class="study-title">신체활동과 무릎 통증<span class="pill ok">1차 완료</span></h4>
+        <p class="study-sub">PASE 활동 점수와 WOMAC 통증의 관계 · 4,502명, 사람·방문 관측 28,895개</p>
+        <p class="study-desc">더 움직이는 사람이 덜 아픈가, 더 움직이면 나중에 더 아파지는가, 아니면 아파서 덜 움직이는가. 사람 사이의 차이와 사람 안의 변화를 나누고, 앞 방문의 값으로 다음 방문을 보는 시차 모형으로 순서를 맞춘다.</p>
+        <ul class="study-points">
+          <li>활동적인 사람이 약간 덜 아프지만 연관은 작다. 평소 활동량 50점당 통증은 0.18점(20점 척도) 낮고, 같은 사람이 평소보다 활동적인 해에는 0.04점 낮을 뿐이다.</li>
+          <li>순서로 보면 "아파서 덜 움직인다" 쪽이 더 뚜렷하다. 표준화 계수로 통증에서 활동으로 가는 쪽이 반대쪽의 약 2.5배다.</li>
+          <li>많이 움직여서 나빠진다는 신호는 없다. 활동량이 가장 높은 사분위도 다음 방문의 통증이 가장 낮은 사분위보다 높지 않았다.</li>
+          <li>PASE는 기억에 기댄 자기 보고라 측정오차가 연관을 0 쪽으로 끌어당긴다. 관찰 자료이므로 인과로 읽지 않는다.</li>
+        </ul>
+        <div class="study-figs"><img src="img/study03_activity_quartile.png" alt="PASE 사분위별 다음 방문 통증의 차이(가장 낮은 사분위 대비)와 95% 구간" loading="lazy"></div>
+        <div class="study-links">
+          <a href="https://github.com/pilsunchoi/rehab-data-analysis/blob/main/analysis/03-activity-pain.md" target="_blank" rel="noopener">문서 읽기</a>
+          <a href="https://github.com/pilsunchoi/rehab-data-analysis/blob/main/analysis/03-activity-pain.qmd" target="_blank" rel="noopener">R 코드</a>
+        </div>
+      </div>
+    </article>
+
+    <div class="panel">
+      <p><b>공통 코드와 자료 문서.</b> 세 분석은 같은 함수로 OAI 파일을 읽고 분석용 표를 만든다.</p>
+      <div class="study-links" style="border-top:none;padding-top:0">
+        <a href="https://github.com/pilsunchoi/rehab-data-analysis/blob/main/R/oai.R" target="_blank" rel="noopener">R/oai.R — 읽기, 분석용 표, 모의 데이터</a>
+        <a href="https://github.com/pilsunchoi/rehab-data-analysis/blob/main/docs/oai-variables.md" target="_blank" rel="noopener">OAI 변수 목록</a>
+        <a href="https://github.com/pilsunchoi/rehab-data-analysis#readme" target="_blank" rel="noopener">실행 방법(README)</a>
+      </div>
+    </div>
+
+    <div class="empty">뇌졸중 등 다른 주제의 연구는 자료가 갖춰지면 이 아래에 주제별로 더한다.</div>
+  </section>
+
+  </div>
+</main>
+
+<footer>
+  <div class="wrap">
+    <p><b>자료.</b> 이 저장소의 분석은 Osteoarthritis Initiative(OAI)의 공개 자료를 사용했다. OAI는 미국 국립보건원(NIH)이 지원하고 OAI 연구진이 수행한 공공·민간 협력 사업이다. 이 저장소의 내용은 OAI 연구진, NIH, 민간 후원 기관의 의견이나 견해를 반영하지 않는다. 원자료는 이용 약관에 따라 다시 배포하지 않는다.</p>
+    <p>집필 중인 저서다. 수치를 인용할 때는 기준 시점(2026년 11월에 받은 판)을 함께 밝힌다.</p>
+  </div>
+</footer>
+
+<script>
+  var TABS = ["knee","research"];
+  function showTab(name){
+    TABS.forEach(function(t){
+      var on = (t === name);
+      document.getElementById("t-"+t).setAttribute("aria-selected", on ? "true" : "false");
+      document.getElementById("tab-"+t).classList.toggle("active", on);
+    });
+    if (history.replaceState) history.replaceState(null, "", "#"+name);
+    if (window.scrollY > 0) window.scrollTo({top:0, behavior:"auto"});
+  }
+  TABS.forEach(function(t){
+    document.getElementById("t-"+t).addEventListener("click", function(){ showTab(t); });
+  });
+  var h = location.hash.replace("#","");
+  if (TABS.indexOf(h) >= 0) showTab(h);
+</script>
