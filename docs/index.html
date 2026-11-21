@@ -314,7 +314,7 @@
     <p class="sub lead">각 장은 재활의 질문 하나로 시작해, OAI로 추정한 뒤 그 결과를 해석한다.</p>
     <div class="note">장마다 원본은 R 코드가 든 Quarto 문서 하나이고, GitHub에서 읽는 것은 그 렌더 결과다. 본문의 수치는 손으로 적지 않고 코드가 낸다. 장의 순서는 데이터의 시간 구조를 따른다. 한 시점의 단면에서 반복 측정, 시간에 따라 바뀌는 노출, 사건까지의 시간으로 간다. 방법도 그 순서를 따라 회귀에서 혼합모형, 고정효과, 생존분석과 결합모형으로 이어지고, 앞 장에서 설명한 방법이 뒤 장에 다시 나오면 설명을 되풀이하지 않고 앞 장을 참조하도록 적는다. 구성의 근거는 <a href="https://github.com/pilsunchoi/rehab-data-analysis/blob/main/docs/book-plan.md" target="_blank" rel="noopener">장 구성 계획</a>에 있다.</div>
 
-    <h3 class="group">무릎 골관절염 <span class="k">Osteoarthritis Initiative · 5개 장</span></h3>
+    <h3 class="group">무릎 골관절염 <span class="k">Osteoarthritis Initiative · 6개 장</span></h3>
 
     <article class="study">
       <div class="study-num">1</div>
@@ -407,6 +407,26 @@
           <a href="https://github.com/pilsunchoi/rehab-data-analysis/blob/main/chapters/05-time-to-replacement.md" target="_blank" rel="noopener">장 읽기</a>
           <a href="https://github.com/pilsunchoi/rehab-data-analysis/blob/main/chapters/05-time-to-replacement.qmd" target="_blank" rel="noopener">R 문서(원본)</a>
           <a href="https://github.com/pilsunchoi/rehab-data-analysis/blob/main/R/fit-jm.R" target="_blank" rel="noopener">결합모형 적합</a>
+        </div>
+      </div>
+    </article>
+
+    <article class="study">
+      <div class="study-num">6</div>
+      <div class="study-body">
+        <h4 class="study-title">기능 궤적과 치환술 시간의 SU정규 결합모형 — 결합모형을 1분 안에 적합할 수 있는가<span class="pill warn">초고</span></h4>
+        <p class="study-sub">다변량 정규 결합모형(닫힌 형태의 우도) · 가속수명 모형 · SU정규 분포와 로그정규 · 우도비 검정 · 모의 검증 · 동적 예측</p>
+        <p class="study-desc">종단 측정의 무작위 효과와 변환한 치환술 시간을 함께 다변량 정규로 두면 우도가 적분 없이 닫힌 형태가 된다. 치환술 시간의 분포로 로그정규를 포함하는 SU정규를 쓰고, 무릎 8,909개 전체로 적합해 5장의 JMbayes2 결합모형과 비교한다.</p>
+        <ul class="study-points">
+          <li>무릎 전체의 적합이 1분 남짓이다(무릎 4,000개에서 11초, 같은 무릎의 JMbayes2는 16분).</li>
+          <li>기능이 나쁘고 빨리 나빠지는 무릎일수록 치환술이 이르다. 기울기가 연 1점 빠르면 치환술까지의 시간이 0.43배다.</li>
+          <li>SU정규가 로그정규보다 데이터에 맞지만(우도비 통계량 21.0), 관측 범위 안의 누적 치환술과 2년 예측(AUC 0.89)은 같다. 두 분포는 추적 기간 밖의 분위수에서 갈라진다.</li>
+        </ul>
+        <div class="study-figs"><img src="img/ch06_marginal_by_kl.png" alt="KL 등급 묶음별 누적 치환술 비율. Kaplan-Meier와 로그정규, SU정규 결합모형의 곡선이 거의 겹친다" loading="lazy"></div>
+        <div class="study-links">
+          <a href="https://github.com/pilsunchoi/rehab-data-analysis/blob/main/chapters/06-su-normal-joint-model.md" target="_blank" rel="noopener">장 읽기</a>
+          <a href="https://github.com/pilsunchoi/rehab-data-analysis/blob/main/chapters/06-su-normal-joint-model.qmd" target="_blank" rel="noopener">R 문서(원본)</a>
+          <a href="https://github.com/pilsunchoi/rehab-data-analysis/blob/main/R/fit-su-joint.R" target="_blank" rel="noopener">결합모형 적합</a>
         </div>
       </div>
     </article>
