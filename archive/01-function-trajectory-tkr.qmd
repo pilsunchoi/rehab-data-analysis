@@ -29,7 +29,7 @@ knitr:
 suppressPackageStartupMessages({
   library(data.table); library(ggplot2); library(survival); library(lme4)
 })
-ROOT <- if (basename(getwd()) == "analysis") dirname(getwd()) else getwd()
+ROOT <- if (file.exists("../R/oai.R")) dirname(getwd()) else getwd()
 source(file.path(ROOT, "R", "oai.R"))
 
 windowsFonts(malgun = windowsFont("Malgun Gothic"))

@@ -7,7 +7,9 @@
 #   read_oai_txt      세로막대 구분 ASCII 파일 하나를 읽는다
 #   resolve_columns   변수 꼴을 실제 열 이름과 대조한다
 #   outcome_columns   Outcomes99.txt의 V99E 열
+#   read_oai_cols     파일에서 필요한 열만 읽는다
 #   build_analysis    원데이터 폴더에서 분석용 표 세 개를 만든다
+#   cohort_data       1장용 표: 사람, 무릎, 무릎·방문(치환술 뒤 측정 표시)
 #   make_synthetic    OAI와 같은 꼴의 모의 데이터를 만든다
 
 suppressPackageStartupMessages(library(data.table))
@@ -259,6 +261,71 @@ activity_table <- function(raw_dir) {
 }
 
 
+# 필요한 열만 골라 읽는다. 방문 파일은 열이 천 개가 넘어 전부 읽으면 느리다.
+read_oai_cols <- function(path, pattern) {
+  h <- header(path)
+  idx <- which(h == "ID" | grepl(pattern, h))
+  dt <- fread(path, sep = "|", select = idx, colClasses = "character", na.strings = "",
+              encoding = "Latin-1", showProgress = FALSE)
+  setnames(dt, h[idx])
+  dt[, names(dt) := lapply(.SD, decode)]
+  dt
+}
+
+# 1장(자료와 측정)용 표. 치환술 뒤의 측정도 지우지 않고 표시만 한다.
+#   person  사람 하나에 한 줄. 하위 코호트, 기관, 기준 특성, 마지막 접촉 방문(개월), 사망 판정
+#   knees   무릎 하나에 한 줄. 기준 KL, 치환술 여부와 시각(개월)
+#   kv      무릎·방문 하나에 한 줄. WOMAC 통증·기능·뻣뻣함, 치환술 뒤 측정 표시(after_tkr)
+# 하위 코호트, 기관, 마지막 접촉, 사망 열이 없는 자료(옛 모의 데이터)에서는 그 값이 NA다.
+cohort_data <- function(raw_dir) {
+  enr <- read_oai_txt(find_file(raw_dir, "Enrollees.txt"))
+  opt <- function(dt, col) if (col %in% names(dt)) dt[[col]] else NA
+  person <- data.table(ID = enr$ID, female = as.numeric(enr[[require_column(names(enr), "sex")]] == 2),
+                       cohort = opt(enr, "V00COHORT"), site = opt(enr, "V00SITE"))
+
+  c00 <- read_oai_cols(find_file(raw_dir, "AllClinical00.txt"), "^(V00AGE|P01BMI|V00PASE)$")
+  person <- merge(person, data.table(ID = c00$ID, age = as.numeric(opt(c00, "V00AGE")), bmi = as.numeric(opt(c00, "P01BMI")),
+                                     pase = as.numeric(opt(c00, "V00PASE"))), by = "ID", all.x = TRUE)
+
+  out <- read_oai_txt(find_file(raw_dir, "Outcomes99.txt"))
+  lc <- suppressWarnings(as.integer(opt(out, "V99RNTCNT")))
+  last_month <- unname(VISIT_MONTHS[sprintf("%02d", lc)])
+  person <- merge(person, data.table(ID = out$ID, last_month = last_month,
+                                     died = as.integer(opt(out, "V99EDDCF") %in% 2)), by = "ID", all.x = TRUE)
+  if (!"V99RNTCNT" %in% names(out)) person[, died := NA_integer_]
+
+  xr <- read_oai_txt(find_file(raw_dir, "kXR_SQ_BU00.txt"))
+  klcol <- require_column(names(xr), "kl")
+  xr <- xr[!is.na(get(klcol))]
+  if ("READPRJ" %in% names(xr)) xr <- xr[order(ID, SIDE, READPRJ != 15)]
+  kl <- unique(xr, by = c("ID", "SIDE"))[, .(ID, SIDE, kl = get(klcol))]
+
+  ev <- wide_to_knee(out, c("tkr_event", "tkr_days"), "99")
+  ev[, `:=`(tkr = as.integer(tkr_event %in% TKR_CONFIRMED), tkr_month = tkr_days / DAYS_PER_MONTH)]
+  knees <- CJ(ID = person$ID, SIDE = unname(SIDES))
+  knees <- merge(knees, kl, by = c("ID", "SIDE"), all.x = TRUE)
+  knees <- merge(knees, ev[, .(ID, SIDE, tkr, tkr_month)], by = c("ID", "SIDE"), all.x = TRUE)
+  knees[is.na(tkr), tkr := 0L]
+  knees[tkr == 0, tkr_month := NA_real_]
+
+  kv <- rbindlist(lapply(names(VISIT_MONTHS), function(v) {
+    p <- find_file(raw_dir, sprintf("AllClinical%s.txt", v))
+    if (is.na(p)) return(NULL)
+    dt <- read_oai_cols(p, sprintf("^V%sWOM(KP|ADL|STF)[RL]$", v))
+    part <- wide_to_knee(dt, c("womac_pain", "womac_func", "womac_stiff"), v)
+    if (is.null(part) || !nrow(part)) return(NULL)
+    part[, `:=`(visit = v, month = VISIT_MONTHS[[v]])]
+  }), fill = TRUE)
+  setnames(kv, c("womac_pain", "womac_func", "womac_stiff"), c("pain", "func", "stiff"), skip_absent = TRUE)
+  if (!"stiff" %in% names(kv)) kv[, stiff := NA_real_]
+  kv <- kv[!(is.na(pain) & is.na(func) & is.na(stiff))]
+  kv <- merge(kv, knees[, .(ID, SIDE, tkr_month)], by = c("ID", "SIDE"), all.x = TRUE)
+  kv[, after_tkr := !is.na(tkr_month) & month >= tkr_month][, tkr_month := NULL]
+  setorder(kv, ID, SIDE, month)
+  list(person = person[], knees = knees[], kv = kv[])
+}
+
+
 # ---------------------------------------------------------------- 공용 준비
 
 # data/raw에 OAI 파일이 있으면 그것을, 없으면 모의 데이터를 쓴다
@@ -362,7 +429,19 @@ make_synthetic <- function(out_dir, n = 1500, seed = 20261118) {
     fwrite(dt, file.path(out_dir, sprintf("AllClinical%s.txt", v)), sep = "|")
   }
 
-  fwrite(data.table(ID = ids, P02SEX = ifelse(sex == 1, "1: Male", "2: Female")),
+  # 하위 코호트, 기관, 마지막 접촉, 사망. 주 난수 흐름을 건드리지 않도록 따로 씨앗을 준다.
+  keep <- .Random.seed
+  set.seed(seed + 2000L)
+  cohort <- sample(c("1: Progression", "2: Incidence", "3: Non-exposed control group"), n, replace = TRUE,
+                   prob = c(0.29, 0.68, 0.03))
+  site <- sample(LETTERS[1:5], n, replace = TRUE)
+  vm <- VISIT_MONTHS[VISIT_MONTHS <= 96]
+  last_idx <- vapply(dropout, function(d) max(as.integer(names(vm))[vm < d]), 1L)
+  last_code <- sprintf("%d: %d-month", last_idx, vm[sprintf("%02d", last_idx)])
+  died <- is.finite(dropout) & runif(n) < 0.3
+  .Random.seed <<- keep
+
+  fwrite(data.table(ID = ids, P02SEX = ifelse(sex == 1, "1: Male", "2: Female"), V00COHORT = cohort, V00SITE = site),
          file.path(out_dir, "Enrollees.txt"), sep = "|")
 
   xr <- rbindlist(lapply(knees, function(k)
@@ -377,6 +456,7 @@ make_synthetic <- function(out_dir, n = 1500, seed = 20261118) {
     o[, (sprintf("V99E%sKDAYS", k$side)) := ifelse(hit, as.character(round(k$tkr_month * DAYS_PER_MONTH)),
                                                    ".A: Not Applicable")]
   }
+  o[, `:=`(V99RNTCNT = last_code, V99EDDCF = ifelse(died, "2: Death adjudicated, confirmed", miss))]
   fwrite(o, file.path(out_dir, "Outcomes99.txt"), sep = "|")
   invisible(out_dir)
 }

@@ -229,7 +229,7 @@
     </figure>
 
     <h3>무엇으로 재는가</h3>
-    <p>이 저서의 분석은 구조, 증상, 활동, 사건의 네 층을 잰 값을 쓴다. 구조와 증상은 생각보다 덜 맞물린다. X선 손상이 큰데 아프지 않은 무릎도, 손상이 거의 없는데 아픈 무릎도 흔하다(<a href="#" onclick="showTab('research');return false">연구</a> 2).</p>
+    <p>이 저서의 분석은 구조, 증상, 활동, 사건의 네 층을 잰 값을 쓴다. 구조와 증상은 생각보다 덜 맞물린다. X선 손상이 큰데 아프지 않은 무릎도, 손상이 거의 없는데 아픈 무릎도 흔하다(<a href="#" onclick="showTab('research');return false">연구</a> 1장과 2장).</p>
     <div class="tblwrap">
       <table>
         <caption>측정의 네 층</caption>
@@ -246,7 +246,7 @@
 
     <h3>우리가 쓰는 자료 — Osteoarthritis Initiative</h3>
     <div class="panel">
-      <p><b>무엇인가.</b> 무릎 골관절염이 있거나 생길 위험이 있는 45~79세 4,796명을 2004~2006년에 미국 네 곳의 임상센터에서 모아, 해마다 다시 부른 전향적 코호트다. 방문마다 문진(통증, 기능, 활동), 신체 계측, 무릎 X선과 MRI를 했고, 치환술은 의무기록으로 판정했다.</p>
+      <p><b>무엇인가.</b> 무릎 골관절염이 있거나 생길 위험이 있는 45~79세 4,796명을 2004~2006년에 미국의 여러 임상센터에서 모아, 해마다 다시 부른 전향적 코호트다. 방문마다 문진(통증, 기능, 활동), 신체 계측, 무릎 X선과 MRI를 했고, 치환술은 의무기록으로 판정했다.</p>
       <p><b>왜 이 자료인가.</b> 같은 사람의 두 무릎을 16년 가까이 따라가며 구조, 증상, 활동, 수술을 함께 잰 공개 자료는 드물다. 궤적과 사건을 함께 다루는 재활의 질문에 맞는다.</p>
       <p><b>어디서 받나.</b> 미국 국립정신보건원 데이터 보관소(<a href="https://nda.nih.gov/oai" target="_blank" rel="noopener">NIMH Data Archive</a>)에서 로그인하고 이용 약관에 동의하면 받을 수 있다.</p>
     </div>
@@ -283,29 +283,26 @@
   <!-- ============ 연구 ============ -->
   <section role="tabpanel" id="tab-research" aria-labelledby="t-research">
     <h2 class="h">연구</h2>
-    <p class="sub lead">주제별로 분석을 모았다. 각 카드는 렌더된 결과 문서와, 그 결과를 만드는 원본(R 코드가 든 Quarto 문서)으로 이어진다.</p>
-    <div class="note">결과 문서는 표와 그림이 담긴 채 올라가 있어 그대로 읽을 수 있다. 본문의 수치는 손으로 옮기지 않고 코드가 출력한 것이다. 내용은 다듬는 중이며 카드의 요약은 2026-11-21 기준이다.</div>
+    <p class="sub lead">데이터 분석 교과서의 장으로 쓴다. 각 장은 재활의 질문 하나로 시작해, 답하는 데 필요한 방법을 수식과 가정까지 설명하고, OAI로 추정한 뒤 그 결과를 해석한다.</p>
+    <div class="note">장마다 원본은 R 코드가 든 Quarto 문서 하나이고, GitHub에서 읽는 것은 그 렌더 결과다. 본문의 수치는 손으로 적지 않고 코드가 낸다. 장의 순서는 자료의 시간 구조를 따른다. 한 시점의 단면에서 반복 측정, 시간에 따라 바뀌는 노출, 사건까지의 시간으로 가며, 앞 장의 방법 위에 다음 장의 방법을 쌓는다. 구성의 근거는 <a href="https://github.com/pilsunchoi/rehab-data-analysis/blob/main/docs/book-plan.md" target="_blank" rel="noopener">장 구성 계획</a>에 있다.</div>
 
-    <h3 class="group">무릎 골관절염 <span class="k">Osteoarthritis Initiative</span></h3>
+    <h3 class="group">무릎 골관절염 <span class="k">Osteoarthritis Initiative · 5개 장</span></h3>
 
     <article class="study">
       <div class="study-num">1</div>
       <div class="study-body">
-        <h4 class="study-title">무릎 기능의 궤적과 인공관절 치환술<span class="pill warn">진행 중</span></h4>
-        <p class="study-sub">WOMAC 기능 점수의 변화가 치환술 위험을 얼마나 예측하는가 · 무릎 8,917개, 치환술 884건</p>
-        <p class="study-desc">기능이 나빠지는 속도가 수술을 예고하는지 본다. 기준 시점의 값, 직전 방문의 값, 무릎별 연간 기울기를 차례로 Cox 모형에 넣어 비교하고, 그 한계를 함께 푸는 종단–생존 결합모형으로 나아간다.</p>
+        <h4 class="study-title">자료와 측정 — OAI는 누구를 무엇으로 쟀는가<span class="pill warn">초고</span></h4>
+        <p class="study-sub">코호트 설계 · 분석 단위와 군집(급내상관, 설계효과) · 척도의 성질(순서 척도, 합산 척도, 바닥 효과) · 결측의 기제와 생존자 선택</p>
+        <p class="study-desc">뒤의 네 장이 모두 기대는 자료를 다룬다. 등록자 4,796명이 누구이고, 무릎을 어떤 척도로 쟀으며, 16년 동안 무엇이 빠져나갔는지를 보고, 그 결과가 뒤 장의 모형 선택에 거는 조건을 정리한다.</p>
         <ul class="study-points">
-          <li>구조 손상이 가장 강한 예측 인자다. 기준 KL 4 무릎은 추적 중 절반 이상(54%)이 치환술을 받았고, KL 0 무릎은 2%였다.</li>
-          <li>같은 KL 등급 안에서도 기능이 중요하다. 직전 방문의 WOMAC 기능 10점당 치환술 위험비는 1.77이고, 무릎별 연간 악화 1점당 위험비는 2.14였다.</li>
-          <li>기준 기능 점수가 0인 무릎이 36%다. 정규 오차를 가정한 궤적 모형은 이 바닥 효과를 다루지 못한다.</li>
-          <li>결합모형(JMbayes2)은 아직 모의 데이터로만 적합했다. 원자료 적합이 다음 단계다.</li>
+          <li>한 사람의 두 무릎은 닮는다. 급내상관이 통증 0.48, 기능 0.64로, 기능 점수는 무릎보다 사람의 상태를 더 많이 반영한다.</li>
+          <li>WOMAC은 바닥에 몰린 척도다. 기준 방문에서 통증 0점인 무릎이 44%이고, KL 3 무릎도 30%가 통증 0점이다.</li>
+          <li>결측은 완전 무작위가 아니다. 기준 통증이 높고 덜 활동적인 사람이 8년 방문에 더 많이 빠졌고, 뒤 방문일수록 처음부터 덜 아팠던 사람들이 남는다.</li>
         </ul>
-        <div class="study-figs"><img src="img/study01_trajectory.png" alt="왼쪽: KL 등급별 WOMAC 기능 평균 궤적. 오른쪽: 치환술 무릎의 수술 전 기능 궤적과 1년 구간 평균" loading="lazy"></div>
+        <div class="study-figs"><img src="img/ch01_womac_floor.png" alt="기준 방문의 WOMAC 통증, 뻣뻣함, 기능 점수 분포. 세 척도 모두 0점에 가장 많이 몰려 있다" loading="lazy"></div>
         <div class="study-links">
-          <a href="https://github.com/pilsunchoi/rehab-data-analysis/blob/main/analysis/01-function-trajectory-tkr.md" target="_blank" rel="noopener">문서 읽기</a>
-          <a href="https://github.com/pilsunchoi/rehab-data-analysis/blob/main/analysis/01-function-trajectory-tkr-method.md" target="_blank" rel="noopener">부록: 방법 해설</a>
-          <a href="https://github.com/pilsunchoi/rehab-data-analysis/blob/main/analysis/01-function-trajectory-tkr.qmd" target="_blank" rel="noopener">R 코드</a>
-          <a href="https://github.com/pilsunchoi/rehab-data-analysis/blob/main/R/fit-jm.R" target="_blank" rel="noopener">결합모형 적합</a>
+          <a href="https://github.com/pilsunchoi/rehab-data-analysis/blob/main/chapters/01-data-and-measures.md" target="_blank" rel="noopener">장 읽기</a>
+          <a href="https://github.com/pilsunchoi/rehab-data-analysis/blob/main/chapters/01-data-and-measures.qmd" target="_blank" rel="noopener">R 문서(원본)</a>
         </div>
       </div>
     </article>
@@ -313,46 +310,37 @@
     <article class="study">
       <div class="study-num">2</div>
       <div class="study-body">
-        <h4 class="study-title">무릎 통증의 궤적<span class="pill ok">1차 완료</span></h4>
-        <p class="study-sub">구조와 통증의 어긋남, 통증과 기능, 통증 궤적의 세 갈래 · 통증 관측 90,667개</p>
-        <p class="study-desc">통증은 X선 손상을 얼마나 따라가는가, 그리고 16년의 통증 경과에는 어떤 전형이 있는가. 잠재계층 혼합모형으로 궤적의 갈래를 나누고, 갈래마다 기준 특성과 치환술을 본다.</p>
-        <ul class="study-points">
-          <li>구조와 통증은 느슨하게만 맞물린다. KL 3~4인데 통증이 없는 무릎이 26%, KL 0~1인데 통증이 5점 이상인 무릎이 13%였고, 둘의 순위 상관은 0.27이다.</li>
-          <li>통증과 기능은 함께 움직인다. 무릎 사이 상관은 0.85, 같은 무릎 안에서 평균을 뺀 값끼리의 상관도 0.75다.</li>
-          <li>궤적은 세 갈래로 나뉜다. 83%는 낮게 유지되고, 11%는 중간에서 시작해 8년 무렵까지 악화되며, 5%는 높게 시작해 호전된다. 갈래는 기준 통증의 높이보다 방향에서 갈린다.</li>
-          <li>악화하는 갈래는 KL 등급을 보정해도 치환술 위험비가 2.96이다. 다만 계층을 추적 전체로 정했으므로 예측이 아니라 기술 통계로 읽는다.</li>
-        </ul>
-        <div class="study-figs"><img src="img/study02_pain_classes.png" alt="통증 궤적 3계층 모형의 평균 궤적과 계층 수별 비교" loading="lazy"></div>
-        <div class="study-links">
-          <a href="https://github.com/pilsunchoi/rehab-data-analysis/blob/main/analysis/02-knee-pain-trajectory.md" target="_blank" rel="noopener">문서 읽기</a>
-          <a href="https://github.com/pilsunchoi/rehab-data-analysis/blob/main/analysis/02-knee-pain-trajectory.qmd" target="_blank" rel="noopener">R 코드</a>
-          <a href="https://github.com/pilsunchoi/rehab-data-analysis/blob/main/R/fit-lcmm.R" target="_blank" rel="noopener">계층 적합</a>
-        </div>
+        <h4 class="study-title">구조와 증상 — X선 손상과 통증은 얼마나 일치하는가<span class="pill info">구상</span></h4>
+        <p class="study-sub">순서 척도의 연관 · 군집 강건 표준오차 · 같은 사람의 두 무릎을 비교하는 사람 안 설계 · 바닥 효과를 다루는 모형(검열 정규, 두 부분 모형)</p>
       </div>
     </article>
 
     <article class="study">
       <div class="study-num">3</div>
       <div class="study-body">
-        <h4 class="study-title">신체활동과 무릎 통증<span class="pill ok">1차 완료</span></h4>
-        <p class="study-sub">PASE 활동 점수와 WOMAC 통증의 관계 · 4,502명, 사람·방문 관측 28,895개</p>
-        <p class="study-desc">더 움직이는 사람이 덜 아픈가, 더 움직이면 나중에 더 아파지는가, 아니면 아파서 덜 움직이는가. 사람 사이의 차이와 사람 안의 변화를 나누고, 앞 방문의 값으로 다음 방문을 보는 시차 모형으로 순서를 맞춘다.</p>
-        <ul class="study-points">
-          <li>활동적인 사람이 약간 덜 아프지만 연관은 작다. 평소 활동량 50점당 통증은 0.18점(20점 척도) 낮고, 같은 사람이 평소보다 활동적인 해에는 0.04점 낮을 뿐이다.</li>
-          <li>순서로 보면 "아파서 덜 움직인다" 쪽이 더 뚜렷하다. 표준화 계수로 통증에서 활동으로 가는 쪽이 반대쪽의 약 2.5배다.</li>
-          <li>많이 움직여서 나빠진다는 신호는 없다. 활동량이 가장 높은 사분위도 다음 방문의 통증이 가장 낮은 사분위보다 높지 않았다.</li>
-          <li>PASE는 기억에 기댄 자기 보고라 측정오차가 연관을 0 쪽으로 끌어당긴다. 관찰 자료이므로 인과로 읽지 않는다.</li>
-        </ul>
-        <div class="study-figs"><img src="img/study03_activity_quartile.png" alt="PASE 사분위별 다음 방문 통증의 차이(가장 낮은 사분위 대비)와 95% 구간" loading="lazy"></div>
-        <div class="study-links">
-          <a href="https://github.com/pilsunchoi/rehab-data-analysis/blob/main/analysis/03-activity-pain.md" target="_blank" rel="noopener">문서 읽기</a>
-          <a href="https://github.com/pilsunchoi/rehab-data-analysis/blob/main/analysis/03-activity-pain.qmd" target="_blank" rel="noopener">R 코드</a>
-        </div>
+        <h4 class="study-title">통증과 기능의 궤적 — 시간에 따라 어떻게 변하고 누가 나빠지는가<span class="pill info">구상</span></h4>
+        <p class="study-sub">선형 혼합모형(무작위 절편과 기울기, BLUP) · 결측 아래의 추정 · 잠재계층 궤적 모형</p>
+      </div>
+    </article>
+
+    <article class="study">
+      <div class="study-num">4</div>
+      <div class="study-body">
+        <h4 class="study-title">신체활동과 통증 — 움직이면 덜 아픈가, 아파서 덜 움직이는가<span class="pill info">구상</span></h4>
+        <p class="study-sub">사람 사이와 사람 안의 분해 · 고정효과 · 시차 모형 · 교란, 측정오차, 역인과</p>
+      </div>
+    </article>
+
+    <article class="study">
+      <div class="study-num">5</div>
+      <div class="study-body">
+        <h4 class="study-title">인공관절 치환술까지의 시간 — 누가 언제 수술에 이르고, 예측할 수 있는가<span class="pill info">구상</span></h4>
+        <p class="study-sub">Kaplan-Meier · Cox 모형과 시간가변 공변량 · 경쟁 위험 · 종단-생존 결합모형 · 동적 예측</p>
       </div>
     </article>
 
     <div class="panel">
-      <p><b>공통 코드와 자료 문서.</b> 세 분석은 같은 함수로 OAI 파일을 읽고 분석용 표를 만든다.</p>
+      <p><b>공통 코드와 자료 문서.</b> 모든 장은 같은 함수로 OAI 파일을 읽고 분석용 표를 만든다. 원자료가 없으면 같은 꼴의 모의 데이터로 돈다.</p>
       <div class="study-links" style="border-top:none;padding-top:0">
         <a href="https://github.com/pilsunchoi/rehab-data-analysis/blob/main/R/oai.R" target="_blank" rel="noopener">R/oai.R — 읽기, 분석용 표, 모의 데이터</a>
         <a href="https://github.com/pilsunchoi/rehab-data-analysis/blob/main/docs/oai-variables.md" target="_blank" rel="noopener">OAI 변수 목록</a>
@@ -360,7 +348,7 @@
       </div>
     </div>
 
-    <div class="empty">뇌졸중 등 다른 주제의 연구는 자료가 갖춰지면 이 아래에 주제별로 더한다.</div>
+    <div class="empty">뇌졸중 등 다른 주제의 장은 자료가 갖춰지면 이 아래에 주제별로 더한다.</div>
   </section>
 
   </div>
