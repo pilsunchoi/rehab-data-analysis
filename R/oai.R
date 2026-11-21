@@ -272,11 +272,11 @@ read_oai_cols <- function(path, pattern) {
   dt
 }
 
-# 1장(자료와 측정)용 표. 치환술 뒤의 측정도 지우지 않고 표시만 한다.
+# 1장(데이터와 측정)용 표. 치환술 뒤의 측정도 지우지 않고 표시만 한다.
 #   person  사람 하나에 한 줄. 하위 코호트, 기관, 기준 특성, 마지막 접촉 방문(개월), 사망 판정과 시각(개월)
 #   knees   무릎 하나에 한 줄. 기준 KL, 치환술 여부와 시각(개월)
 #   kv      무릎·방문 하나에 한 줄. WOMAC 통증·기능·뻣뻣함, 치환술 뒤 측정 표시(after_tkr)
-# 하위 코호트, 기관, 마지막 접촉, 사망 열이 없는 자료(옛 모의 데이터)에서는 그 값이 NA다.
+# 하위 코호트, 기관, 마지막 접촉, 사망 열이 없는 데이터(옛 모의 데이터)에서는 그 값이 NA다.
 cohort_data <- function(raw_dir) {
   enr <- read_oai_txt(find_file(raw_dir, "Enrollees.txt"))
   opt <- function(dt, col) if (col %in% names(dt)) dt[[col]] else NA

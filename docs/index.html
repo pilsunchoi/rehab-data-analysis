@@ -3,7 +3,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>재활 데이터 분석</title>
-<meta name="description" content="공개된 재활 관련 자료를 내용 중심으로 분석한다. 첫 주제는 무릎 골관절염(Osteoarthritis Initiative).">
+<meta name="description" content="재활과 관련된 공개 데이터를 분석한다. 첫 주제는 무릎 골관절염(Osteoarthritis Initiative).">
 <style>
   :root{
     --bg:#f6f7f9; --panel:#ffffff; --ink:#1b2430; --muted:#5b6673;
@@ -139,7 +139,7 @@
       <span class="tag">공개 코호트로 읽는 재활의 내용</span>
       <span class="wip">집필 중</span>
     </div>
-    <p class="lede">재활과 관련된 공개 자료를 분석한다. 기능과 통증이 시간에 따라 어떻게 변하는지, 무엇이 그 변화와 함께 움직이는지, 언제 수술에 이르는지를 본다. 첫 주제는 무릎 골관절염이고, 자료는 미국 국립보건원(NIH)이 지원한 <a href="https://nda.nih.gov/oai" target="_blank" rel="noopener">Osteoarthritis Initiative(OAI)</a>다. 뇌졸중 등 다른 주제는 자료가 갖춰지는 대로 탭을 더한다.</p>
+    <p class="lede">재활과 관련된 공개 데이터를 분석한다. 기능과 통증이 시간에 따라 어떻게 변하는지, 무엇이 그 변화와 함께 움직이는지, 언제 수술에 이르는지를 본다. 첫 주제는 무릎 골관절염이고, 데이터는 미국 국립보건원(NIH)이 지원한 <a href="https://nda.nih.gov/oai" target="_blank" rel="noopener">Osteoarthritis Initiative(OAI)</a>다. 뇌졸중 등 다른 주제는 데이터가 갖춰지는 대로 탭을 더한다.</p>
   </div>
 </header>
 
@@ -158,74 +158,102 @@
   <!-- ============ 무릎 골관절염 ============ -->
   <section role="tabpanel" id="tab-knee" aria-labelledby="t-knee" class="active">
     <h2 class="h">무릎 골관절염</h2>
-    <p class="sub lead">어떤 병이고, 재활에서 왜 중요하며, 우리가 쓰는 자료는 무엇인가.</p>
+    <p class="sub lead">어떤 병이고, 재활에서 왜 중요하며, 우리가 쓰는 데이터는 무엇인가.</p>
 
     <h3>어떤 병인가</h3>
     <div class="panel">
-      <p><b>관절 전체의 병.</b> 골관절염은 뼈 끝을 덮은 관절 연골이 닳는 데서 시작해, 그 아래 뼈(연골하골), 관절을 싸는 활막, 인대와 근육까지 함께 변하는 만성 질환이다. 무릎은 골관절염이 가장 흔한 관절이다.</p>
-      <p><b>증상.</b> 걷거나 계단을 오를 때의 통증, 아침이나 오래 앉았다 일어날 때의 짧은 뻣뻣함, 그리고 일상 동작의 제한이다. 통증은 좋아졌다 나빠지기를 되풀이하며 사람마다 경과가 크게 다르다.</p>
-      <p><b>위험 요인.</b> 나이, 여성, 비만, 과거의 무릎 손상, 관절에 무리가 가는 직업이 알려져 있다. 비만과 근력처럼 바꿀 수 있는 요인이 있다는 점이 재활의 출발점이다.</p>
-      <p><b>치료의 순서.</b> 진료지침은 운동치료, 체중 조절, 교육을 첫 단계로 둔다. 그다음이 약물과 주사이고, 이것으로 조절되지 않는 말기 관절은 인공관절 치환술로 바꾼다. 수술 전 대부분의 기간이 물리치료와 재활의 영역이다.</p>
+      <p><b>관절 전체의 병.</b> 골관절염(osteoarthritis)은 뼈 끝을 덮은 관절 연골(articular cartilage)이 닳는 데서 시작해, 그 아래 뼈인 연골하골(subchondral bone), 관절을 싸는 활막(synovium), 인대(ligament)와 근육까지 함께 변하는 만성 질환이다. 무릎은 골관절염이 가장 흔한 관절이다.</p>
+      <p><b>증상.</b> 걷거나 계단을 오를 때의 통증, 아침이나 오래 앉았다 일어날 때의 짧은 뻣뻣함(stiffness), 그리고 일상 동작의 제한이다. 통증은 좋아졌다 나빠지기를 되풀이하며 사람마다 경과가 크게 다르다.</p>
+      <p><b>위험 요인(risk factors).</b> 나이, 여성, 비만(obesity), 과거의 무릎 손상(knee injury), 관절에 무리가 가는 직업이 알려져 있다. 비만과 근력(muscle strength)처럼 바꿀 수 있는 요인이 있다는 점이 재활의 출발점이다.</p>
+      <p><b>치료의 순서.</b> 진료지침(clinical guidelines)은 운동치료(exercise therapy), 체중 조절(weight management), 교육(education)을 첫 단계로 둔다. 그다음이 약물과 주사이고, 이것으로 조절되지 않는 말기 관절은 인공관절 치환술(total knee replacement, TKR)로 바꾼다. 수술 전 대부분의 기간이 물리치료(physical therapy)와 재활(rehabilitation)의 영역이다.</p>
     </div>
 
     <figure class="fig">
-      <svg viewBox="0 0 660 330" role="img" aria-labelledby="kneeTitle kneeDesc" font-family="-apple-system,'Segoe UI','Malgun Gothic',sans-serif">
+      <svg viewBox="0 0 680 396" role="img" aria-labelledby="kneeTitle kneeDesc" font-family="-apple-system,'Segoe UI','Malgun Gothic',sans-serif">
         <title id="kneeTitle">건강한 무릎과 골관절염 무릎의 모식도</title>
-        <desc id="kneeDesc">왼쪽은 연골이 고르고 관절 간격이 넓은 건강한 무릎, 오른쪽은 안쪽 연골이 닳아 관절 간격이 좁아지고 골극과 연골하골 경화가 생긴 골관절염 무릎이다.</desc>
+        <desc id="kneeDesc">앞에서 본 오른쪽 무릎. 왼쪽 그림은 연골이 고르고 관절 간격이 넓은 건강한 무릎, 오른쪽 그림은 안쪽 연골이 닳아 관절 간격이 좁아지고 골극과 연골하골 경화가 생긴 골관절염 무릎이다.</desc>
         <defs>
-          <g id="femur">
-            <path d="M115,18 L185,18 L192,105 C228,116 250,138 250,163 C250,183 232,191 208,189 C190,187 178,178 150,178 C122,178 110,187 92,189 C68,191 50,183 50,163 C50,138 72,116 108,105 Z" fill="#f4ecdb" stroke="#a8946a" stroke-width="2"/>
-          </g>
+          <!-- 대퇴골: 가는 몸통이 아래에서 넓어져 두 관절융기가 된다 -->
+          <path id="femur" d="M122,8 L178,8 L180,92 C182,118 200,132 222,144 C242,155 248,176 240,192 C233,204 216,208 198,205 C184,202 172,195 160,193 C154,192 146,192 140,193 C128,195 116,202 102,205 C84,208 67,204 60,192 C52,176 58,155 78,144 C100,132 118,118 120,92 Z" fill="#f4ecdb" stroke="#a8946a" stroke-width="2"/>
+          <!-- 비골: 바깥쪽(그림의 왼쪽), 경골 뒤 -->
+          <path id="fibula" d="M42,252 C38,240 58,236 66,247 L68,266 L62,340 L50,340 L50,268 Z" fill="#efe5cf" stroke="#a8946a" stroke-width="2"/>
         </defs>
 
         <!-- 건강한 무릎 -->
-        <g transform="translate(10,20)">
-          <text x="150" y="0" text-anchor="middle" font-size="16" font-weight="700" fill="#1b2430">건강한 무릎</text>
+        <g transform="translate(20,22)">
+          <text x="150" y="-6" text-anchor="middle" font-size="16" font-weight="700" fill="#1b2430">건강한 무릎</text>
+          <use href="#fibula"/>
           <use href="#femur"/>
-          <path d="M56,176 C68,193 92,194 114,186" fill="none" stroke="#4d8fd1" stroke-width="7" stroke-linecap="round"/>
-          <path d="M186,186 C208,194 232,193 244,176" fill="none" stroke="#4d8fd1" stroke-width="7" stroke-linecap="round"/>
-          <path d="M45,212 L255,212 L250,228 C236,238 206,242 196,252 L196,300 L104,300 L104,252 C94,242 64,238 50,228 Z" fill="#f4ecdb" stroke="#a8946a" stroke-width="2"/>
-          <line x1="56" y1="207" x2="138" y2="207" stroke="#4d8fd1" stroke-width="7" stroke-linecap="round"/>
-          <line x1="162" y1="207" x2="244" y2="207" stroke="#4d8fd1" stroke-width="7" stroke-linecap="round"/>
-          <text x="150" y="70" text-anchor="middle" font-size="13" fill="#5b6673">대퇴골</text>
-          <text x="150" y="285" text-anchor="middle" font-size="13" fill="#5b6673">경골</text>
-          <!-- 관절 간격 -->
-          <line x1="85" y1="192" x2="85" y2="203" stroke="#1b2430" stroke-width="1.2"/>
-          <line x1="20" y1="197" x2="80" y2="197" stroke="#1b2430" stroke-width="1" stroke-dasharray="3 2"/>
-          <text x="18" y="190" text-anchor="start" font-size="12" fill="#1b2430">관절 간격</text>
-          <text x="262" y="198" font-size="12" fill="#2f6fb0">연골</text>
+          <!-- 경골: 평평한 고원 위에 가운데 융기 -->
+          <path d="M52,232 C52,226 58,224 66,224 L134,224 L142,215 L150,224 L158,215 L166,224 L234,224 C242,224 248,226 248,232 L244,248 C236,260 210,266 196,272 L192,340 L108,340 L104,272 C90,266 64,260 56,248 Z" fill="#f4ecdb" stroke="#a8946a" stroke-width="2"/>
+          <!-- 반월판 -->
+          <path d="M54,222 L92,222 Q72,216 58,209 Z" fill="#cfc6dc" stroke="#8f86a3" stroke-width="1"/>
+          <path d="M246,222 L208,222 Q228,216 242,209 Z" fill="#cfc6dc" stroke="#8f86a3" stroke-width="1"/>
+          <!-- 관절 연골 -->
+          <path d="M64,196 C72,207 90,210 104,206" fill="none" stroke="#4d8fd1" stroke-width="6" stroke-linecap="round"/>
+          <path d="M196,206 C210,210 228,207 236,196" fill="none" stroke="#4d8fd1" stroke-width="6" stroke-linecap="round"/>
+          <line x1="66" y1="221" x2="132" y2="221" stroke="#4d8fd1" stroke-width="6" stroke-linecap="round"/>
+          <line x1="168" y1="221" x2="234" y2="221" stroke="#4d8fd1" stroke-width="6" stroke-linecap="round"/>
+          <!-- 이름표 -->
+          <text x="150" y="60" text-anchor="middle" font-size="13" fill="#5b6673">대퇴골</text>
+          <text x="150" y="75" text-anchor="middle" font-size="10.5" fill="#8a929c">femur</text>
+          <text x="150" y="304" text-anchor="middle" font-size="13" fill="#5b6673">경골</text>
+          <text x="150" y="319" text-anchor="middle" font-size="10.5" fill="#8a929c">tibia</text>
+          <text x="22" y="300" text-anchor="middle" font-size="12" fill="#5b6673">비골</text>
+          <text x="22" y="314" text-anchor="middle" font-size="10" fill="#8a929c">fibula</text>
+          <!-- 연골 설명 -->
+          <line x1="236" y1="200" x2="270" y2="178" stroke="#2f6fb0" stroke-width="1"/>
+          <text x="272" y="170" font-size="12" fill="#2f6fb0">관절 연골</text>
+          <text x="272" y="183" font-size="10" fill="#2f6fb0">cartilage</text>
+          <line x1="228" y1="217" x2="270" y2="238" stroke="#6f6584" stroke-width="1"/>
+          <text x="272" y="242" font-size="12" fill="#6f6584">반월판</text>
+          <text x="272" y="255" font-size="10" fill="#6f6584">meniscus</text>
+          <text x="58" y="364" text-anchor="middle" font-size="11" fill="#8a929c">바깥쪽</text>
+          <text x="242" y="364" text-anchor="middle" font-size="11" fill="#8a929c">안쪽</text>
         </g>
 
         <!-- 골관절염 무릎 -->
-        <g transform="translate(345,20)">
-          <text x="150" y="0" text-anchor="middle" font-size="16" font-weight="700" fill="#1b2430">골관절염 무릎</text>
+        <g transform="translate(360,22)">
+          <text x="150" y="-6" text-anchor="middle" font-size="16" font-weight="700" fill="#1b2430">골관절염 무릎</text>
+          <use href="#fibula"/>
           <use href="#femur"/>
-          <!-- 골극(대퇴) -->
-          <path d="M50,160 L36,172 L52,175 Z" fill="#e6d6b4" stroke="#a8946a" stroke-width="1.5"/>
-          <!-- 닳은 안쪽 연골(왼쪽), 비교적 남은 바깥 연골 -->
-          <path d="M60,180 C70,190 80,190 88,189 M98,188 C104,187 110,186 114,185" fill="none" stroke="#4d8fd1" stroke-width="2.5" stroke-linecap="round"/>
-          <path d="M186,186 C208,194 232,193 244,176" fill="none" stroke="#4d8fd1" stroke-width="5" stroke-linecap="round"/>
-          <!-- 경골: 안쪽이 올라와 간격이 좁다 -->
-          <path d="M45,196 L140,198 L160,210 L255,212 L250,228 C236,238 206,242 196,252 L196,300 L104,300 L104,252 C94,242 64,238 50,228 Z" fill="#f4ecdb" stroke="#a8946a" stroke-width="2"/>
-          <!-- 골극(경골) -->
-          <path d="M45,196 L30,188 L46,206 Z" fill="#e6d6b4" stroke="#a8946a" stroke-width="1.5"/>
-          <!-- 연골하골 경화 -->
-          <path d="M52,201 L136,203" stroke="#8a6d3b" stroke-width="5" stroke-linecap="round" opacity=".75"/>
-          <line x1="58" y1="194" x2="134" y2="196" stroke="#4d8fd1" stroke-width="2" stroke-linecap="round" stroke-dasharray="10 6"/>
-          <line x1="164" y1="207" x2="244" y2="207" stroke="#4d8fd1" stroke-width="5" stroke-linecap="round"/>
-          <text x="150" y="70" text-anchor="middle" font-size="13" fill="#5b6673">대퇴골</text>
-          <text x="150" y="285" text-anchor="middle" font-size="13" fill="#5b6673">경골</text>
+          <!-- 대퇴 골극(안쪽) -->
+          <path d="M240,190 L256,197 L240,203 Z" fill="#e3d2ad" stroke="#a8946a" stroke-width="1.5"/>
+          <!-- 경골: 안쪽 고원이 올라와 간격이 좁다 -->
+          <path d="M52,232 C52,226 58,224 66,224 L134,224 L142,215 L150,224 L158,215 L166,222 L234,214 C242,213 248,216 248,222 L244,248 C236,260 210,266 196,272 L192,340 L108,340 L104,272 C90,266 64,260 56,248 Z" fill="#f4ecdb" stroke="#a8946a" stroke-width="2"/>
+          <!-- 경골 골극(안쪽) -->
+          <path d="M246,216 L262,210 L249,229 Z" fill="#e3d2ad" stroke="#a8946a" stroke-width="1.5"/>
+          <!-- 연골하골 경화(안쪽 고원 아래) -->
+          <path d="M172,226 L236,219" stroke="#8a6d3b" stroke-width="6" stroke-linecap="round" opacity=".7"/>
+          <!-- 반월판: 바깥은 그대로, 안쪽은 닳고 밀려남 -->
+          <path d="M54,222 L92,222 Q72,216 58,209 Z" fill="#cfc6dc" stroke="#8f86a3" stroke-width="1"/>
+          <path d="M252,214 L230,216 Q244,212 252,207 Z" fill="#cfc6dc" stroke="#8f86a3" stroke-width="1"/>
+          <!-- 관절 연골: 바깥은 남고 안쪽은 얇고 끊김 -->
+          <path d="M64,196 C72,207 90,210 104,206" fill="none" stroke="#4d8fd1" stroke-width="5" stroke-linecap="round"/>
+          <line x1="66" y1="221" x2="132" y2="221" stroke="#4d8fd1" stroke-width="5" stroke-linecap="round"/>
+          <path d="M198,205 C206,207 214,207 220,206" fill="none" stroke="#4d8fd1" stroke-width="2" stroke-linecap="round"/>
+          <line x1="176" y1="219" x2="196" y2="217" stroke="#4d8fd1" stroke-width="2" stroke-linecap="round"/>
+          <!-- 이름표 -->
+          <text x="150" y="60" text-anchor="middle" font-size="13" fill="#5b6673">대퇴골</text>
+          <text x="150" y="75" text-anchor="middle" font-size="10.5" fill="#8a929c">femur</text>
+          <text x="150" y="304" text-anchor="middle" font-size="13" fill="#5b6673">경골</text>
+          <text x="150" y="319" text-anchor="middle" font-size="10.5" fill="#8a929c">tibia</text>
           <!-- 설명 -->
-          <text x="6" y="150" font-size="12" fill="#a3324f">골극</text>
-          <line x1="22" y1="154" x2="38" y2="168" stroke="#a3324f" stroke-width="1"/>
-          <line x1="22" y1="154" x2="32" y2="188" stroke="#a3324f" stroke-width="1"/>
-          <text x="90" y="232" text-anchor="middle" font-size="12" fill="#8a5b00">연골하골 경화</text>
-          <text x="0" y="262" font-size="12" fill="#2f6fb0">안쪽 연골이 닳아</text>
-          <text x="0" y="278" font-size="12" fill="#2f6fb0">간격이 좁다</text>
-          <text x="262" y="198" font-size="12" fill="#2f6fb0">바깥 연골</text>
+          <line x1="256" y1="198" x2="276" y2="150" stroke="#a3324f" stroke-width="1"/>
+          <line x1="260" y1="212" x2="276" y2="150" stroke="#a3324f" stroke-width="1"/>
+          <text x="262" y="132" font-size="12" fill="#a3324f">골극</text>
+          <text x="262" y="145" font-size="10" fill="#a3324f">osteophyte</text>
+          <line x1="205" y1="211" x2="205" y2="176" stroke="#2f6fb0" stroke-width="1"/>
+          <text x="166" y="160" font-size="12" fill="#2f6fb0">연골이 닳고</text>
+          <text x="166" y="173" font-size="12" fill="#2f6fb0">간격이 좁아짐</text>
+          <line x1="200" y1="226" x2="214" y2="262" stroke="#8a5b00" stroke-width="1"/>
+          <text x="214" y="276" font-size="12" fill="#8a5b00">연골하골 경화</text>
+          <text x="214" y="289" font-size="10" fill="#8a5b00">subchondral sclerosis</text>
+          <text x="58" y="364" text-anchor="middle" font-size="11" fill="#8a929c">바깥쪽</text>
+          <text x="242" y="364" text-anchor="middle" font-size="11" fill="#8a929c">안쪽</text>
         </g>
       </svg>
-      <figcaption>앞에서 본 오른쪽 무릎의 모식도(직접 그림, 비례는 맞지 않는다). X선에는 연골이 보이지 않으므로 연골이 닳은 정도를 관절 간격으로 읽는다. 골극과 관절 간격으로 등급을 매긴 것이 아래의 KL 등급이다.</figcaption>
+      <figcaption>앞에서 본 오른쪽 무릎의 모식도(직접 그림, 비례는 맞지 않는다). 그림의 왼쪽이 바깥쪽, 오른쪽이 몸의 가운데를 향한 안쪽이다. 무릎 골관절염은 체중이 더 실리는 안쪽에서 흔하다. X선에는 연골이 보이지 않으므로 연골이 닳은 정도를 관절 간격(joint space)으로 읽는다. 골극(osteophyte)과 관절 간격으로 등급을 매긴 것이 아래의 KL 등급이고, 연골하골 경화(subchondral sclerosis)는 연골 아래 뼈가 단단하고 두꺼워진 것이다.</figcaption>
     </figure>
 
     <h3>무엇으로 재는가</h3>
@@ -235,31 +263,31 @@
         <caption>측정의 네 층</caption>
         <thead><tr><th>층</th><th>척도</th><th>값</th><th>무엇을 보나</th></tr></thead>
         <tbody>
-          <tr><td>구조</td><td>Kellgren-Lawrence(KL) 등급</td><td>0~4</td><td>X선의 골극과 관절 간격. 0 정상, 1 의심, 2 골극 확실, 3 간격이 좁아짐, 4 간격이 크게 좁아지고 뼈가 변형</td></tr>
-          <tr><td>증상</td><td>WOMAC 통증</td><td>0~20</td><td>걷기, 계단, 밤, 휴식, 체중 부하 때의 통증 5문항. 클수록 나쁨</td></tr>
-          <tr><td>증상</td><td>WOMAC 기능</td><td>0~68</td><td>일상 동작 17문항의 어려움. 클수록 나쁨</td></tr>
-          <tr><td>활동</td><td>PASE</td><td>0 이상</td><td>지난 7일의 걷기, 운동, 집안일, 일을 자기 보고로 합한 신체활동 점수. 클수록 활동적</td></tr>
-          <tr><td>사건</td><td>인공관절 치환술</td><td>날짜</td><td>의무기록으로 판정한 치환술과 그 날짜</td></tr>
+          <tr><td>구조</td><td>Kellgren-Lawrence(KL) 등급(grade)</td><td>0~4</td><td>X선의 골극과 관절 간격. 0 정상, 1 의심, 2 골극 확실, 3 간격이 좁아짐, 4 간격이 크게 좁아지고 뼈가 변형</td></tr>
+          <tr><td>증상</td><td>WOMAC 통증(pain)</td><td>0~20</td><td>걷기, 계단, 밤, 휴식, 체중 부하(weight bearing) 때의 통증 5문항. WOMAC은 Western Ontario and McMaster Universities Osteoarthritis Index의 약자다. 클수록 나쁨</td></tr>
+          <tr><td>증상</td><td>WOMAC 기능(physical function)</td><td>0~68</td><td>일상 동작 17문항의 어려움. 클수록 나쁨</td></tr>
+          <tr><td>활동</td><td>PASE</td><td>0 이상</td><td>지난 7일의 걷기, 운동, 집안일, 일을 자기 보고(self-report)로 합한 신체활동(physical activity) 점수. PASE는 Physical Activity Scale for the Elderly의 약자다. 클수록 활동적</td></tr>
+          <tr><td>사건</td><td>인공관절 치환술</td><td>날짜</td><td>의무기록(medical records)으로 판정(adjudication)한 치환술과 그 날짜</td></tr>
         </tbody>
       </table>
     </div>
 
-    <h3>우리가 쓰는 자료 — Osteoarthritis Initiative</h3>
+    <h3>우리가 쓰는 데이터 — Osteoarthritis Initiative</h3>
     <div class="panel">
-      <p><b>무엇인가.</b> 무릎 골관절염이 있거나 생길 위험이 있는 45~79세 4,796명을 2004~2006년에 미국의 여러 임상센터에서 모아, 해마다 다시 부른 전향적 코호트다. 방문마다 문진(통증, 기능, 활동), 신체 계측, 무릎 X선과 MRI를 했고, 치환술은 의무기록으로 판정했다.</p>
-      <p><b>왜 이 자료인가.</b> 같은 사람의 두 무릎을 16년 가까이 따라가며 구조, 증상, 활동, 수술을 함께 잰 공개 자료는 드물다. 궤적과 사건을 함께 다루는 재활의 질문에 맞는다.</p>
+      <p><b>무엇인가.</b> 무릎 골관절염이 있거나 생길 위험이 있는 45~79세 4,796명을 2004~2006년에 미국의 여러 임상센터에서 모아, 해마다 다시 부른 전향적 코호트(prospective cohort)다. 방문마다 설문(통증, 기능, 활동), 신체 계측(anthropometry), 무릎 X선과 MRI를 했고, 치환술은 의무기록으로 판정했다.</p>
+      <p><b>왜 이 데이터인가.</b> 같은 사람의 두 무릎을 16년 가까이 따라가며 구조, 증상, 활동, 수술을 함께 잰 공개 데이터는 드물다. 궤적과 사건을 함께 다루는 재활의 질문에 맞는다.</p>
       <p><b>어디서 받나.</b> 미국 국립정신보건원 데이터 보관소(<a href="https://nda.nih.gov/oai" target="_blank" rel="noopener">NIMH Data Archive</a>)에서 로그인하고 이용 약관에 동의하면 받을 수 있다.</p>
     </div>
 
     <div class="stats">
       <div class="stat"><div class="n">4,796</div><div class="k">등록자 (45~79세)</div></div>
-      <div class="stat"><div class="n">8,917</div><div class="k">분석한 무릎</div></div>
-      <div class="stat"><div class="n">884</div><div class="k">판정된 치환술 무릎</div></div>
+      <div class="stat"><div class="n">9,592</div><div class="k">등록자의 무릎</div></div>
+      <div class="stat"><div class="n">903</div><div class="k">판정된 치환술 무릎</div></div>
       <div class="stat"><div class="n">15</div><div class="k">방문 (0~192개월)</div></div>
-      <div class="stat"><div class="n">90,667</div><div class="k">무릎 통증 관측</div></div>
-      <div class="stat"><div class="n">168개월</div><div class="k">무릎당 추적 (중앙값)</div></div>
+      <div class="stat"><div class="n">47%</div><div class="k">192개월 방문까지 추적된 사람</div></div>
+      <div class="stat"><div class="n">44%</div><div class="k">기준 방문에 통증이 0점인 무릎</div></div>
     </div>
-    <p class="sub">등록자 수는 OAI의 설계 값이고, 나머지는 2026-11-20에 받은 판을 분석 문서가 읽어 낸 값이다. 분석한 무릎은 기준 KL 등급과 기준 WOMAC 기능이 있고 등록 전에 치환술을 받지 않은 무릎이다.</p>
+    <p class="sub">2026-11-20에 받은 판을 1장(<a href="https://github.com/pilsunchoi/rehab-data-analysis/blob/main/chapters/01-data-and-measures.md" target="_blank" rel="noopener">데이터와 측정</a>)이 읽어 낸 값이다. 무릎 수와 치환술은 등록자 전체의 무릎을 센 것이고, 장마다 분석에 쓴 무릎은 그 장의 표본 정의에 따라 조금씩 다르다.</p>
 
     <h3>분석 단위와 정의</h3>
     <div class="tblwrap">
@@ -267,33 +295,33 @@
         <caption>공통 정의</caption>
         <thead><tr><th>항목</th><th>정의</th></tr></thead>
         <tbody>
-          <tr><td>분석 단위</td><td>통증·기능·치환술은 무릎. 한 사람의 두 무릎은 군집으로 다룬다. 활동량(PASE)은 사람 단위로 재므로 그 분석은 사람·방문 단위</td></tr>
+          <tr><td>분석 단위(unit of analysis)</td><td>통증·기능·치환술은 무릎. 한 사람의 두 무릎은 군집(cluster)으로 다룬다. 활동량(PASE)은 사람 단위로 재므로 그 분석은 사람·방문 단위</td></tr>
           <tr><td>사건</td><td>판정이 확정된 치환술만 센다. 자기 보고만 있는 것은 세지 않는다</td></tr>
-          <tr><td>시간 원점</td><td>등록 방문(V00)</td></tr>
+          <tr><td>시간 원점(time origin)</td><td>등록 방문(V00)</td></tr>
           <tr><td>치환술 뒤</td><td>그 무릎의 이후 측정은 쓰지 않는다. 수술 뒤의 점수는 다른 관절을 재는 셈이다</td></tr>
-          <tr><td>사망</td><td>지금은 중도절단으로 둔다. 경쟁 위험으로 다루는 것은 남은 일이다</td></tr>
+          <tr><td>사망</td><td>치환술의 경쟁 위험(competing risk)이다. 5장은 사망을 중도절단(censoring)으로 둔 분석과 경쟁 사건으로 둔 분석을 함께 제시한다</td></tr>
         </tbody>
       </table>
     </div>
     <p>받은 파일, 변수 이름, 부호, 방문 일정은 <a href="https://github.com/pilsunchoi/rehab-data-analysis/blob/main/docs/oai-variables.md" target="_blank" rel="noopener">OAI 변수 목록</a>에 확인 날짜와 함께 적었다.</p>
 
-    <div class="note warn"><b>원자료는 이 저장소에 없다.</b> OAI 이용 약관에 따라 자료를 다시 배포하지 않는다. 대신 분석 코드가 원자료와 같은 파일, 열 이름, 부호 꼴의 모의 데이터를 만들어 자료 없이도 끝까지 돈다. 모의 데이터로 낸 수치는 해석하지 않는다.</div>
+    <div class="note warn"><b>원데이터는 이 저장소에 없다.</b> OAI 이용 약관에 따라 데이터를 다시 배포하지 않는다. 대신 분석 코드가 원데이터와 같은 파일, 열 이름, 부호 꼴의 모의 데이터를 만들어 데이터 없이도 끝까지 돈다. 모의 데이터로 낸 수치는 해석하지 않는다.</div>
   </section>
 
   <!-- ============ 연구 ============ -->
   <section role="tabpanel" id="tab-research" aria-labelledby="t-research">
     <h2 class="h">연구</h2>
-    <p class="sub lead">데이터 분석 교과서의 장으로 쓴다. 각 장은 재활의 질문 하나로 시작해, 답하는 데 필요한 방법을 수식과 가정까지 설명하고, OAI로 추정한 뒤 그 결과를 해석한다.</p>
-    <div class="note">장마다 원본은 R 코드가 든 Quarto 문서 하나이고, GitHub에서 읽는 것은 그 렌더 결과다. 본문의 수치는 손으로 적지 않고 코드가 낸다. 장의 순서는 자료의 시간 구조를 따른다. 한 시점의 단면에서 반복 측정, 시간에 따라 바뀌는 노출, 사건까지의 시간으로 가며, 앞 장의 방법 위에 다음 장의 방법을 쌓는다. 구성의 근거는 <a href="https://github.com/pilsunchoi/rehab-data-analysis/blob/main/docs/book-plan.md" target="_blank" rel="noopener">장 구성 계획</a>에 있다.</div>
+    <p class="sub lead">각 장은 재활의 질문 하나로 시작해, OAI로 추정한 뒤 그 결과를 해석한다.</p>
+    <div class="note">장마다 원본은 R 코드가 든 Quarto 문서 하나이고, GitHub에서 읽는 것은 그 렌더 결과다. 본문의 수치는 손으로 적지 않고 코드가 낸다. 장의 순서는 데이터의 시간 구조를 따른다. 한 시점의 단면에서 반복 측정, 시간에 따라 바뀌는 노출, 사건까지의 시간으로 간다. 방법도 그 순서를 따라 회귀에서 혼합모형, 고정효과, 생존분석과 결합모형으로 이어지고, 앞 장에서 설명한 방법이 뒤 장에 다시 나오면 설명을 되풀이하지 않고 앞 장을 참조하도록 적는다. 구성의 근거는 <a href="https://github.com/pilsunchoi/rehab-data-analysis/blob/main/docs/book-plan.md" target="_blank" rel="noopener">장 구성 계획</a>에 있다.</div>
 
     <h3 class="group">무릎 골관절염 <span class="k">Osteoarthritis Initiative · 5개 장</span></h3>
 
     <article class="study">
       <div class="study-num">1</div>
       <div class="study-body">
-        <h4 class="study-title">자료와 측정 — OAI는 누구를 무엇으로 쟀는가<span class="pill warn">초고</span></h4>
+        <h4 class="study-title">데이터와 측정 — OAI는 누구를 무엇으로 쟀는가<span class="pill warn">초고</span></h4>
         <p class="study-sub">코호트 설계 · 분석 단위와 군집(급내상관, 설계효과) · 척도의 성질(순서 척도, 합산 척도, 바닥 효과) · 결측의 기제와 생존자 선택</p>
-        <p class="study-desc">뒤의 네 장이 모두 기대는 자료를 다룬다. 등록자 4,796명이 누구이고, 무릎을 어떤 척도로 쟀으며, 16년 동안 무엇이 빠져나갔는지를 보고, 그 결과가 뒤 장의 모형 선택에 거는 조건을 정리한다.</p>
+        <p class="study-desc">뒤의 네 장이 공통으로 쓰는 데이터를 다룬다. 등록자 4,796명이 누구이고, 무릎을 어떤 척도로 측정했으며, 16년 동안 무엇이 빠져나갔는지를 보고, 그 결과로부터 뒤 장에서 모형을 고를 때 고려해야 할 점을 정리한다.</p>
         <ul class="study-points">
           <li>한 사람의 두 무릎은 닮는다. 급내상관이 통증 0.48, 기능 0.64로, 기능 점수는 무릎보다 사람의 상태를 더 많이 반영한다.</li>
           <li>WOMAC은 바닥에 몰린 척도다. 기준 방문에서 통증 0점인 무릎이 44%이고, KL 3 무릎도 30%가 통증 0점이다.</li>
@@ -312,7 +340,7 @@
       <div class="study-body">
         <h4 class="study-title">구조와 증상 — X선 손상과 통증은 얼마나 일치하는가<span class="pill warn">초고</span></h4>
         <p class="study-sub">순서 척도의 연관 · 군집 강건 표준오차 · 같은 사람의 두 무릎을 비교하는 사람 안 설계 · 바닥 효과를 다루는 모형(검열 정규, 두 부분 모형)</p>
-        <p class="study-desc">재활을 찾는 이유는 통증인데 진단은 X선에서 시작한다. 기준 방문의 무릎 8,944개로 KL 등급과 WOMAC 통증의 어긋남을 측정하고, 그 어긋남이 사람마다 다른 통증 보고에서 오는지, 무릎의 차이에서 오는지를 가른다.</p>
+        <p class="study-desc">재활을 찾는 이유는 통증인데 진단은 X선에서 시작한다. 기준 방문의 무릎 8,944개로 KL 등급과 WOMAC 통증의 어긋남을 측정하고, 그 어긋남이 사람마다 다른 통증 보고에서 오는지, 무릎의 차이에서 오는지를 구분한다.</p>
         <ul class="study-points">
           <li>연관은 같은 방향이지만 약하다. 순위상관은 0.27이고, KL 3 이상인 무릎의 26%는 통증이 없으며 KL 0~1인 무릎의 13%는 통증이 5점 이상이다.</li>
           <li>같은 사람의 두 무릎을 비교해도 연관은 크게 바뀌지 않는다. 어긋남은 주로 사람이 아니라 무릎 사이의 차이에서 온다.</li>
@@ -350,7 +378,7 @@
       <div class="study-body">
         <h4 class="study-title">신체활동과 통증 — 움직이면 덜 아픈가, 아파서 덜 움직이는가<span class="pill warn">초고</span></h4>
         <p class="study-sub">교란과 빠진 변수의 치우침 · 사람 사이와 사람 안의 분해(혼성 모형), 고정효과 · 교차 지연 모형 · 측정오차의 감쇠와 민감도 분석</p>
-        <p class="study-desc">운동치료가 통증을 줄인다는 시험의 근거와, 일상에서 많이 움직이는 사람이 덜 아픈지는 다른 질문이다. 4,500여 명의 사람·방문 관측 2만 9천 개로 PASE 활동 점수와 통증의 연관에서 교란, 사람의 고정된 특성, 역인과, 측정오차를 하나씩 덜어 낸다.</p>
+        <p class="study-desc">운동치료가 통증을 줄인다는 시험의 근거와, 일상에서 많이 움직이는 사람이 덜 아픈지는 다른 질문이다. 4,500여 명의 사람·방문 관측 2만 9천 개로 PASE 활동 점수와 통증의 연관에 섞여 있는 교란, 사람의 고정된 특성, 역인과, 측정오차의 영향을 하나씩 통제하거나 가늠한다.</p>
         <ul class="study-points">
           <li>기준 방문의 단면 연관은 우울과 동반질환을 통제하면 거의 사라진다(PASE 50점당 통증 -0.068점에서 -0.013점으로).</li>
           <li>같은 사람이 평소보다 활동적이었던 방문의 통증 차이(-0.04점)는 사람 사이의 차이(-0.18점)보다 훨씬 작다.</li>
@@ -370,7 +398,7 @@
         <p class="study-sub">중도절단 · Kaplan-Meier · Cox 모형과 비례위험 점검 · 시간가변 공변량 · 경쟁 위험(Aalen-Johansen, Fine-Gray) · 종단-생존 결합모형 · 랜드마크와 동적 예측</p>
         <p class="study-desc">무릎 8,912개의 16년 추적에서 치환술 875건을 분석한다. 생존분석의 기본에서 시작해, 측정오차와 수술로 끝나는 측정을 함께 다루는 결합모형과 방문마다 갱신되는 예측까지 간다.</p>
         <ul class="study-points">
-          <li>기준 KL 등급이 치환술을 가장 강하게 가른다. 15년 누적 치환술은 KL 0이 2%, KL 3이 34%, KL 4가 66%이고, KL 4는 5년 안에 31%가 수술을 받았다.</li>
+          <li>치환술의 위험은 기준 KL 등급에 따라 가장 크게 달라진다. 15년 누적 치환술은 KL 0이 2%, KL 3이 34%, KL 4가 66%이고, KL 4는 5년 안에 31%가 수술을 받았다.</li>
           <li>같은 등급 안에서 수술 직전의 기능이 중요하다. 직전 방문의 기능 10점당 위험비는 1.76으로, 등록 시점 기능(1.24)보다 크다.</li>
           <li>결합모형에서는 기능의 수준과 함께 악화 속도가 위험과 강하게 관련된다(같은 수준에서 연 1점 빨리 나빠지면 위험 2.6배). 2년 안의 수술 예측은 결합모형과 랜드마크 Cox 모두 AUC 0.87~0.89로 비슷하다.</li>
         </ul>
@@ -384,7 +412,7 @@
     </article>
 
     <div class="panel">
-      <p><b>공통 코드와 자료 문서.</b> 모든 장은 같은 함수로 OAI 파일을 읽고 분석용 표를 만든다. 원자료가 없으면 같은 꼴의 모의 데이터로 돈다.</p>
+      <p><b>공통 코드와 데이터 문서.</b> 모든 장은 같은 함수로 OAI 파일을 읽고 분석용 표를 만든다. 원데이터가 없으면 같은 꼴의 모의 데이터로 돈다.</p>
       <div class="study-links" style="border-top:none;padding-top:0">
         <a href="https://github.com/pilsunchoi/rehab-data-analysis/blob/main/R/oai.R" target="_blank" rel="noopener">R/oai.R — 읽기, 분석용 표, 모의 데이터</a>
         <a href="https://github.com/pilsunchoi/rehab-data-analysis/blob/main/docs/oai-variables.md" target="_blank" rel="noopener">OAI 변수 목록</a>
@@ -392,7 +420,7 @@
       </div>
     </div>
 
-    <div class="empty">뇌졸중 등 다른 주제의 장은 자료가 갖춰지면 이 아래에 주제별로 더한다.</div>
+    <div class="empty">뇌졸중 등 다른 주제의 장은 데이터가 갖춰지면 이 아래에 주제별로 더한다.</div>
   </section>
 
   </div>
@@ -400,7 +428,7 @@
 
 <footer>
   <div class="wrap">
-    <p><b>자료.</b> 이 저장소의 분석은 Osteoarthritis Initiative(OAI)의 공개 자료를 사용했다. OAI는 미국 국립보건원(NIH)이 지원하고 OAI 연구진이 수행한 공공·민간 협력 사업이다. 이 저장소의 내용은 OAI 연구진, NIH, 민간 후원 기관의 의견이나 견해를 반영하지 않는다. 원자료는 이용 약관에 따라 다시 배포하지 않는다.</p>
+    <p><b>데이터.</b> 이 저장소의 분석은 Osteoarthritis Initiative(OAI)의 공개 데이터를 사용했다. OAI는 미국 국립보건원(NIH)이 지원하고 OAI 연구진이 수행한 공공·민간 협력 사업이다. 이 저장소의 내용은 OAI 연구진, NIH, 민간 후원 기관의 의견이나 견해를 반영하지 않는다. 원데이터는 이용 약관에 따라 다시 배포하지 않는다.</p>
     <p>집필 중인 저서다. 수치를 인용할 때는 기준 시점(2026년 11월에 받은 판)을 함께 밝힌다.</p>
   </div>
 </footer>
