@@ -15,7 +15,10 @@ rehab-data-analysis/
 │   ├── _quarto.yml                           렌더 설정(렌더 뒤 MD 손질)
 │   ├── 01-data-and-measures.qmd              1장 원본(R 코드 포함)
 │   ├── 01-data-and-measures.md               1장 렌더 결과(GitHub에서 읽는 본문)
-│   └── 01-data-and-measures_files/           1장 그림
+│   ├── 01-data-and-measures_files/           1장 그림
+│   ├── 02-structure-and-symptoms.qmd         2장 원본
+│   ├── 02-structure-and-symptoms.md          2장 렌더 결과
+│   └── 02-structure-and-symptoms_files/      2장 그림
 ├── docs/
 │   ├── index.html                            소개 대시보드(GitHub Pages)
 │   ├── img/                                  대시보드의 그림(장의 그림을 복사)
