@@ -18,7 +18,10 @@ rehab-data-analysis/
 │   ├── 01-data-and-measures_files/           1장 그림
 │   ├── 02-structure-and-symptoms.qmd         2장 원본
 │   ├── 02-structure-and-symptoms.md          2장 렌더 결과
-│   └── 02-structure-and-symptoms_files/      2장 그림
+│   ├── 02-structure-and-symptoms_files/      2장 그림
+│   ├── 03-pain-trajectories.qmd              3장 원본(잠재계층 적합은 outputs/lcmm-02.rds를 읽는다)
+│   ├── 03-pain-trajectories.md               3장 렌더 결과
+│   └── 03-pain-trajectories_files/           3장 그림
 ├── docs/
 │   ├── index.html                            소개 대시보드(GitHub Pages)
 │   ├── img/                                  대시보드의 그림(장의 그림을 복사)
@@ -47,6 +50,8 @@ rehab-data-analysis/
 cd chapters
 quarto render 01-data-and-measures.qmd
 ```
+
+3장의 잠재계층 궤적은 적합에 몇 시간이 걸려 장 안에서 하지 않는다. 먼저 `Rscript R/fit-lcmm.R`로 적합하면 요약이 `outputs/lcmm-02.rds`에 저장되고, 장은 그 파일을 읽는다. 파일이 없으면 그 절은 안내만 남기고 나머지는 그대로 돈다.
 
 OAI 데이터가 없어도 장은 끝까지 돈다. `data/raw/`가 비어 있으면 같은 파일·열·부호 꼴의 모의 데이터를 만들어 읽고, 문서 첫머리에 그 사실을 적는다. 모의 데이터의 수치는 해석하지 않는다.
 
