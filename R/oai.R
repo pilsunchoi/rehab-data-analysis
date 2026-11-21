@@ -273,7 +273,7 @@ read_oai_cols <- function(path, pattern) {
 }
 
 # 1장(자료와 측정)용 표. 치환술 뒤의 측정도 지우지 않고 표시만 한다.
-#   person  사람 하나에 한 줄. 하위 코호트, 기관, 기준 특성, 마지막 접촉 방문(개월), 사망 판정
+#   person  사람 하나에 한 줄. 하위 코호트, 기관, 기준 특성, 마지막 접촉 방문(개월), 사망 판정과 시각(개월)
 #   knees   무릎 하나에 한 줄. 기준 KL, 치환술 여부와 시각(개월)
 #   kv      무릎·방문 하나에 한 줄. WOMAC 통증·기능·뻣뻣함, 치환술 뒤 측정 표시(after_tkr)
 # 하위 코호트, 기관, 마지막 접촉, 사망 열이 없는 자료(옛 모의 데이터)에서는 그 값이 NA다.
@@ -283,16 +283,23 @@ cohort_data <- function(raw_dir) {
   person <- data.table(ID = enr$ID, female = as.numeric(enr[[require_column(names(enr), "sex")]] == 2),
                        cohort = opt(enr, "V00COHORT"), site = opt(enr, "V00SITE"))
 
-  c00 <- read_oai_cols(find_file(raw_dir, "AllClinical00.txt"), "^(V00AGE|P01BMI|V00PASE)$")
+  c00 <- read_oai_cols(find_file(raw_dir, "AllClinical00.txt"), "^(V00AGE|P01BMI|V00PASE|V00EVDATE)$")
   person <- merge(person, data.table(ID = c00$ID, age = as.numeric(opt(c00, "V00AGE")), bmi = as.numeric(opt(c00, "P01BMI")),
-                                     pase = as.numeric(opt(c00, "V00PASE"))), by = "ID", all.x = TRUE)
+                                     pase = as.numeric(opt(c00, "V00PASE")),
+                                     enroll_date = suppressWarnings(as.Date(as.character(opt(c00, "V00EVDATE")), "%m/%d/%Y"))),
+                  by = "ID", all.x = TRUE)
 
   out <- read_oai_txt(find_file(raw_dir, "Outcomes99.txt"))
   lc <- suppressWarnings(as.integer(opt(out, "V99RNTCNT")))
   last_month <- unname(VISIT_MONTHS[sprintf("%02d", lc)])
   person <- merge(person, data.table(ID = out$ID, last_month = last_month,
-                                     died = as.integer(opt(out, "V99EDDCF") %in% 2)), by = "ID", all.x = TRUE)
+                                     died = as.integer(opt(out, "V99EDDCF") %in% 2),
+                                     death_date = suppressWarnings(as.Date(as.character(opt(out, "V99EDDDATE")), "%m/%d/%y"))),
+                  by = "ID", all.x = TRUE)
   if (!"V99RNTCNT" %in% names(out)) person[, died := NA_integer_]
+  # 사망 시각(등록부터의 개월). 사건 파일의 치환술 일수와 같게 날짜 차이에 1일을 더한다
+  person[, death_month := fifelse(died %in% 1, as.numeric(death_date - enroll_date + 1) / DAYS_PER_MONTH, NA_real_)]
+  person[, c("enroll_date", "death_date") := NULL]
 
   xr <- read_oai_txt(find_file(raw_dir, "kXR_SQ_BU00.txt"))
   klcol <- require_column(names(xr), "kl")

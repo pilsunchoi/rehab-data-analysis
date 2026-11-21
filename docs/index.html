@@ -366,8 +366,20 @@
     <article class="study">
       <div class="study-num">5</div>
       <div class="study-body">
-        <h4 class="study-title">인공관절 치환술까지의 시간 — 누가 언제 수술에 이르고, 예측할 수 있는가<span class="pill info">구상</span></h4>
-        <p class="study-sub">Kaplan-Meier · Cox 모형과 시간가변 공변량 · 경쟁 위험 · 종단-생존 결합모형 · 동적 예측</p>
+        <h4 class="study-title">인공관절 치환술까지의 시간 — 누가 언제 수술에 이르고, 예측할 수 있는가<span class="pill warn">초고</span></h4>
+        <p class="study-sub">중도절단 · Kaplan-Meier · Cox 모형과 비례위험 점검 · 시간가변 공변량 · 경쟁 위험(Aalen-Johansen, Fine-Gray) · 종단-생존 결합모형 · 랜드마크와 동적 예측</p>
+        <p class="study-desc">무릎 8,912개의 16년 추적에서 치환술 875건을 분석한다. 생존분석의 기본에서 시작해, 측정오차와 수술로 끝나는 측정을 함께 다루는 결합모형과 방문마다 갱신되는 예측까지 간다.</p>
+        <ul class="study-points">
+          <li>기준 KL 등급이 치환술을 가장 강하게 가른다. 15년 누적 치환술은 KL 0이 2%, KL 3이 34%, KL 4가 66%이고, KL 4는 5년 안에 31%가 수술을 받았다.</li>
+          <li>같은 등급 안에서 수술 직전의 기능이 중요하다. 직전 방문의 기능 10점당 위험비는 1.76으로, 등록 시점 기능(1.24)보다 크다.</li>
+          <li>사망을 경쟁 사건으로 두면 15년 누적 치환술은 12.0%에서 11.7%로 조금 줄어든다. 4년까지의 기능을 쓴 랜드마크 예측은 2년 안의 수술을 AUC 0.89로 판별한다.</li>
+        </ul>
+        <div class="study-figs"><img src="img/ch05_km_by_kl.png" alt="기준 KL 등급별 누적 치환술 비율. KL 4가 가장 가파르게 오르고 KL 0은 거의 평평하다" loading="lazy"></div>
+        <div class="study-links">
+          <a href="https://github.com/pilsunchoi/rehab-data-analysis/blob/main/chapters/05-time-to-replacement.md" target="_blank" rel="noopener">장 읽기</a>
+          <a href="https://github.com/pilsunchoi/rehab-data-analysis/blob/main/chapters/05-time-to-replacement.qmd" target="_blank" rel="noopener">R 문서(원본)</a>
+          <a href="https://github.com/pilsunchoi/rehab-data-analysis/blob/main/R/fit-jm.R" target="_blank" rel="noopener">결합모형 적합</a>
+        </div>
       </div>
     </article>
 

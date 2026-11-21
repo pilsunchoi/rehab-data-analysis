@@ -30,6 +30,22 @@ jm_fit <- jm(cox_fit, lme_fit, time_var = "year",
              n_iter = N_ITER, n_burnin = N_BURNIN, n_chains = 3L, cores = 3L, seed = 20261118L)
 minutes <- as.numeric(difftime(Sys.time(), t0, units = "mins"))
 
+# 동적 예측: 4년 시점(랜드마크)에 치환술 없이 남은 무릎에서, 그때까지의 기능 점수로 2년 안의 치환술 확률을 예측한다.
+# 시간이 오래 걸려 무작위로 고른 무릎 2,500개에만 한다. 5장이 같은 무릎으로 랜드마크 Cox와 비교한다.
+LM <- 4; H <- 2
+pred <- tryCatch({
+  at_risk <- as.character(j$surv$knee[j$surv$time_y > LM])
+  set.seed(20261121L)
+  pick <- sample(at_risk, min(2500L, length(at_risk)))
+  nd <- j$long[as.character(j$long$knee) %in% pick & j$long$year <= LM, ]
+  nd <- merge(nd, j$surv[, c("knee", "age_c", "female", "bmi_c")], by = "knee")
+  nd$knee <- droplevels(nd$knee); nd$time_y <- LM; nd$event <- 0
+  pr <- predict(jm_fit, newdata = nd, process = "event", times = LM + H, return_newdata = TRUE)
+  pr <- as.data.table(pr)[abs(time_y - (LM + H)) < 1e-8, .(knee = as.character(knee), risk = pred_CIF)]
+  obs <- as.data.table(j$surv)[, .(knee = as.character(knee), time_y, event)]
+  merge(pr, obs, by = "knee")
+}, error = function(e) { message("예측 실패: ", conditionMessage(e)); NULL })
+
 s <- summary(jm_fit)
 tidy <- function(tab, expo) {
   f <- if (expo) exp else identity
@@ -40,6 +56,7 @@ res <- list(
   longitudinal = tidy(s$Outcome1, expo = FALSE),
   n_knees = nrow(j$surv), n_events = sum(j$surv$event), n_obs = nrow(j$long),
   n_iter = N_ITER, n_burnin = N_BURNIN, minutes = minutes,
+  landmark = list(t0 = LM, horizon = H, pred = pred),
   real_data = src$real, fitted_at = format(Sys.time(), "%Y-%m-%d %H:%M"))
 
 dir.create(file.path(ROOT, "outputs"), showWarnings = FALSE)
