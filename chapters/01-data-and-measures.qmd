@@ -370,11 +370,11 @@ Bellamy, N., Buchanan, W. W., Goldsmith, C. H., Campbell, J., and Stitt, L. W. (
 
 Kellgren, J. H., and Lawrence, J. S. (1957). "Radiological assessment of osteo-arthrosis." *Annals of the Rheumatic Diseases* 16(4), 494–502.
 
-Kish, L. (1965). 『Survey Sampling』. Wiley.
+Kish, L. (1965). *Survey Sampling*. Wiley.
 
-Little, R. J. A., and Rubin, D. B. (2019). 『Statistical Analysis with Missing Data』 (3rd ed.). Wiley.
+Little, R. J. A., and Rubin, D. B. (2019). *Statistical Analysis with Missing Data* (3rd ed.). Wiley.
 
-Nevitt, M. C., Felson, D. T., and Lester, G. (2006). 『The Osteoarthritis Initiative: Protocol for the Cohort Study』 (Version 1.1). National Institute of Arthritis and Musculoskeletal and Skin Diseases.
+Nevitt, M. C., Felson, D. T., and Lester, G. (2006). *The Osteoarthritis Initiative: Protocol for the Cohort Study* (Version 1.1). National Institute of Arthritis and Musculoskeletal and Skin Diseases.
 
 Rubin, D. B. (1976). "Inference and missing data." *Biometrika* 63(3), 581–592.
 

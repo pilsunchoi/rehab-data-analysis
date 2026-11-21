@@ -368,9 +368,9 @@ Collins, J. E., Katz, J. N., Dervan, E. E., and Losina, E. (2014). "Trajectories
 
 Laird, N. M., and Ware, J. H. (1982). "Random-effects models for longitudinal data." *Biometrics* 38(4), 963–974.
 
-Little, R. J. A., and Rubin, D. B. (2019). 『Statistical Analysis with Missing Data』 (3rd ed.). Wiley.
+Little, R. J. A., and Rubin, D. B. (2019). *Statistical Analysis with Missing Data* (3rd ed.). Wiley.
 
-Nagin, D. S. (2005). 『Group-Based Modeling of Development』. Harvard University Press.
+Nagin, D. S. (2005). *Group-Based Modeling of Development*. Harvard University Press.
 
 Proust-Lima, C., Philipps, V., and Liquet, B. (2017). "Estimation of extended mixed models using latent classes and latent processes: The R package lcmm." *Journal of Statistical Software* 78(2), 1–56.
 
@@ -378,4 +378,4 @@ Robinson, G. K. (1991). "That BLUP is a good thing: The estimation of random eff
 
 Self, S. G., and Liang, K.-Y. (1987). "Asymptotic properties of maximum likelihood estimators and likelihood ratio tests under nonstandard conditions." *Journal of the American Statistical Association* 82(398), 605–610.
 
-Verbeke, G., and Molenberghs, G. (2000). 『Linear Mixed Models for Longitudinal Data』. Springer.
+Verbeke, G., and Molenberghs, G. (2000). *Linear Mixed Models for Longitudinal Data*. Springer.

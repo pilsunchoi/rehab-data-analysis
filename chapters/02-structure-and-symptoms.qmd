@@ -328,4 +328,4 @@ Neogi, T., Felson, D., Niu, J., Nevitt, M., Lewis, C. E., Aliabadi, P., Sack, B.
 
 Tobin, J. (1958). "Estimation of relationships for limited dependent variables." *Econometrica* 26(1), 24–36.
 
-Wooldridge, J. M. (2010). 『Econometric Analysis of Cross Section and Panel Data』 (2nd ed.). MIT Press.
+Wooldridge, J. M. (2010). *Econometric Analysis of Cross Section and Panel Data* (2nd ed.). MIT Press.

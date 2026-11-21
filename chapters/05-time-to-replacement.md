@@ -262,11 +262,11 @@ Fine, J. P., and Gray, R. J. (1999). “A proportional hazards model for the sub
 
 Grambsch, P. M., and Therneau, T. M. (1994). “Proportional hazards tests and diagnostics based on weighted residuals.” *Biometrika* 81(3), 515–526.
 
-Greenwood, M. (1926). 『The Natural Duration of Cancer』. Reports on Public Health and Medical Subjects 33. His Majesty’s Stationery Office.
+Greenwood, M. (1926). *The Natural Duration of Cancer*. Reports on Public Health and Medical Subjects 33. His Majesty’s Stationery Office.
 
 Heagerty, P. J., Lumley, T., and Pepe, M. S. (2000). “Time-dependent ROC curves for censored survival data and a diagnostic marker.” *Biometrics* 56(2), 337–344.
 
-Kalbfleisch, J. D., and Prentice, R. L. (2002). 『The Statistical Analysis of Failure Time Data』 (2nd ed.). Wiley.
+Kalbfleisch, J. D., and Prentice, R. L. (2002). *The Statistical Analysis of Failure Time Data* (2nd ed.). Wiley.
 
 Kaplan, E. L., and Meier, P. (1958). “Nonparametric estimation from incomplete observations.” *Journal of the American Statistical Association* 53(282), 457–481.
 
@@ -278,9 +278,9 @@ Putter, H., Fiocco, M., and Geskus, R. B. (2007). “Tutorial in biostatistics: 
 
 Rizopoulos, D. (2011). “Dynamic predictions and prospective accuracy in joint models for longitudinal and time-to-event data.” *Biometrics* 67(3), 819–829.
 
-Rizopoulos, D. (2012). 『Joint Models for Longitudinal and Time-to-Event Data: With Applications in R』. Chapman and Hall/CRC.
+Rizopoulos, D. (2012). *Joint Models for Longitudinal and Time-to-Event Data: With Applications in R*. Chapman and Hall/CRC.
 
-Rizopoulos, D., Miranda-Afonso, P., and Papageorgiou, G. (2026). 『JMbayes2: Extended Joint Models for Longitudinal and Time-to-Event Data』. R package version 0.6-5. https://doi.org/10.32614/CRAN.package.JMbayes2
+Rizopoulos, D., Miranda-Afonso, P., and Papageorgiou, G. (2026). *JMbayes2: Extended Joint Models for Longitudinal and Time-to-Event Data*. R package version 0.6-5. https://doi.org/10.32614/CRAN.package.JMbayes2
 
 van Houwelingen, H. C. (2007). “Dynamic prediction by landmarking in event history analysis.” *Scandinavian Journal of Statistics* 34(1), 70–85.
 
