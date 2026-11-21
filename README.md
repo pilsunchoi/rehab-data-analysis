@@ -21,7 +21,9 @@ rehab-data-analysis/
 │   ├── 02-structure-and-symptoms_files/      2장 그림
 │   ├── 03-pain-trajectories.qmd              3장 원본(잠재계층 적합은 outputs/lcmm-02.rds를 읽는다)
 │   ├── 03-pain-trajectories.md               3장 렌더 결과
-│   └── 03-pain-trajectories_files/           3장 그림
+│   ├── 03-pain-trajectories_files/           3장 그림
+│   ├── 04-activity-and-pain.qmd              4장 원본
+│   └── 04-activity-and-pain.md               4장 렌더 결과(그림 없음)
 ├── docs/
 │   ├── index.html                            소개 대시보드(GitHub Pages)
 │   ├── img/                                  대시보드의 그림(장의 그림을 복사)

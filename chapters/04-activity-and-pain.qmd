@@ -1,0 +1,294 @@
+---
+title: "4장. 신체활동과 통증 — 움직이면 덜 아픈가, 아파서 덜 움직이는가"
+lang: ko
+format:
+  gfm:
+    toc: true
+    toc-depth: 2
+    df-print: kable
+    wrap: none
+execute:
+  echo: false
+  warning: false
+  message: false
+knitr:
+  opts_chunk:
+    dev: png
+    dpi: 300
+    fig.width: 6
+    fig.height: 2.8
+---
+
+```{r setup}
+#| include: false
+suppressPackageStartupMessages({
+  library(data.table); library(ggplot2); library(lme4)
+})
+ROOT <- if (file.exists("../R/oai.R")) dirname(getwd()) else getwd()
+source(file.path(ROOT, "R", "oai.R"))
+
+windowsFonts(malgun = windowsFont("Malgun Gothic"))
+theme_set(theme_classic(base_family = "malgun", base_size = 9) +
+            theme(panel.grid.major.y = element_line(colour = "grey87", linewidth = 0.3),
+                  strip.background = element_blank()))
+
+src <- pick_data(ROOT)
+USE_REAL <- src$real
+
+f0 <- function(x) format(round(x), big.mark = ",", scientific = FALSE, trim = TRUE)
+f1 <- function(x, k = 1) formatC(x, format = "f", digits = k, big.mark = ",")
+pc <- function(x, k = 1) formatC(100 * x, format = "f", digits = k)
+tab <- function(x, digits = 2) knitr::kable(x, digits = digits, format.args = list(big.mark = ","))
+
+# 사람·방문 표: PASE가 있는 방문, 어느 한쪽이라도 치환술을 받기 전
+a <- activity_table(src$dir)
+cf <- read_oai_cols(find_file(src$dir, "AllClinical00.txt"), "^V00(CESD|COMORB)$")
+for (v in c("V00CESD", "V00COMORB")) if (!v %in% names(cf)) cf[, (v) := NA_real_]
+a <- merge(a, cf[, .(ID, cesd = as.numeric(V00CESD), comorb = as.numeric(V00COMORB))], by = "ID", all.x = TRUE)
+a <- a[!is.na(age) & !is.na(bmi0) & !is.na(kl)]
+a[, `:=`(pase50 = pase / 50, age10 = (age - 61) / 10, bmi5 = (bmi0 - 28.5) / 5, klf = factor(kl, 0:4),
+         cesd10 = cesd / 10)]
+setorder(a, ID, month)
+HAS_CONF <- a[, mean(!is.na(cesd) & !is.na(comorb)) > 0.5]
+
+# 군집(사람) 강건 표준오차를 붙인 최소제곱 계수표
+cluster_lm <- function(formula, data, keep) {
+  data <- data[complete.cases(data[, all.vars(formula), with = FALSE])]
+  f <- lm(formula, data = data)
+  X <- model.matrix(f); u <- residuals(f); g <- data$ID
+  B <- solve(crossprod(X)); S <- rowsum(X * u, g)
+  G <- nrow(S); N <- nrow(X); K <- ncol(X)
+  V <- B %*% crossprod(S) %*% B * (G / (G - 1)) * ((N - 1) / (N - K))
+  est <- coef(f); se <- sqrt(diag(V))
+  out <- data.table(항 = names(est), 계수 = est, 표준오차 = se, 하한 = est - 1.96 * se, 상한 = est + 1.96 * se)
+  list(table = out[항 %in% keep], n = N, persons = G, fit = f)
+}
+row_of <- function(r, term = "pase50") r$table[항 == term]
+```
+
+```{r notice}
+#| output: asis
+if (!USE_REAL) cat("> 이 렌더는 모의 데이터로 만든 것이다. 수치를 해석하지 않는다.\n\n")
+```
+
+운동치료는 무릎 골관절염 진료지침의 첫 단계이고, 무작위 대조 시험은 운동이 통증을 줄인다는 근거를 쌓아 왔다(Fransen et al., 2015). 그런데 일상에서 많이 움직이는 사람이 덜 아픈지는 다른 질문이다. 시험의 운동은 처방되고 감독된 운동이고, 일상의 활동량은 그 사람이 스스로 고른 결과다. 아픈 사람은 덜 움직이고, 건강한 사람은 더 움직이며 덜 아프다. 관찰 자료에서 활동량과 통증의 연관을 보면 이 모든 것이 섞인다.
+
+이 장은 관찰 자료로 그 섞임을 얼마나 풀 수 있는지를 다룬다. 소개하는 방법은 넷이다. 교란과 그 통제(II장), 사람 사이의 차이와 사람 안의 변화를 나누는 분해와 고정효과(III장), 시간의 순서를 이용하는 시차 모형(IV장), 그리고 측정오차가 이 모든 추정을 0 쪽으로 끌어당기는 정도를 가늠하는 민감도 분석(V장)이다. 어느 방법도 무작위 배정을 대신하지 못한다. 각 방법이 무엇을 통제하고 무엇을 남기는지를 분명히 하는 것이 이 장의 목표다.
+
+자료는 PASE를 잰 방문(0, 12, 24, 36, 48, 72, 96, 168개월)의 사람·방문 관측이다. 1장 III.3절의 PASE와 WOMAC 통증을 쓴다. PASE는 사람의 값이므로 분석 단위는 사람이고, 통증은 두 무릎 가운데 더 아픈 쪽의 WOMAC 통증(0\~20)이다. 어느 한쪽 무릎이라도 치환술을 받은 뒤의 방문은 뺐다. 사람 `r f0(uniqueN(a$ID))`명의 관측 `r f0(nrow(a))`개다. PASE는 50점 단위로 넣는다. 50점은 기준 방문 표준편차의 약 0.6배다. 자료는 `R/oai.R`의 `activity_table`이 만든다.
+
+## I. 세 가지 질문
+
+활동량과 통증의 관계에는 서로 다른 세 질문이 겹쳐 있다. 첫째는 사람 사이의 질문이다. 평소에 많이 움직이는 사람은 덜 움직이는 사람보다 덜 아픈가. 둘째는 사람 안의 질문이다. 같은 사람이 평소보다 많이 움직인 해에 통증은 어떠했는가. 셋째는 방향의 질문이다. 움직임이 뒤의 통증을 바꾸는가, 통증이 뒤의 움직임을 바꾸는가.
+
+재활에서 알고 싶은 것은 둘째와 셋째에 가깝다. 한 사람에게 더 움직이라고 권할 때 그 사람의 통증이 어떻게 될지가 관심이기 때문이다. 첫째 질문의 답은 사람 사이의 비교이므로, 움직이는 사람과 움직이지 않는 사람이 활동량 말고도 여러 면에서 다르다는 문제를 안고 있다. 아래의 장들은 첫째에서 셋째로 갈수록 그 문제를 하나씩 덜어 낸다.
+
+## II. 교란과 통제
+
+### 1. 교란
+
+활동량 $X$와 통증 $Y$의 연관이 $X$가 $Y$에 미치는 효과와 다를 수 있는 가장 흔한 이유는 둘에 함께 영향을 주는 제3의 변수 $Z$다. 이것을 교란이라 한다. 우울은 그 예다. 우울한 사람은 덜 움직이고, 같은 무릎이라도 통증을 더 강하게 느끼고 보고한다. 우울을 무시하면 활동량과 통증 사이에 활동량의 효과가 아닌 음의 연관이 생긴다.
+
+교란의 크기는 회귀에서 빠진 변수의 치우침으로 쓸 수 있다. 참 모형이 $Y = \beta_0 + \beta X + \gamma Z + e$일 때 $Z$를 빼고 $Y$를 $X$에 회귀하면 그 계수의 기댓값은 다음과 같다(Wooldridge, 2010).
+
+$$E(\tilde\beta) = \beta + \gamma \delta, \qquad \delta = \frac{\mathrm{Cov}(X, Z)}{\mathrm{Var}(X)}$$
+
+$\delta$는 $Z$를 $X$에 회귀한 계수다. 우울($Z$)이 통증을 높이고($\gamma > 0$) 활동량과 음의 관계에 있으면($\delta < 0$) 치우침 $\gamma\delta$는 음수이고, 활동량의 계수는 실제보다 더 음수로 나온다. 교란 변수를 회귀에 넣으면 이 치우침이 사라진다. 다만 넣을 수 있는 것은 관측한 변수뿐이다.
+
+### 2. 기준 방문의 단면 회귀
+
+표 1은 기준 방문에서 통증을 PASE에 회귀한 계수를 통제 변수를 차례로 늘리며 제시한 것이다. 모형 A는 PASE만, 모형 B는 나이, 성별, BMI, KL 등급(두 무릎 가운데 높은 쪽)을 더했고, 모형 C는 우울(CES-D, 0\~60, 10점 단위)과 동반질환 지수를 더했다. 한 사람이 관측 하나이므로 표준오차는 이분산 강건 표준오차다.
+
+```{r table1}
+#| output: asis
+b <- a[month == 0]
+if (HAS_CONF) b <- b[!is.na(cesd) & !is.na(comorb)]
+mA <- cluster_lm(pain ~ pase50, b, c("pase50"))
+mB <- cluster_lm(pain ~ pase50 + age10 + female + bmi5 + klf, b, c("pase50"))
+mods <- list(`A. PASE만` = mA, `B. + 나이, 성별, BMI, KL` = mB)
+if (HAS_CONF) {
+  mC <- cluster_lm(pain ~ pase50 + age10 + female + bmi5 + klf + cesd10 + comorb, b, c("pase50", "cesd10", "comorb"))
+  mods[["C. + 우울, 동반질환"]] <- mC
+}
+t1 <- rbindlist(lapply(mods, function(m) row_of(m)), idcol = "모형")[, !"항"]
+cat("**표 1. 기준 방문의 통증과 PASE (50점당 통증 점수의 차이)**\n\n")
+print(tab(t1, 3))
+cat(sprintf("\n\n사람 %s명. 기준 방문의 PASE와 통증의 상관: %s\n\n", f0(nrow(b)), f1(b[, cor(pase, pain)], 3)))
+if (HAS_CONF) {
+  cz <- mC$table
+  dl <- coef(lm(cesd10 ~ pase50, b))[2]
+}
+```
+
+```{r t1-text}
+#| include: false
+bA <- row_of(mA)$계수; bB <- row_of(mB)$계수
+bC <- if (HAS_CONF) row_of(mC)$계수 else NA
+g_cesd <- if (HAS_CONF) cz[항 == "cesd10", 계수] else NA
+```
+
+표 1에서 PASE의 계수는 통제 변수를 늘릴수록 0 쪽으로 움직인다. 보정하지 않으면 PASE가 50점 많은 사람의 통증이 `r f1(abs(bA), 3)`점 낮고, 나이, 성별, BMI, KL 등급을 통제하면 `r f1(abs(bB), 3)`점, 우울과 동반질환까지 통제하면 `r f1(abs(bC), 3)`점 낮고 그 신뢰구간은 0을 넓게 포함한다. 모형 C에서 우울(CES-D 10점)의 계수는 `r f1(g_cesd, 2)`점으로, 같은 모형의 PASE 50점 계수보다 훨씬 크다. 모형 B에서 C로 가며 사라진 활동량의 계수는 대부분 위 식의 $\gamma\delta$, 곧 우울과 동반질환을 통한 교란이었다는 뜻이다. 기준 방문의 단면에서 활동량과 통증의 연관은 관측한 교란을 통제하는 것만으로 거의 남지 않는다.
+
+이 계수를 활동량의 효과로 읽지 않는 이유는 두 가지다. 관측하지 않은 교란(직업, 다른 관절의 문제, 통증 민감도)은 여전히 남아 있다. 그리고 단면 회귀는 방향을 가리지 못한다. 통증이 활동량을 줄여도 같은 음의 계수가 나온다. 활동량과 통증이 모두 우울에 영향을 줄 수도 있으므로, 우울을 통제하는 것이 오히려 치우침을 만들 가능성도 있다. 무엇을 통제할지는 자료가 아니라 변수들 사이의 인과 구조에 대한 판단으로 정한다(Hernán and Robins, 2020).
+
+## III. 사람 사이의 차이와 사람 안의 변화
+
+### 1. 분해
+
+반복 측정이 있으면 관측되지 않은 사람의 특성을 통제하는 길이 생긴다. 사람 $i$의 방문 $t$의 활동량 $x_{it}$를 그 사람의 평균 $\bar x_i$와 평균에서 벗어난 값 $x_{it} - \bar x_i$로 나눈다. 앞의 것은 사람 사이에서만 달라지고, 뒤의 것은 사람 안에서만 달라진다.
+
+$$y_{it} = \beta_0 + \beta_B \bar x_i + \beta_W (x_{it} - \bar x_i) + \beta_t t + w_i^\top \gamma + u_i + \varepsilon_{it}$$
+
+$\beta_B$는 평소 활동량이 다른 사람 사이의 통증 차이이고, $\beta_W$는 같은 사람이 평소보다 활동적이었던 방문의 통증 차이다. $u_i$는 사람의 무작위 효과다. 두 계수를 한 모형에서 따로 추정하는 이 방법을 Mundlak (1978)의 이름을 따 사람 평균을 넣는 모형, 또는 혼성 모형이라 한다. 관측되지 않은 사람의 특성(통증 민감도, 성격, 직업)이 평소 활동량과 관련되면 그 영향은 $\beta_B$에만 들어가고 $\beta_W$에는 들어가지 않는다. 사람 안의 변화는 그 사람의 고정된 특성과 무관하게 달라지는 몫이기 때문이다.
+
+### 2. 고정효과
+
+$\beta_W$는 사람마다 절편을 따로 두는 고정효과 모형으로도 같은 값을 얻는다. 사람 $i$의 모든 관측에서 그 사람의 평균을 빼면 사람마다 고정된 것이 모두 사라진다.
+
+$$y_{it} - \bar y_i = \beta_W (x_{it} - \bar x_i) + \beta_t (t - \bar t_i) + (\varepsilon_{it} - \bar\varepsilon_i)$$
+
+나이, 성별, KL 등급처럼 사람마다 하나인 변수도 함께 사라지므로 따로 넣을 수 없다. 고정효과 추정량은 관측되지 않은 고정된 교란을 모두 통제한다는 강점이 있고, 사람 사이의 정보를 모두 버린다는 대가가 있다(Allison, 2009). 활동량이 사람 사이에서는 크게 다르고 사람 안에서는 조금씩만 변하면, 고정효과 추정은 남은 작은 변동에만 기대므로 불확실성이 커진다.
+
+### 3. 추정
+
+표 2는 같은 자료에 네 가지 추정을 함께 제시한 것이다. 통합 최소제곱은 모든 관측을 하나로 놓고 회귀한 것으로 사람 사이와 사람 안이 섞인 계수다. 사람 사이는 사람마다 평균을 내어 사람 평균끼리 회귀한 것, 고정효과는 사람 평균을 뺀 값끼리 회귀한 것이다. 혼성 모형은 위의 식을 사람의 무작위 절편과 기울기를 둔 혼합모형으로 적합한 것이고, 두 계수가 함께 나온다. 통합 최소제곱과 고정효과의 표준오차는 사람 단위로 군집 강건하게 구했다. 통제 변수는 연수와(고정효과가 아니면) 나이, 성별, BMI, KL 등급이다.
+
+```{r table2}
+#| output: asis
+a[, `:=`(pase_b = mean(pase50), pain_b = mean(pain), year_b = mean(year), n_i = .N), by = ID]
+a[, `:=`(pase_w = pase50 - pase_b, pain_w = pain - pain_b, year_w = year - year_b)]
+pooled <- cluster_lm(pain ~ pase50 + year + age10 + female + bmi5 + klf, a, "pase50")
+pm <- unique(a, by = "ID")[, .(ID, pain_b, pase_b, year_b, age10, female, bmi5, klf)]
+betw <- cluster_lm(pain_b ~ pase_b + year_b + age10 + female + bmi5 + klf, pm, "pase_b")
+fe <- cluster_lm(pain_w ~ 0 + pase_w + year_w, a[n_i >= 2], "pase_w")
+hy <- lmer(pain ~ pase_b + pase_w + year + age10 + female + bmi5 + klf + (1 + year | ID), data = a,
+           control = lmerControl(calc.derivs = FALSE))
+co <- coef(summary(hy))
+hrow <- function(term, label) data.table(추정 = label, 계수 = co[term, 1], 표준오차 = co[term, 2])
+t2 <- rbind(
+  data.table(추정 = "통합 최소제곱", 계수 = row_of(pooled)$계수, 표준오차 = row_of(pooled)$표준오차),
+  data.table(추정 = "사람 사이 (사람 평균끼리)", 계수 = row_of(betw, "pase_b")$계수, 표준오차 = row_of(betw, "pase_b")$표준오차),
+  data.table(추정 = "고정효과 (사람 안)", 계수 = row_of(fe, "pase_w")$계수, 표준오차 = row_of(fe, "pase_w")$표준오차),
+  hrow("pase_b", "혼성 모형: 사람 사이"), hrow("pase_w", "혼성 모형: 사람 안"))
+t2[, `:=`(하한 = 계수 - 1.96 * 표준오차, 상한 = 계수 + 1.96 * 표준오차)]
+cat("**표 2. PASE 50점당 통증의 차이: 네 가지 추정**\n\n")
+print(tab(t2, 3))
+share_b <- a[, var(pase_b) / var(pase50)]
+r_w <- a[n_i >= 2, cor(pase_w, pain_w)]
+cB <- co["pase_b", 1]; cW <- co["pase_w", 1]; cFE <- row_of(fe, "pase_w")$계수
+```
+
+표 2에서 사람 사이의 계수와 사람 안의 계수는 크기가 다르다. 혼성 모형에서 평소 활동량이 50점 많은 사람은 통증이 `r f1(abs(cB), 3)`점 낮고, 같은 사람이 평소보다 50점 더 활동적이었던 방문에는 통증이 `r f1(abs(cW), 3)`점 낮다. 고정효과 추정(`r f1(cFE, 3)`)은 혼성 모형의 사람 안 계수와 거의 같다. 두 방법이 같은 변동을 쓰기 때문이다. 통합 최소제곱은 둘 사이에 있다. 사람 사이와 사람 안의 정보를 그 변동의 크기에 따라 섞은 값이기 때문이다. PASE 분산 가운데 사람 사이의 몫은 `r pc(share_b, 0)`%다.
+
+사람 사이의 계수가 사람 안의 계수보다 몇 배 큰 것은 두 가지로 읽을 수 있다. 하나는 사람 사이 비교에 관측되지 않은 교란이 남아 있다는 해석이다. 평소에 활동적인 사람은 건강, 성격, 생활 여건에서 통증이 적을 이유를 따로 갖고 있을 수 있고, 그 몫이 $\beta_B$에 들어간다. 다른 하나는 활동량의 효과가 오래 쌓여야 나타난다는 해석이다. 수년 동안 활동적이었던 것의 효과는 사람 사이에서 보이지만, 한 해의 변동은 그만큼의 효과를 내지 못한다. 두 해석은 이 자료로 구분되지 않는다. 그리고 V장에서 보듯 측정오차는 사람 안의 계수를 더 많이 줄인다.
+
+## IV. 시간의 순서
+
+### 1. 시차 모형
+
+같은 방문에서 잰 활동량과 통증은 방향을 가리지 못한다. 연속한 두 방문을 짝지어 앞 방문의 값으로 뒤 방문의 값을 설명하면 원인이 결과보다 먼저라는 조건 하나는 맞출 수 있다. 두 식을 함께 적합한다.
+
+$$y_{i,t+1} = a_0 + a_1 y_{it} + a_2 x_{it} + w_i^\top a + e_{i,t+1}, \qquad x_{i,t+1} = c_0 + c_1 x_{it} + c_2 y_{it} + w_i^\top c + f_{i,t+1}$$
+
+$a_2$는 앞 방문의 통증이 같을 때 활동량이 많았던 사람의 다음 방문 통증의 차이이고, $c_2$는 앞 방문의 활동량이 같을 때 통증이 높았던 사람의 다음 방문 활동량의 차이다. 두 계수를 교차 계수라 하고, 이런 짝을 교차 지연 모형이라 부른다. 앞 방문의 결과 변수($y_{it}$, $x_{it}$)를 넣는 것은 두 변수가 원래 상관되어 있다는 사실을 통제하기 위해서다. 단위가 다른 두 교차 계수를 비교할 때는 두 변수의 표준편차로 표준화한다.
+
+교차 지연 모형에는 알려진 한계가 있다. 사람마다 안정적인 수준의 차이(활동적인 사람, 잘 아픈 사람)를 따로 두지 않으면, 교차 계수에 사람 사이의 차이가 섞여 사람 안의 시간적 효과로 잘못 읽힐 수 있다(Hamaker et al., 2015). 아래의 추정은 기준 특성을 통제하지만 사람마다의 고정된 수준은 따로 두지 않았다.
+
+### 2. 추정
+
+간격이 2년 이내인 연속 방문의 짝을 쓴다(0과 12, 12와 24, 24와 36, 36과 48, 48과 72, 72와 96개월). 간격(연)과 기준 특성을 통제하고, 표준오차는 사람 단위로 군집 강건하게 구했다. 표 3의 위 두 행은 통증 식, 아래 두 행은 활동량 식의 계수다. 활동량 식의 결과는 50점 단위다.
+
+```{r table3}
+#| output: asis
+a[, `:=`(pain_next = shift(pain, -1), pase_next = shift(pase50, -1), gap = (shift(month, -1) - month) / 12), by = ID]
+lg <- a[!is.na(gap) & gap <= 2]
+f1m <- cluster_lm(pain_next ~ pain + pase50 + gap + age10 + female + bmi5 + klf, lg, c("pase50", "pain"))
+f2m <- cluster_lm(pase_next ~ pase50 + pain + gap + age10 + female + bmi5 + klf, lg, c("pain", "pase50"))
+nm <- c(pase50 = "앞 방문의 PASE (50점)", pain = "앞 방문의 통증 (1점)")
+t3 <- rbind(cbind(결과 = "다음 방문의 통증", f1m$table), cbind(결과 = "다음 방문의 PASE (50점 단위)", f2m$table))
+t3[, 항 := nm[항]]
+cat("**표 3. 교차 지연 모형의 계수**\n\n")
+print(tab(t3, 3))
+sd_pase <- lg[, sd(pase50)]; sd_pain <- lg[, sd(pain)]
+std_ap <- row_of(f1m)$계수 * sd_pase / sd_pain
+std_pa <- f2m$table[항 == "pain", 계수] * sd_pain / sd_pase
+pa_points <- f2m$table[항 == "pain", 계수] * 50
+```
+
+방문 짝은 `r f0(f1m$n)`개(사람 `r f0(f1m$persons)`명)다. 표 3에서 두 교차 계수는 모두 음수다. 앞 방문의 통증이 같을 때 PASE가 50점 많았던 사람은 다음 방문의 통증이 `r f1(abs(row_of(f1m)$계수), 3)`점 낮고, 앞 방문의 PASE가 같을 때 통증이 1점 높았던 사람은 다음 방문의 PASE가 `r f1(abs(pa_points), 2)`점 낮다. 표준편차 단위로 바꾸면 통증에서 활동량으로 가는 계수(`r f1(std_pa, 3)`)가 활동량에서 통증으로 가는 계수(`r f1(std_ap, 3)`)보다 절대값으로 `r f1(std_pa / std_ap, 1)`배 크다.
+
+두 방향 모두 작지만, 통증이 뒤의 활동량을 줄이는 쪽이 더 크고 더 분명하다. 단면에서 본 음의 연관의 일부는 아파서 덜 움직이는 역인과에서 온다. 활동량이 뒤의 통증을 줄이는 방향의 계수는 작고 신뢰구간의 끝이 0에 닿아 있다. 이 자료로는 일상의 활동량이 늘면 통증이 줄어든다는 결론을 끌어낼 근거가 약하다.
+
+## V. 측정오차
+
+### 1. 감쇠
+
+PASE는 지난 7일의 활동을 기억으로 답한 값이다. 그 주가 평소와 달랐을 수 있고, 기억과 응답 습관의 오차도 들어간다. 관측한 활동량 $x_{it}$가 참 활동량 $\xi_{it}$에 서로 독립인 오차 $\nu_{it}$가 더해진 것이라 하자. 오차가 있는 변수를 설명변수로 쓰면 그 계수는 다음과 같이 줄어든다(Fuller, 1987).
+
+$$\mathrm{plim}\ \hat\beta = \lambda \beta, \qquad \lambda = \frac{\mathrm{Var}(\xi)}{\mathrm{Var}(\xi) + \mathrm{Var}(\nu)}$$
+
+$\lambda$는 신뢰도로, 관측 변동 가운데 참 변동의 몫이다. 신뢰도가 0.5면 계수는 절반으로 줄어든다. 결과 변수의 측정오차는 계수를 치우치게 하지 않고 표준오차만 키운다.
+
+### 2. 고정효과는 측정오차에 더 약하다
+
+사람 안의 추정에서는 이 감쇠가 더 심해진다(Griliches and Hausman, 1986). 사람 평균을 빼면 참 활동량의 사람 사이 변동은 모두 사라지지만, 방문마다 새로 생기는 측정오차는 거의 그대로 남는다. 그래서 사람 안의 변동에서 참 변동의 몫, 곧 사람 안 신뢰도 $\lambda_W$는 전체 신뢰도 $\lambda$보다 낮다. III장에서 사람 안의 계수가 작았던 이유의 일부가 여기 있을 수 있다.
+
+### 3. 민감도 분석
+
+PASE의 신뢰도를 이 자료로 직접 추정할 수는 없다. 같은 주의 활동을 두 번 잰 자료가 없기 때문이다. 대신 신뢰도에 여러 값을 가정하고 계수가 어떻게 바뀌는지 본다. 표 4는 혼성 모형의 두 계수를 가정한 신뢰도로 나눈 값이다. 사람 사이의 계수에는 사람 평균의 신뢰도를, 사람 안의 계수에는 사람 안 신뢰도를 쓴다. 사람 평균은 여러 방문의 평균이어서 오차가 줄어들므로 사람 안 신뢰도보다 높게 가정했다.
+
+```{r table4}
+#| output: asis
+sens <- data.table(`사람 평균 신뢰도` = c(1, 0.9, 0.8, 0.7), `사람 안 신뢰도` = c(1, 0.6, 0.4, 0.2))
+sens[, `:=`(`사람 사이 계수` = cB / `사람 평균 신뢰도`, `사람 안 계수` = cW / `사람 안 신뢰도`)]
+cat("**표 4. 측정오차를 보정한 PASE 50점당 통증의 차이 (가정한 신뢰도별)**\n\n")
+print(tab(sens, c(1, 1, 3, 3)))
+```
+
+표 4의 첫 행은 측정오차가 없다고 본 경우로 표 2의 혼성 모형 계수와 같다. 사람 안 신뢰도를 0.2로 낮게 잡아도 보정한 사람 안 계수는 `r f1(cW / 0.2, 3)`점으로, PASE 50점당 통증 1점에 미치지 않는다. 20점 척도에서 이 크기는 작다. 측정오차가 연관을 작게 보이게 하는 것은 분명하지만, 그것만으로 일상의 활동량과 통증 사이에 큰 관계가 숨어 있다고 보기는 어렵다. 측정오차를 직접 다루려면 가속도계처럼 활동량을 객관적으로 잰 자료가 필요하다. OAI의 일부 대상자에게는 가속도계 자료가 있으나 이 책은 쓰지 않았다.
+
+## VI. 많이 움직이면 해로운가
+
+활동량과 통증의 관계가 직선이 아닐 수 있다. 무릎에 부담이 큰 활동을 많이 하면 오히려 통증이 늘어날 수 있다는 우려가 있기 때문이다. IV장의 통증 식에서 PASE를 사분위 범주로 바꾸어 넣으면 이 우려를 점검할 수 있다. 표 5는 가장 낮은 사분위를 기준으로 한 다음 방문 통증의 차이다.
+
+```{r table5}
+#| output: asis
+qs <- quantile(lg$pase, 0:4 / 4)
+lg[, q := cut(pase, qs, include.lowest = TRUE, labels = c("1", "2", "3", "4"))]
+f3m <- cluster_lm(pain_next ~ pain + q + gap + age10 + female + bmi5 + klf, lg, paste0("q", 2:4))
+t5 <- copy(f3m$table)[, 항 := paste0("PASE 사분위 ", sub("^q", "", 항), " (1 대비)")]
+cat("**표 5. 앞 방문의 PASE 사분위와 다음 방문 통증의 차이**\n\n")
+print(tab(t5, 3))
+cat(sprintf("\n\n주: 사분위 경계(PASE) %s.\n\n", paste(round(qs), collapse = ", ")))
+q4 <- f3m$table[항 == "q4"]
+```
+
+표 5에서 PASE가 높은 사분위일수록 다음 방문의 통증 차이는 0에서 음의 쪽으로 움직인다. 가장 높은 사분위는 가장 낮은 사분위보다 다음 방문의 통증이 `r f1(abs(q4$계수), 3)`점 낮다(95% 신뢰구간 `r f1(q4$하한, 3)`\~`r f1(q4$상한, 3)`). 많이 움직이는 사람에게서 통증이 늘어난다는 신호는 없다. 다만 PASE 총점은 걷기, 집안일, 일을 합친 값이어서, 무릎에 부담을 주는 특정 활동의 효과는 이 총점으로 가려낼 수 없다.
+
+## VII. 정리와 한계
+
+이 장의 결과는 세 가지다. 첫째, 활동적인 사람은 덜 아프지만 그 연관은 작고, 기준 방문의 단면에서는 우울과 동반질환을 통제하면 거의 사라진다. 단면의 연관은 대부분 교란이다. 둘째, 같은 사람 안에서 활동량이 많았던 방문의 통증 차이는 사람 사이의 차이보다 훨씬 작다. 셋째, 시간의 순서를 맞추면 통증이 뒤의 활동량을 줄이는 방향이 활동량이 뒤의 통증을 줄이는 방향보다 크다. 많이 움직이는 것이 통증을 늘린다는 신호는 없다.
+
+재활의 관점에서 이 결과는 운동치료의 효과를 부정하지 않는다. 시험에서 확인된 것은 처방된 운동의 효과이고, 여기서 본 것은 스스로 고른 일상 활동량과 통증의 연관이다. 두 결과가 다른 것은 질문이 다르기 때문이다. 오히려 이 장의 결과는 통증이 사람을 덜 움직이게 한다는 쪽을 가리키므로, 통증을 줄이는 것이 활동을 유지하는 데 중요하다는 해석과 맞는다.
+
+한계는 넷이다. 첫째, 관찰 자료다. 고정효과와 시차 모형은 일부 교란과 역인과를 덜어 낼 뿐, 시간에 따라 변하는 교란(그해의 질병, 생활 사건)은 남는다. 둘째, 활동량은 자기 보고이고 종류를 가리지 않는다. 셋째, 통증은 더 아픈 무릎의 값이고 바닥 효과가 있다. 넷째, 치환술 뒤의 방문을 뺐으므로 통증이 심해진 사람이 먼저 빠진다(1장 IV.4절, 3장 IV장).
+
+## 참고문헌
+
+Allison, P. D. (2009). 『Fixed Effects Regression Models』. Sage.
+
+Fransen, M., McConnell, S., Harmer, A. R., Van der Esch, M., Simic, M., and Bennell, K. L. (2015). "Exercise for osteoarthritis of the knee: A Cochrane systematic review." 『British Journal of Sports Medicine』 49(24), 1554–1557.
+
+Fuller, W. A. (1987). 『Measurement Error Models』. Wiley.
+
+Griliches, Z., and Hausman, J. A. (1986). "Errors in variables in panel data." 『Journal of Econometrics』 31(1), 93–118.
+
+Hamaker, E. L., Kuiper, R. M., and Grasman, R. P. P. P. (2015). "A critique of the cross-lagged panel model." 『Psychological Methods』 20(1), 102–116.
+
+Hernán, M. A., and Robins, J. M. (2020). 『Causal Inference: What If』. Chapman and Hall/CRC.
+
+Mundlak, Y. (1978). "On the pooling of time series and cross section data." 『Econometrica』 46(1), 69–85.
+
+Washburn, R. A., Smith, K. W., Jette, A. M., and Janney, C. A. (1993). "The Physical Activity Scale for the Elderly (PASE): Development and evaluation." 『Journal of Clinical Epidemiology』 46(2), 153–162.
+
+Wooldridge, J. M. (2010). 『Econometric Analysis of Cross Section and Panel Data』 (2nd ed.). MIT Press.
