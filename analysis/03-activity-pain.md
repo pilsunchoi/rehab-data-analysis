@@ -73,7 +73,7 @@
 
 단면 관계는 서로 다른 사람을 비교한 것이다. 같은 사람이 더 활동적이었던 해에 통증이 어땠는지는 다른 질문이다. PASE를 그 사람의 평균과 평균에서 벗어난 값으로 나누어 혼합모형에 함께 넣는다.
 
-$$\text{통증}_{it} = \beta_0 + \beta_B\,\overline{\text{PASE}}_i + \beta_W\,(\text{PASE}_{it} - \overline{\text{PASE}}_i) + \beta_t\,t + x_i^\top\gamma + b_{0i} + b_{1i}t + \varepsilon_{it}$$
+$$\text{통증}_{it} = \beta_0 + \beta_B\ \overline{\text{PASE}}_i + \beta_W\ (\text{PASE}_{it} - \overline{\text{PASE}}_i) + \beta_t\ t + x_i^\top\gamma + b_{0i} + b_{1i}t + \varepsilon_{it}$$
 
 $\beta_B$는 평소 활동량이 50점 많은 사람의 통증 차이, $\beta_W$는 같은 사람이 평소보다 50점 더 활동적이었던 방문의 통증 차이다. 무작위 효과는 사람별 절편과 기울기다.
 

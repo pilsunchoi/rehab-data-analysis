@@ -1,6 +1,6 @@
 # 무릎 기능 궤적과 인공관절 치환술: 방법 해설
 
-이 문서는 첫 분석(`analysis/01-function-trajectory-tkr.qmd`와 그 렌더 결과 `01-function-trajectory-tkr.md`)이 쓰는 데이터, 정의, 모형을 수식과 함께 설명한다. 추정값은 렌더 결과에 있고 이 문서에는 옮겨 적지 않는다. 데이터를 바꾸어 다시 렌더하면 수치는 바뀌지만 이 문서의 설명은 그대로 유지된다. 파일과 변수 이름은 `docs/oai-variables.md`가, 코드는 `R/oai.R`과 `R/fit-jm.R`이 정한다.
+이 문서는 첫 분석([`01-function-trajectory-tkr.qmd`](01-function-trajectory-tkr.qmd)와 그 렌더 결과 [`01-function-trajectory-tkr.md`](01-function-trajectory-tkr.md))이 쓰는 데이터, 정의, 모형을 수식과 함께 설명한다. 추정값은 렌더 결과에 있고 이 문서에는 옮겨 적지 않는다. 데이터를 바꾸어 다시 렌더하면 수치는 바뀌지만 이 문서의 설명은 그대로 유지된다. 파일과 변수 이름은 [`docs/oai-variables.md`](../docs/oai-variables.md)가, 코드는 [`R/oai.R`](../R/oai.R)과 [`R/fit-jm.R`](../R/fit-jm.R)이 정한다.
 
 ---
 
@@ -12,7 +12,7 @@
 
 ### 2. Osteoarthritis Initiative
 
-데이터는 미국 국립보건원이 지원한 Osteoarthritis Initiative(OAI)다. OAI는 무릎 골관절염이 있거나 생길 위험이 높은 45\~79세 성인을 등록해 매년 추적한 다기관 전향적 코호트이며, 임상 평가, 자기 보고 설문, 방사선 영상과 MRI를 방문마다 수집했다(Nevitt et al., 2006). 데이터는 NIMH Data Archive에서 이용 약관에 동의한 연구자에게 공개된다. 방문은 등록 시점(V00)부터 번호가 붙고, 치환술 같은 사건은 방문과 별도로 판정해 `Outcomes99` 파일에 모은다. 방문 번호와 개월의 대응, 변수 이름 가운데 확인한 것과 확인하지 못한 것은 `docs/oai-variables.md` 3장과 4장에 있다.
+데이터는 미국 국립보건원이 지원한 Osteoarthritis Initiative(OAI)다. OAI는 무릎 골관절염이 있거나 생길 위험이 높은 45\~79세 성인을 등록해 매년 추적한 다기관 전향적 코호트이며, 임상 평가, 자기 보고 설문, 방사선 영상과 MRI를 방문마다 수집했다(Nevitt et al., 2006). 데이터는 NIMH Data Archive에서 이용 약관에 동의한 연구자에게 공개된다. 방문은 등록 시점(V00)부터 번호가 붙고, 치환술 같은 사건은 방문과 별도로 판정해 `Outcomes99` 파일에 모은다. 방문 번호와 개월의 대응, 변수 이름과 그 확인 상태는 [`docs/oai-variables.md`](../docs/oai-variables.md) 3장과 4장에 있다.
 
 ### 3. 측정
 
@@ -24,7 +24,7 @@
 
 분석 단위는 무릎이다. 무릎을 $i = 1, \dots, n$으로, 무릎 $i$가 속한 사람을 $p(i)$로 적는다. 한 사람에게 무릎이 둘이므로 같은 $p$를 공유하는 두 무릎은 독립이 아니며, 이 의존은 III.2절과 V.2절에서 다룬다. 시간 $t$는 등록부터 측정한 연수다.
 
-무릎 $i$의 기능 점수는 방문 시각 $t_{i1} < t_{i2} < \dots < t_{in_i}$에서 관측되며, 관측값을 $y_{ij} = y_i(t_{ij})$로 적는다. 치환술까지의 참 시간을 $T_i^*$, 중도절단 시간을 $C_i$라 하면 관측되는 것은 $T_i = \min(T_i^*, C_i)$와 사건 지시자 $\delta_i = I(T_i^* \le C_i)$다. 중도절단 시간은 그 무릎의 기능 점수가 마지막으로 관측된 방문의 시각으로 정했다(`docs/oai-variables.md` 5장). 치환술 뒤의 기능 점수는 인공관절을 측정한 값이므로 쓰지 않는다. 따라서 모든 $j$에 대해 $t_{ij} < T_i$다. 기준 공변량(나이, 성별, BMI, KL 등급)은 벡터 $w_i$로 적는다.
+무릎 $i$의 기능 점수는 방문 시각 $t_{i1} < t_{i2} < \dots < t_{in_i}$에서 관측되며, 관측값을 $y_{ij} = y_i(t_{ij})$로 적는다. 치환술까지의 참 시간을 $T_i^{\ast}$, 중도절단 시간을 $C_i$라 하면 관측되는 것은 $T_i = \min(T_i^{\ast}, C_i)$와 사건 지시자 $\delta_i = I(T_i^{\ast} \le C_i)$다. 중도절단 시간은 그 무릎의 기능 점수가 마지막으로 관측된 방문의 시각으로 정했다(`docs/oai-variables.md` 5장). 치환술 뒤의 기능 점수는 인공관절을 측정한 값이므로 쓰지 않는다. 따라서 모든 $j$에 대해 $t_{ij} < T_i$다. 기준 공변량(나이, 성별, BMI, KL 등급)은 벡터 $w_i$로 적는다.
 
 ---
 
@@ -34,7 +34,7 @@
 
 분석 문서 3절의 그림은 기준 시점 WOMAC 기능 점수의 분포를 보여 준다. 왼쪽은 전체 무릎의 히스토그램이고, 오른쪽은 KL 등급별 경험 누적분포함수 $\hat F_k(y) = n_k^{-1} \sum_{i: \mathrm{KL}_i = k} I(y_i \le y)$다. 골관절염이 없거나 가벼운 무릎은 일상 활동에 곤란이 없다고 답하는 경우가 많아 0에 확률 질량이 몰린다. 이것이 척도의 바닥 효과다.
 
-바닥 효과는 IV장에서 정규 오차를 가정하는 종단 모형과 충돌한다. 점수가 0에 막혀 있으면 관측값의 조건부 분포는 0에서 잘린 꼴이 되고, 0 근처 무릎의 평균 궤적은 실제보다 완만하게 추정된다. 한 가지 처리는 관측되지 않는 잠재 점수 $y^*$를 두고 $y = \max(0, y^*)$로 관측된다고 보는 검열 정규 모형(Tobin, 1958)이다. 이 모형에서 $y_{ij} = 0$인 관측의 우도 기여는 $\Phi(-m_{ij}/\sigma)$, $y_{ij} > 0$인 관측의 기여는 $\sigma^{-1}\phi\{(y_{ij} - m_{ij})/\sigma\}$다. 여기서 $m_{ij}$는 잠재 점수의 평균, $\Phi$와 $\phi$는 표준정규 분포함수와 밀도다. 첫 분석은 이 처리를 하지 않았고, V.1절에서 다음 단계로 둔다.
+바닥 효과는 IV장에서 정규 오차를 가정하는 종단 모형과 충돌한다. 점수가 0에 막혀 있으면 관측값의 조건부 분포는 0에서 잘린 꼴이 되고, 0 근처 무릎의 평균 궤적은 실제보다 완만하게 추정된다. 한 가지 처리는 관측되지 않는 잠재 점수 $y^{\ast}$를 두고 $y = \max(0, y^{\ast})$로 관측된다고 보는 검열 정규 모형(Tobin, 1958)이다. 이 모형에서 $y_{ij} = 0$인 관측의 우도 기여는 $\Phi(-m_{ij}/\sigma)$, $y_{ij} > 0$인 관측의 기여는 $\sigma^{-1}\phi\lbrace (y_{ij} - m_{ij})/\sigma\rbrace $다. 여기서 $m_{ij}$는 잠재 점수의 평균, $\Phi$와 $\phi$는 표준정규 분포함수와 밀도다. 첫 분석은 이 처리를 하지 않았고, V.1절에서 다음 단계로 둔다.
 
 ### 2. 궤적
 
@@ -44,7 +44,7 @@
 
 ### 3. Kaplan-Meier 추정
 
-분석 문서 5절의 그림은 기준 KL 등급별로 치환술 없이 지낸 비율 $S(t) = P(T^* > t)$의 Kaplan-Meier 추정량(Kaplan and Meier, 1958)이다. 서로 다른 사건 시각을 $\tau_1 < \tau_2 < \dots$, 각 시각 직전에 위험에 놓인 무릎 수를 $r_m$, 그 시각의 사건 수를 $d_m$이라 하면 다음과 같다.
+분석 문서 5절의 그림은 기준 KL 등급별로 치환술 없이 지낸 비율 $S(t) = P(T^{\ast} > t)$의 Kaplan-Meier 추정량(Kaplan and Meier, 1958)이다. 서로 다른 사건 시각을 $\tau_1 < \tau_2 < \dots$, 각 시각 직전에 위험에 놓인 무릎 수를 $r_m$, 그 시각의 사건 수를 $d_m$이라 하면 다음과 같다.
 
 $$\hat S(t) = \prod_{m: \tau_m \le t} \left(1 - \frac{d_m}{r_m}\right)$$
 
@@ -60,7 +60,7 @@ III장의 세 모형은 모두 Cox (1972)의 비례위험모형이다. 무릎 $i
 
 $$h_i(t) = h_0(t) \exp(x_i(t)^\top \beta)$$
 
-$h_0(t)$는 모양을 정하지 않은 기준 위험이고 $x_i(t)$는 공변량이다. $\beta$는 부분우도를 최대화해 추정한다. 사건 시각에서 위험집합을 $R(\tau_m) = \{i : T_i \ge \tau_m\}$이라 하면 동시 사건이 없을 때 부분우도는 다음과 같다.
+$h_0(t)$는 모양을 정하지 않은 기준 위험이고 $x_i(t)$는 공변량이다. $\beta$는 부분우도를 최대화해 추정한다. 사건 시각에서 위험집합을 $R(\tau_m) = \lbrace i : T_i \ge \tau_m\rbrace $이라 하면 동시 사건이 없을 때 부분우도는 다음과 같다.
 
 $$L(\beta) = \prod_{i: \delta_i = 1} \frac{\exp(x_i(T_i)^\top \beta)}{\sum_{l \in R(T_i)} \exp(x_l(T_i)^\top \beta)}$$
 
@@ -70,7 +70,7 @@ $$L(\beta) = \prod_{i: \delta_i = 1} \frac{\exp(x_i(T_i)^\top \beta)}{\sum_{l \i
 
 한 사람의 두 무릎은 같은 유전, 체중, 활동량, 통증 민감성을 공유하므로 사건 시간이 양의 상관을 가질 가능성이 크다. 첫 분석은 무릎을 독립으로 놓은 작업 독립 부분우도로 $\beta$를 추정하고, 분산만 사람 단위로 보정한다(Lin and Wei, 1989). 무릎 $i$의 점수 잔차를 $U_i(\hat\beta)$, 관측 정보행렬을 $I(\hat\beta)$라 하면 군집 강건 분산은 다음과 같다.
 
-$$\widehat{\mathrm{Var}}(\hat\beta) = I(\hat\beta)^{-1} \left\{ \sum_{p} \Big( \sum_{i: p(i) = p} U_i(\hat\beta) \Big) \Big( \sum_{i: p(i) = p} U_i(\hat\beta) \Big)^\top \right\} I(\hat\beta)^{-1}$$
+$$\widehat{\mathrm{Var}}(\hat\beta) = I(\hat\beta)^{-1} \left\lbrace \sum_{p} \Big( \sum_{i: p(i) = p} U_i(\hat\beta) \Big) \Big( \sum_{i: p(i) = p} U_i(\hat\beta) \Big)^\top \right\rbrace I(\hat\beta)^{-1}$$
 
 이 보정은 표준오차만 고치고 계수의 해석은 바꾸지 않는다. 계수는 사람 안의 상관을 모형으로 다룬 조건부 효과가 아니라 무릎 집단 수준의 효과다(Therneau and Grambsch, 2000). R에서는 `coxph(..., cluster = ID)`가 이 추정량을 준다.
 
@@ -78,19 +78,19 @@ $$\widehat{\mathrm{Var}}(\hat\beta) = I(\hat\beta)^{-1} \left\{ \sum_{p} \Big( \
 
 모형 A의 공변량은 기준 시점의 값뿐이다.
 
-$$h_i(t) = h_0(t) \exp\big(w_i^\top \gamma + \beta_y \, y_{i1}/10\big)$$
+$$h_i(t) = h_0(t) \exp\big(w_i^\top \gamma + \beta_y \  y_{i1}/10\big)$$
 
 $y_{i1}$은 등록 시점의 기능 점수이고, 10으로 나눈 것은 계수를 10점당 위험비로 읽기 위해서다. $w_i$의 KL 등급은 0등급을 기준으로 한 지시변수 4개로 들어간다. 이 모형은 등록 시점에 이미 알 수 있는 정보로 이후의 위험을 설명하며, 기능이 그 뒤에 어떻게 변했는지는 쓰지 않는다. 기준 점수 하나에도 측정오차가 있으므로 $\beta_y$는 III.4절과 같은 이유로 0 쪽으로 편향될 수 있다.
 
 ### 4. 모형 B: 시간가변 공변량
 
-모형 B는 기능 점수를 시간에 따라 바뀌는 공변량으로 넣는다. 시각 $t$ 직전의 마지막 방문을 $j(t) = \max\{j : t_{ij} \le t\}$라 하고, 그 방문의 값을 다음 방문까지 유지한다.
+모형 B는 기능 점수를 시간에 따라 바뀌는 공변량으로 넣는다. 시각 $t$ 직전의 마지막 방문을 $j(t) = \max\lbrace j : t_{ij} \le t\rbrace $라 하고, 그 방문의 값을 다음 방문까지 유지한다.
 
-$$h_i(t) = h_0(t) \exp\big(w_i^\top \gamma + \beta_y \, y_{i, j(t)}/10\big)$$
+$$h_i(t) = h_0(t) \exp\big(w_i^\top \gamma + \beta_y \  y_{i, j(t)}/10\big)$$
 
 추정은 계수 과정 표현(Andersen and Gill, 1982)으로 한다. 무릎마다 방문 사이 구간 $(t_{ij}, t_{i,j+1}]$을 한 줄로 만들고, 마지막 구간의 끝은 $T_i$로 자르며, 사건은 마지막 구간에만 표시한다. 분석 문서의 `tv` 표가 이 형식이고, R에서는 `Surv(start, stop, event)`로 적는다.
 
-이 모형에는 문제가 셋 있다. 첫째, $y_{ij}$는 참 기능 수준 $m_i(t_{ij})$에 측정오차 $\varepsilon_{ij}$가 더해진 값이다. 오차가 섞인 공변량을 그대로 넣으면 계수가 0 쪽으로 편향된다(Prentice, 1982). 둘째, 값을 다음 방문까지 유지하는 것은 방문 사이의 변화를 무시하는 것이다. OAI의 방문 간격은 1\~2년이어서 이 근사가 거칠다. 셋째, 기능 점수는 무릎이 살아 있어야, 곧 치환술 전이어야 측정되는 내부 공변량이다(Kalbfleisch and Prentice, 2002). 내부 공변량에서는 위험함수와 생존함수 사이의 관계 $S_i(t) = \exp\{-\int_0^t h_i(s)\, ds\}$가 공변량 경로를 조건으로 해서는 성립하지 않으므로, 모형 B로는 개인별 생존 확률을 예측할 수 없다.
+이 모형에는 문제가 셋 있다. 첫째, $y_{ij}$는 참 기능 수준 $m_i(t_{ij})$에 측정오차 $\varepsilon_{ij}$가 더해진 값이다. 오차가 섞인 공변량을 그대로 넣으면 계수가 0 쪽으로 편향된다(Prentice, 1982). 둘째, 값을 다음 방문까지 유지하는 것은 방문 사이의 변화를 무시하는 것이다. OAI의 방문 간격은 1\~2년이어서 이 근사가 거칠다. 셋째, 기능 점수는 무릎이 살아 있어야, 곧 치환술 전이어야 측정되는 내부 공변량이다(Kalbfleisch and Prentice, 2002). 내부 공변량에서는 위험함수와 생존함수 사이의 관계 $S_i(t) = \exp\lbrace -\int_0^t h_i(s)\  ds\rbrace $가 공변량 경로를 조건으로 해서는 성립하지 않으므로, 모형 B로는 개인별 생존 확률을 예측할 수 없다.
 
 ### 5. 모형 C: 2단계 추정
 
@@ -122,17 +122,17 @@ $$m_i(t) = \beta_0 + \beta_{0k} + (\beta_1 + \beta_{1k}) t + b_{0i} + b_{1i} t, 
 
 생존 하위모형은 시각 $t$의 위험을 그 시각의 참 궤적 값과 변화율에 연결한다.
 
-$$h_i(t \mid \mathcal M_i(t), w_i) = h_0(t) \exp\big\{ w_i^\top \gamma + \alpha_1 m_i(t) + \alpha_2 m_i'(t) \big\}$$
+$$h_i(t \mid \mathcal M_i(t), w_i) = h_0(t) \exp\big\lbrace w_i^\top \gamma + \alpha_1 m_i(t) + \alpha_2 m_i'(t) \big\rbrace $$
 
-$\mathcal M_i(t) = \{m_i(s) : 0 \le s < t\}$는 시각 $t$까지의 참 궤적이다. $\exp(\alpha_1)$은 같은 시각에 참 기능 점수가 1점 나쁜 데 따른 위험비이고, $\exp(\alpha_2)$는 연간 악화 속도가 1점 빠른 데 따른 위험비다. JMbayes2에서는 이 두 항을 `functional_forms = ~ value(womac_func) + slope(womac_func)`로 지정한다. 궤적이 시간의 1차식이므로 변화율은 $m_i'(t) = \beta_1 + \beta_{1k} + b_{1i}$로, 무릎마다 시간에 따라 변하지 않는 값이다.
+$\mathcal M_i(t) = \lbrace m_i(s) : 0 \le s < t\rbrace $는 시각 $t$까지의 참 궤적이다. $\exp(\alpha_1)$은 같은 시각에 참 기능 점수가 1점 나쁜 데 따른 위험비이고, $\exp(\alpha_2)$는 연간 악화 속도가 1점 빠른 데 따른 위험비다. JMbayes2에서는 이 두 항을 `functional_forms = ~ value(womac_func) + slope(womac_func)`로 지정한다. 궤적이 시간의 1차식이므로 변화율은 $m_i'(t) = \beta_1 + \beta_{1k} + b_{1i}$로, 무릎마다 시간에 따라 변하지 않는 값이다.
 
-모형 B와 비교하면 차이는 공변량 자리에 관측값 $y_{i,j(t)}$ 대신 참 값 $m_i(t)$가 들어간다는 데 있다. $m_i(t)$는 측정오차가 없고 방문 사이에서도 연속적으로 정의되므로 III.4절의 첫째와 둘째 문제가 해결된다. 셋째 문제도 해결된다. 생존 하위모형이 무작위 효과를 조건으로 정의되므로 $S_i(t \mid b_i) = \exp\{-\int_0^t h_i(s \mid b_i)\, ds\}$가 성립하고, 이 관계가 V.4절의 동적 예측을 가능하게 한다.
+모형 B와 비교하면 차이는 공변량 자리에 관측값 $y_{i,j(t)}$ 대신 참 값 $m_i(t)$가 들어간다는 데 있다. $m_i(t)$는 측정오차가 없고 방문 사이에서도 연속적으로 정의되므로 III.4절의 첫째와 둘째 문제가 해결된다. 셋째 문제도 해결된다. 생존 하위모형이 무작위 효과를 조건으로 정의되므로 $S_i(t \mid b_i) = \exp\lbrace -\int_0^t h_i(s \mid b_i)\  ds\rbrace $가 성립하고, 이 관계가 V.4절의 동적 예측을 가능하게 한다.
 
 ### 2. 우도
 
 두 하위모형은 무작위 효과가 주어지면 조건부 독립이라고 가정한다. 무릎 $i$의 우도 기여는 다음과 같다.
 
-$$p(y_i, T_i, \delta_i) = \int p(y_i \mid b_i)\, h_i(T_i \mid b_i)^{\delta_i} \exp\Big\{ -\int_0^{T_i} h_i(s \mid b_i)\, ds \Big\}\, p(b_i)\, db_i$$
+$$p(y_i, T_i, \delta_i) = \int p(y_i \mid b_i)\  h_i(T_i \mid b_i)^{\delta_i} \exp\Big\lbrace -\int_0^{T_i} h_i(s \mid b_i)\  ds \Big\rbrace \  p(b_i)\  db_i$$
 
 $p(y_i \mid b_i)$는 독립 정규 밀도의 곱이다. 치환술로 인한 추적 중단은 공유된 $b_i$를 통해 종단 하위모형과 연결되므로, 중단이 관측되지 않은 궤적에 의존하는 경우도 이 우도 안에서 다루어진다. III.5절의 2단계 추정이 이 점을 다루지 못한 것과 다르다.
 
@@ -140,7 +140,7 @@ $p(y_i \mid b_i)$는 독립 정규 밀도의 곱이다. 치환술로 인한 추�
 
 ### 3. KL 등급을 종단 하위모형에 넣는 이유
 
-KL 등급을 종단 하위모형에서 빼면 $m_i(t) = \beta_0 + \beta_1 t + b_{0i} + b_{1i} t$가 되고, 등급에 따른 수준 차이는 무작위 절편이 떠안는다. 등급 $k$의 평균 수준 차이를 $\mu_k$라 하면 $b_{0i} \approx \mu_k + \tilde b_{0i}$꼴이 되어, 생존 하위모형의 선형 예측식에서 등급의 효과가 $\gamma_k$와 $\alpha_1 \mu_k$ 두 자리에 동시에 들어간다. 사후분포는 $\gamma_k + \alpha_1 \mu_k$가 일정한 방향으로 길게 늘어난 능선이 되고, 마르코프 연쇄는 이 능선을 따라 느리게 움직인다. 첫 적합에서 KL 계수의 $\hat R$이 가장 나빴던 것이 이 때문이다. 등급을 종단 하위모형의 고정효과로 넣으면 무작위 효과는 같은 등급 안의 편차가 되어 $\gamma_k$와 분리되고, 같은 반복 수에서 KL 계수의 $\hat R$은 기준 1.05 아래로 내려갔다.
+KL 등급을 종단 하위모형에서 빼면 $m_i(t) = \beta_0 + \beta_1 t + b_{0i} + b_{1i} t$가 되고, 등급에 따른 수준 차이는 무작위 절편이 떠안는다. 등급 $k$의 평균 수준 차이를 $\mu_k$라 하면 $b_{0i} \approx \mu_k + \tilde b_{0i}$꼴이 되어, 생존 하위모형의 선형 예측식에서 등급의 효과가 $\gamma_k$와 $\alpha_1 \mu_k$ 두 자리에 동시에 들어간다. 사후분포는 $\gamma_k + \alpha_1 \mu_k$가 일정한 방향으로 길게 늘어난 능선이 되고, 마르코프 연쇄는 이 능선을 따라 느리게 움직인다. 모의 데이터로 한 첫 적합에서 KL 계수의 $\hat R$이 가장 나빴던 것이 이 때문이다. 등급을 종단 하위모형의 고정효과로 넣으면 무작위 효과는 같은 등급 안의 편차가 되어 $\gamma_k$와 분리되고, 같은 반복 수에서 KL 계수의 $\hat R$은 기준 1.05 아래로 내려갔다.
 
 ### 4. 베이즈 추정과 수렴 진단
 
@@ -150,19 +150,19 @@ JMbayes2는 사후분포를 마르코프 연쇄 몬테카를로(MCMC)로 추출�
 
 $$\hat R = \sqrt{\frac{\frac{N-1}{N} W + \frac{1}{N} B}{W}}$$
 
-연쇄들이 같은 분포에 도달했으면 $\hat R$은 1에 가깝다. 분석 문서는 1.05를 기준으로 삼았다. Vehtari et al. (2021)은 순위 정규화를 적용한 개선된 $\hat R$과 더 엄격한 기준 1.01을 권고한다. 첫 분석에서 가장 늦게 섞인 것은 $\alpha_1$과 $\alpha_2$였다. 두 항은 모두 $b_{1i}$를 통해 같은 무작위 효과에 의존하므로 사후 상관이 높다. 반복 수를 늘려 기준을 만족시켰고, 그 반복 수를 `R/fit-jm.R`의 기본값으로 두었다.
+연쇄들이 같은 분포에 도달했으면 $\hat R$은 1에 가깝다. 분석 문서는 1.05를 기준으로 삼았다. Vehtari et al. (2021)은 순위 정규화를 적용한 개선된 $\hat R$과 더 엄격한 기준 1.01을 권고한다. 모의 데이터 적합에서 가장 늦게 섞인 것은 $\alpha_1$과 $\alpha_2$였다. 두 항은 모두 $b_{1i}$를 통해 같은 무작위 효과에 의존하므로 사후 상관이 높다. 반복 수를 늘려 기준을 만족시켰고, 그 반복 수를 `R/fit-jm.R`의 기본값으로 두었다.
 
 ### 5. 모의 데이터에서의 점검
 
 원데이터를 받기 전까지 분석은 `R/oai.R`의 `make_synthetic`이 만든 모의 데이터로 돈다. 모의 데이터의 참 궤적은 KL 등급 $k$, BMI, 무릎별 무작위 효과로 정해지는 선형식을 $[0, 68]$로 자른 것이다.
 
-$$m_i^*(t) = \min\Big\{68, \max\big(0,\; -4 + 5.5k + 0.25(\mathrm{BMI}_i - 28.5) + u_{0i} + (0.2 + 0.45k + u_{1i})\, t\big)\Big\}$$
+$$m_i^{\ast}(t) = \min\Big\lbrace 68, \max\big(0,\  -4 + 5.5k + 0.25(\mathrm{BMI}_i - 28.5) + u_{0i} + (0.2 + 0.45k + u_{1i})\  t\big)\Big\rbrace $$
 
 $u_{0i} \sim N(0, 7^2)$, $u_{1i} \sim N(0, 1.2^2)$이고, 관측값은 여기에 $N(0, 4^2)$ 오차를 더해 반올림하고 $[0, 68]$로 자른 것이다. 치환술은 월 단위 이산 위험으로 생성했다.
 
-$$h_i^*(t) = \exp\{-9.6 + 0.07\, m_i^*(t) + 0.35k + 0.02(\mathrm{age}_i - 61)\}$$
+$$h_i^{\ast}(t) = \exp\lbrace -9.6 + 0.07\  m_i^{\ast}(t) + 0.35k + 0.02(\mathrm{age}_i - 61)\rbrace $$
 
-따라서 결합모형의 참값은 $\alpha_1 = 0.07$(위험비 $e^{0.07} \approx 1.073$)이고 $\alpha_2 = 0$이다. 참 궤적이 0과 68에서 잘려 있고 관측값도 잘려 있으므로, 정규 오차를 가정한 종단 하위모형은 이 데이터를 조금 잘못 지정한다. 점검의 기준은 둘이다. 결합모형의 $\alpha_1$과 $\alpha_2$ 신용구간이 참값을 담는지, 그리고 모형 B의 시간가변 계수가 III.4절의 측정오차 때문에 참값보다 0 쪽에 있는지다. 수치는 분석 문서 6절과 7절의 표에 있다. 모의 데이터의 결과는 모형과 코드의 점검일 뿐이며 OAI에 대한 결론이 아니다.
+따라서 결합모형의 참값은 $\alpha_1 = 0.07$(위험비 $e^{0.07} \approx 1.073$)이고 $\alpha_2 = 0$이다. 참 궤적이 0과 68에서 잘려 있고 관측값도 잘려 있으므로, 정규 오차를 가정한 종단 하위모형은 이 데이터를 조금 잘못 지정한다. 점검의 기준은 둘이다. 결합모형의 $\alpha_1$과 $\alpha_2$ 신용구간이 참값을 담는지, 그리고 모형 B의 시간가변 계수가 III.4절의 측정오차 때문에 참값보다 0 쪽에 있는지다. 수치는 모의 데이터로 렌더한 분석 문서의 6절과 7절 표에 나온다. 지금 공개된 렌더 결과는 원데이터를 읽었으므로 6절은 OAI의 Cox 모형이고, 7절만 저장된 모의 데이터 적합이다. 모의 데이터의 결과는 모형과 코드의 점검일 뿐이며 OAI에 대한 결론이 아니다.
 
 ---
 
@@ -180,15 +180,15 @@ III.2절의 군집 강건 분산은 Cox 모형의 표준오차만 보정하며, 
 
 사망을 중도절단으로 두면 사망한 사람이 계속 살았다면 치환술을 받았을 것처럼 다루게 된다. 원인별 위험 $h_1(t)$(치환술)과 $h_2(t)$(사망)를 따로 두면 치환술의 누적 발생률은 다음과 같다.
 
-$$F_1(t) = \int_0^t S(s^-)\, h_1(s)\, ds, \qquad S(t) = \exp\Big\{ -\int_0^t \big(h_1(s) + h_2(s)\big) ds \Big\}$$
+$$F_1(t) = \int_0^t S(s^-)\  h_1(s)\  ds, \qquad S(t) = \exp\Big\lbrace -\int_0^t \big(h_1(s) + h_2(s)\big) ds \Big\rbrace $$
 
-이 값은 II.3절의 $1 - \hat S(t)$보다 작다. 공변량 효과를 누적 발생률에 직접 연결하려면 Fine and Gray (1999)의 부분분포 위험모형을 쓴다. 결합모형에서는 생존 하위모형을 원인별 위험 두 개로 확장한다. 먼저 `Outcomes99`에 사망 일자 변수가 있는지 확인해야 한다.
+이 값은 II.3절의 $1 - \hat S(t)$보다 작다. 공변량 효과를 누적 발생률에 직접 연결하려면 Fine and Gray (1999)의 부분분포 위험모형을 쓴다. 결합모형에서는 생존 하위모형을 원인별 위험 두 개로 확장한다. `Outcomes99`에는 사망 관련 열(`V99EDDCF`, `V99EDDDATE` 등)이 있으므로, 부호의 뜻을 데이터 사전으로 확인한 뒤 쓴다.
 
 ### 4. 동적 예측
 
-결합모형의 쓸모가 가장 크게 드러나는 것은 예측이다. 시각 $t$까지 치환술 없이 지냈고 그때까지의 점수 $\mathcal Y_i(t) = \{y_{ij} : t_{ij} \le t\}$가 관측된 무릎에 대해, $u > t$까지 치환술 없이 지낼 확률은 다음과 같다(Rizopoulos, 2011).
+결합모형의 쓸모가 가장 크게 드러나는 것은 예측이다. 시각 $t$까지 치환술 없이 지냈고 그때까지의 점수 $\mathcal Y_i(t) = \lbrace y_{ij} : t_{ij} \le t\rbrace $가 관측된 무릎에 대해, $u > t$까지 치환술 없이 지낼 확률은 다음과 같다(Rizopoulos, 2011).
 
-$$\pi_i(u \mid t) = P\big(T_i^* > u \mid T_i^* > t, \mathcal Y_i(t)\big) = \int \frac{S_i(u \mid b_i)}{S_i(t \mid b_i)}\, p\big(b_i \mid T_i^* > t, \mathcal Y_i(t)\big)\, db_i$$
+$$\pi_i(u \mid t) = P\big(T_i^{\ast} > u \mid T_i^{\ast} > t, \mathcal Y_i(t)\big) = \int \frac{S_i(u \mid b_i)}{S_i(t \mid b_i)}\  p\big(b_i \mid T_i^{\ast} > t, \mathcal Y_i(t)\big)\  db_i$$
 
 새 방문에서 점수가 하나 더 관측되면 $b_i$의 사후분포가 갱신되고 예측도 함께 갱신된다. 예를 들어 앞으로 2년 안의 치환술 확률을 방문마다 다시 계산하면 물리치료사가 운동치료의 강도나 의뢰 시점을 정할 때 참고할 수 있는 숫자가 된다. 예측의 판별력은 시간의존 ROC 곡선과 AUC로 평가하고(Heagerty et al., 2000), 보정은 예측 확률과 관측 발생률을 구간별로 비교해 평가한다.
 
@@ -233,8 +233,6 @@ Putter, H., Fiocco, M., and Geskus, R. B. (2007). "Tutorial in biostatistics: Co
 Rizopoulos, D. (2011). "Dynamic predictions and prospective accuracy in joint models for longitudinal and time-to-event data." 『Biometrics』 67(3), 819–829.
 
 Rizopoulos, D. (2012). 『Joint Models for Longitudinal and Time-to-Event Data: With Applications in R』. Chapman and Hall/CRC.
-
-Rizopoulos, D. (2016). "The R package JMbayes for fitting joint models for longitudinal and time-to-event data using MCMC." 『Journal of Statistical Software』 72(7), 1–45.
 
 Rizopoulos, D., Miranda-Afonso, P., and Papageorgiou, G. (2026). 『JMbayes2: Extended Joint Models for Longitudinal and Time-to-Event Data』. R package version 0.6-5. https://doi.org/10.32614/CRAN.package.JMbayes2
 
