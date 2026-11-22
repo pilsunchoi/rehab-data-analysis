@@ -140,7 +140,7 @@ III장과 IV장의 선형 모형은 통증이 0 아래로 내려갈 수 없다�
 
 $$y^{\ast}_{pk} = \beta_0 + \sum_{g} \beta_g D_{gpk} + x_p^\top \gamma + e_{pk}, \quad e_{pk} \sim N(0, \sigma^2), \qquad y_{pk} = \max(0, y^{\ast}_{pk})$$
 
-선형 예측을 $m_{pk}$라 하면 통증 0인 무릎의 우도 기여는 잠재 통증이 0 이하일 확률 $\Phi(-m_{pk}/\sigma)$이고, 양의 통증을 보고한 무릎의 기여는 정규 밀도 $\sigma^{-1}\phi((y_{pk} - m_{pk})/\sigma)$다. $\Phi$와 $\phi$는 표준정규의 분포함수와 밀도다. 계수 $\beta_g$는 잠재 통증의 차이이고, 관측 척도의 평균은 다음과 같다.
+선형 예측을 $m_{pk}$라 하면 통증 0인 무릎의 가능도 기여는 잠재 통증이 0 이하일 확률 $\Phi(-m_{pk}/\sigma)$이고, 양의 통증을 보고한 무릎의 기여는 정규 밀도 $\sigma^{-1}\phi((y_{pk} - m_{pk})/\sigma)$다. $\Phi$와 $\phi$는 표준정규의 분포함수와 밀도다. 계수 $\beta_g$는 잠재 통증의 차이이고, 관측 척도의 평균은 다음과 같다.
 
 $$E(y_{pk}) = \Phi\left(\frac{m_{pk}}{\sigma}\right) m_{pk} + \sigma \phi\left(\frac{m_{pk}}{\sigma}\right)$$
 

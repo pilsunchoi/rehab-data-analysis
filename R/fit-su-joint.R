@@ -37,7 +37,7 @@ unpack <- function(p, D, su) {
   o
 }
 
-# 무릎별 조건부 분포의 재료: 무작위 효과의 사후 평균(mb1, mb2), M 행렬, 종단 로그우도
+# 무릎별 조건부 분포의 재료: 무작위 효과의 사후 평균(mb1, mb2), M 행렬, 종단 로그가능도
 long_parts <- function(o, D, rows = NULL) {
   r <- as.vector(D$y - D$X %*% o$beta)
   if (!is.null(rows)) {                       # 일부 측정만 쓴다(동적 예측)

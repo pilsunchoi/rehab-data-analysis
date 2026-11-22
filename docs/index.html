@@ -433,7 +433,7 @@
       <div class="study-num">2</div>
       <div class="study-body">
         <h4 class="study-title">로지스틱 회귀 — X선 손상이 큰 무릎은 통증이 잦은가<span class="pill warn">초고</span></h4>
-        <p class="study-sub">위험 차이, 위험비, 승산비 · 로짓 변환과 최대우도 추정 · 군집 강건 표준오차 · 표준화 위험 · 보정과 판별력(ROC, AUC) · 조건부 로지스틱 회귀</p>
+        <p class="study-sub">위험 차이, 위험비, 승산비 · 로짓 변환과 최대가능도 추정 · 군집 강건 표준오차 · 표준화 위험 · 보정과 판별력(ROC, AUC) · 조건부 로지스틱 회귀</p>
         <p class="study-desc">1장과 동일한 질문을 결과의 형태만 바꾸어 다시 분석한다. 기준 방문의 무릎 8,834개에서 "지난 12개월 동안 한 달의 대부분의 날에 아팠는가"를 결과로 두고, 승산비가 무엇이고 무엇이 아닌지를 수치로 보인다.</p>
         <p class="study-lbl">OAI에 적용한 결과</p>
         <ul class="study-points">
@@ -485,7 +485,7 @@
       <div class="study-num">1</div>
       <div class="study-body">
         <h4 class="study-title">인공관절 치환술까지의 시간 — 누가 언제 수술에 이르는가<span class="pill warn">초고</span></h4>
-        <p class="study-sub">사건 시간과 중도절단 · Kaplan-Meier · Cox 모형과 부분우도 · 비례위험 가정의 점검 · 시간가변 공변량(계수 과정 표현, 내부 공변량)</p>
+        <p class="study-sub">사건 시간과 중도절단 · Kaplan-Meier · Cox 모형과 부분가능도 · 비례위험 가정의 점검 · 시간가변 공변량(계수 과정 표현, 내부 공변량)</p>
         <p class="study-desc">무릎 8,912개의 16년 추적에서 치환술 875건을 분석한다. 중도절단된 관측을 어떻게 쓰는지에서 시작해, 한 공변량의 수준별 비교, 여러 공변량을 함께 넣는 회귀, 시간에 따라 바뀌는 공변량의 순서로 간다.</p>
         <p class="study-lbl">OAI에 적용한 결과</p>
         <ul class="study-points">
@@ -642,13 +642,13 @@
       <div class="study-num">2</div>
       <div class="study-body">
         <h4 class="study-title">기능 궤적과 치환술 시간의 SU정규 결합모형 — 결합모형을 1분 안에 적합할 수 있는가<span class="pill warn">초고</span></h4>
-        <p class="study-sub">다변량 정규 결합모형(닫힌 형태의 우도) · 가속수명 모형 · SU정규 분포와 로그정규 · 우도비 검정 · 모의 검증 · 동적 예측</p>
-        <p class="study-desc">종단 측정의 무작위 효과와 변환한 치환술 시간을 함께 다변량 정규로 두면 우도가 적분 없이 닫힌 형태가 된다. 치환술 시간의 분포로 로그정규를 포함하는 SU정규를 쓰고, 무릎 8,909개 전체로 적합해 1장의 JMbayes2 결합모형과 비교한다.</p>
+        <p class="study-sub">다변량 정규 결합모형(닫힌 형태의 가능도) · 가속수명 모형 · SU정규 분포와 로그정규 · 가능도비 검정 · 모의 검증 · 동적 예측</p>
+        <p class="study-desc">종단 측정의 무작위 효과와 변환한 치환술 시간을 함께 다변량 정규로 두면 가능도가 적분 없이 닫힌 형태가 된다. 치환술 시간의 분포로 로그정규를 포함하는 SU정규를 쓰고, 무릎 8,909개 전체로 적합해 1장의 JMbayes2 결합모형과 비교한다.</p>
         <p class="study-lbl">OAI에 적용한 결과</p>
         <ul class="study-points">
           <li>무릎 전체의 적합이 1분 남짓이다(무릎 4,000개에서 11초, 같은 무릎의 JMbayes2는 16분).</li>
           <li>기능이 나쁘고 빨리 나빠지는 무릎일수록 치환술이 이르다. 기울기가 연 1점 빠르면 치환술까지의 시간이 0.43배다.</li>
-          <li>SU정규가 로그정규보다 데이터에 맞지만(우도비 통계량 21.0), 관측 범위 안의 누적 치환술과 2년 예측(AUC 0.89)은 같다. 두 분포는 추적 기간 밖의 분위수에서 갈라진다.</li>
+          <li>SU정규가 로그정규보다 데이터에 맞지만(가능도비 통계량 21.0), 관측 범위 안의 누적 치환술과 2년 예측(AUC 0.89)은 같다. 두 분포는 추적 기간 밖의 분위수에서 갈라진다.</li>
         </ul>
         <div class="study-figs"><img src="img/ch06_marginal_by_kl.png" alt="KL 등급 묶음별 누적 치환술 비율. Kaplan-Meier와 로그정규, SU정규 결합모형의 곡선이 거의 겹친다" loading="lazy"></div>
         <div class="study-links">
