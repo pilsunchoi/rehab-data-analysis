@@ -12,3 +12,7 @@ analysis/Choi/
 
 # 내부 작업용 계획 문서. 공개하지 않는다
 docs/*-plan.md
+
+# 작업 문서. 저장소에는 최종 결과물만 둔다(2026-11-23)
+docs/stroke-data-sources.md
+archive/

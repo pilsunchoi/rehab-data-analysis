@@ -50,8 +50,7 @@ rehab-data-analysis/
 ├── docs/
 │   ├── index.html                            소개 대시보드(GitHub Pages)
 │   ├── img/                                  대시보드의 그림(장의 그림을 복사)
-│   ├── oai-variables.md                      받을 파일, 변수 이름의 형식, 사건 정의
-│   └── stroke-data-sources.md                뇌졸중 재활 데이터 후보와 접근 조건(I권에서는 쓰지 않는다)
+│   └── oai-variables.md                      받을 파일, 변수 이름의 형식, 사건 정의
 ├── R/
 │   ├── oai.R                                 OAI 파일 읽기, 분석용 표, 시뮬레이션 데이터
 │   ├── postrender-md.R                       렌더된 MD를 GitHub용으로 손질(물결 이스케이프)
@@ -59,14 +58,11 @@ rehab-data-analysis/
 │   ├── fit-causal.R                          운동의 시작·중단을 처치로 쌓은 시험의 평균 효과(13분). 장에서는 쓰지 않는다
 │   ├── fit-su-joint.R                        SU정규 결합모형 장의 적합과 모의 검증(25분 안팎)
 │   └── fit-lcmm.R                            통증 궤적 계층 적합(몇 시간), 요약을 outputs/에 저장
-├── archive/                                  2026-11-18~21의 첫 분석 세 편(고치지 않는다)
 ├── outputs/                                  오래 걸리는 적합의 요약(공개하지 않는다)
 └── data/                                     공개하지 않는다
     ├── raw/                                  OAI에서 받은 파일(이름을 바꾸지 않는다)
     └── synthetic/                            시뮬레이션 데이터
 ```
-
-`archive/`의 세 편은 장 구성을 정하기 전에 쓴 첫 분석이다. 그 내용은 회귀, 종단 분석, 인과 추론, 생존 분석의 장으로 옮겨 다시 썼다.
 
 ## 렌더하기
 
