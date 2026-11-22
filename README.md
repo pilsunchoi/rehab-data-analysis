@@ -77,7 +77,7 @@ cd chapters
 quarto render 01-data-and-measures.qmd
 ```
 
-종단 분석 1장의 잠재계층 궤적(몇 시간)과 결합모형과 동적 예측 장의 결합모형(무릎 4,000개로 20분 안팎)은 적합이 오래 걸려 장 안에서 하지 않는다. 먼저 `Rscript R/fit-lcmm.R`과 `Rscript R/fit-jm.R`로 적합하면 요약이 `outputs/lcmm-02.rds`와 `outputs/jm-01.rds`에 저장되고, 장은 그 파일을 읽는다. SU정규 결합모형 장은 `Rscript R/fit-su-joint.R`의 요약(`outputs/su-joint-06.rds`)을 읽는다. 적합 자체는 1분 남짓이지만 모의 검증 20회가 함께 돈다. 생존 분석 1장과 같은 무릎으로 예측을 비교하므로 `R/fit-jm.R`을 먼저 돌린다. 파일이 없으면 그 절은 안내만 남기고 나머지는 그대로 돈다.
+종단 분석 1장의 잠재계층 궤적(몇 시간)과 결합모형과 동적 예측 장의 결합모형(무릎 4,000개로 20분 안팎)은 적합이 오래 걸려 장 안에서 하지 않는다. 먼저 `Rscript R/fit-lcmm.R`과 `Rscript R/fit-jm.R`로 적합하면 요약이 `outputs/lcmm-02.rds`와 `outputs/jm-01.rds`에 저장되고, 장은 그 파일을 읽는다. SU정규 결합모형 장은 `Rscript R/fit-su-joint.R`의 요약(`outputs/su-joint-06.rds`)을 읽는다. 적합 자체는 1분 남짓이지만 모의 검증 20회가 함께 돈다. 생존 분석 1장과 동일한 무릎으로 예측을 비교하므로 `R/fit-jm.R`을 먼저 돌린다. 파일이 없으면 그 절은 안내만 남기고 나머지는 그대로 돈다.
 
 OAI 데이터가 없어도 장은 끝까지 돈다. `data/raw/`가 비어 있으면 같은 파일·열·부호 형식의 시뮬레이션 데이터를 만들어 읽고, 문서 첫머리에 그 사실을 적는다. 시뮬레이션 데이터의 수치는 해석하지 않는다.
 

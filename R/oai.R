@@ -131,7 +131,7 @@ require_column <- function(columns, concept, v = "00", s = "R") {
   col
 }
 
-# 넓은 형식(오른쪽·왼쪽 열)을 무릎 하나에 한 줄로 바꾼다
+# 넓은 형식(오른쪽·왼쪽 열)을 무릎 하나에 한 행으로 바꾼다
 wide_to_knee <- function(dt, concepts, v) {
   parts <- lapply(names(SIDES), function(s) {
     cols <- vapply(concepts, function(cn) match_column(names(dt), cn, v, s), "")
@@ -145,8 +145,8 @@ wide_to_knee <- function(dt, concepts, v) {
 }
 
 # 원데이터 폴더에서 분석용 표 세 개를 만든다.
-#   knees  무릎 하나에 한 줄. 기준 공변량, 사건 여부(event), 사건·중도절단 개월(time)
-#   long   무릎·방문 하나에 한 줄. 사건 뒤 측정은 뺀다
+#   knees  무릎 하나에 한 행. 기준 공변량, 사건 여부(event), 사건·중도절단 개월(time)
+#   long   무릎·방문 하나에 한 행. 사건 뒤 측정은 뺀다
 #   tv     시간가변 Cox용 구간(start, stop, event, 직전 WOMAC)
 build_analysis <- function(raw_dir) {
   # 사람 단위
@@ -276,9 +276,9 @@ read_oai_cols <- function(path, pattern) {
 }
 
 # 데이터 1장(데이터와 측정)용 표. 치환술 뒤의 측정도 지우지 않고 표시만 한다.
-#   person  사람 하나에 한 줄. 하위 코호트, 기관, 기준 특성, 마지막 접촉 방문(개월), 사망 판정과 시각(개월)
-#   knees   무릎 하나에 한 줄. 기준 KL, 치환술 여부와 시각(개월)
-#   kv      무릎·방문 하나에 한 줄. WOMAC 통증·기능·뻣뻣함, 치환술 뒤 측정 표시(after_tkr)
+#   person  사람 하나에 한 행. 하위 코호트, 기관, 기준 특성, 마지막 접촉 방문(개월), 사망 판정과 시각(개월)
+#   knees   무릎 하나에 한 행. 기준 KL, 치환술 여부와 시각(개월)
+#   kv      무릎·방문 하나에 한 행. WOMAC 통증·기능·뻣뻣함, 치환술 뒤 측정 표시(after_tkr)
 # 하위 코호트, 기관, 마지막 접촉, 사망 열이 없는 데이터(옛 시뮬레이션 데이터)에서는 그 값이 NA다.
 cohort_data <- function(raw_dir) {
   enr <- read_oai_txt(find_file(raw_dir, "Enrollees.txt"))
@@ -389,8 +389,8 @@ TRIAL_COVARIATES <- c("pase", "sit", "walk", "sport_l", "sport_m", "sport_s", "s
                       "nsaid", "pnmed", "narc", "inj", "pace", "chair", "quad", "employed", "hand")
 
 # 운동 항목과 시간가변 공변량의 사람·방문 표.
-#   person  사람 하나에 한 줄. 고정 특성과 가장 이른 확정 치환술의 개월(tkr_month)
-#   pv      사람·방문 하나에 한 줄. pain, func, stiff는 두 무릎 가운데 나쁜 쪽, quad는 두 다리의 평균,
+#   person  사람 하나에 한 행. 고정 특성과 가장 이른 확정 치환술의 개월(tkr_month)
+#   pv      사람·방문 하나에 한 행. pain, func, stiff는 두 무릎 가운데 나쁜 쪽, quad는 두 다리의 평균,
 #           hand는 어느 한 손이라도 통증이 있으면 1, 없으면 0. 동반질환 지수는 격년으로 재므로 직전 값을 유지한다
 exercise_panel <- function(raw_dir) {
   opt <- function(dt, col) if (col %in% names(dt)) dt[[col]] else NA
