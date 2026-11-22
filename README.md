@@ -9,7 +9,7 @@
 ```
 rehab-data-analysis/
 ├── README.md
-├── chapters/                                 무릎 골관절염 편(11개 장)
+├── chapters/                                 무릎 골관절염 편(12개 장)
 │   ├── _quarto.yml                           렌더 설정(렌더 뒤 MD 손질)
 │   ├── 01-data-and-measures.qmd              데이터 1장 원본(R 코드 포함)
 │   ├── 01-data-and-measures.md               데이터 1장 렌더 결과(GitHub에서 읽는 본문)
@@ -40,7 +40,10 @@ rehab-data-analysis/
 │   ├── 10-joint-model.md                     결합모형과 동적 예측 장 렌더 결과(그림 없음)
 │   ├── 11-graphical-model.qmd                그래프 모형 1장 원본(부분상관 네트워크)
 │   ├── 11-graphical-model.md                 그래프 모형 1장 렌더 결과
-│   └── 11-graphical-model_files/             그래프 모형 1장 그림
+│   ├── 11-graphical-model_files/             그래프 모형 1장 그림
+│   ├── 12-logistic-regression.qmd            회귀 2장 원본(로지스틱 회귀)
+│   ├── 12-logistic-regression.md             회귀 2장 렌더 결과
+│   └── 12-logistic-regression_files/         회귀 2장 그림
 ├── docs/
 │   ├── index.html                            소개 대시보드(GitHub Pages)
 │   ├── img/                                  대시보드의 그림(장의 그림을 복사)

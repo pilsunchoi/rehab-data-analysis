@@ -1,0 +1,392 @@
+---
+title: "회귀 2장. 로지스틱 회귀 — X선 손상이 큰 무릎은 통증이 잦은가"
+lang: ko
+format:
+  gfm:
+    toc: true
+    toc-depth: 2
+    df-print: kable
+    wrap: none
+execute:
+  echo: false
+  warning: false
+  message: false
+knitr:
+  opts_chunk:
+    dev: png
+    dpi: 300
+    fig.width: 3.6
+    fig.height: 3.2
+---
+
+```{r setup}
+#| include: false
+suppressPackageStartupMessages({
+  library(data.table); library(ggplot2); library(survival)
+})
+ROOT <- if (file.exists("../R/oai.R")) dirname(getwd()) else getwd()
+source(file.path(ROOT, "R", "oai.R"))
+
+windowsFonts(malgun = windowsFont("Malgun Gothic"))
+theme_set(theme_classic(base_family = "malgun", base_size = 9) +
+            theme(panel.grid.major.y = element_line(colour = "grey87", linewidth = 0.3),
+                  strip.background = element_blank(), legend.position = "bottom"))
+
+src <- pick_data(ROOT)
+USE_REAL <- src$real
+d <- cohort_data(src$dir)
+
+f0 <- function(x) format(round(x), big.mark = ",", scientific = FALSE, trim = TRUE)
+f1 <- function(x, k = 2) formatC(as.numeric(x), format = "f", digits = k, big.mark = ",")
+pc <- function(x, k = 1) formatC(100 * as.numeric(x), format = "f", digits = k)
+tab <- function(x, digits = 2) knitr::kable(x, digits = digits, format.args = list(big.mark = ","))
+SEED <- 20261122L
+
+# 무릎 단위 표: 기준 KL, 잦은 통증, 사람의 공변량. 등록 전에 치환술을 받은 무릎은 뺀다
+c00 <- read_oai_cols(find_file(src$dir, "AllClinical00.txt"), "^(P01[RL]KSX|V00CESD)$")
+HAS_KSX <- all(c("P01RKSX", "P01LKSX") %in% names(c00))
+HAS_CESD <- "V00CESD" %in% names(c00)
+K <- merge(d$knees[is.na(tkr_month) | tkr_month > 0], d$person[, .(ID, female, age, bmi)], by = "ID")
+if (HAS_KSX) {
+  sx <- rbind(c00[, .(ID, SIDE = 1L, sx = as.numeric(P01RKSX))], c00[, .(ID, SIDE = 2L, sx = as.numeric(P01LKSX))])
+  K <- merge(K, sx, by = c("ID", "SIDE"))
+  K[, y := as.integer(sx == 2)]
+} else {
+  # 잦은 통증 변수가 없는 데이터(시뮬레이션 데이터)에서는 기준 WOMAC 통증 5점 이상으로 대신한다
+  K <- merge(K, d$kv[month == 0, .(ID, SIDE, pain)], by = c("ID", "SIDE"))
+  K[, y := as.integer(pain >= 5)]
+}
+if (HAS_CESD) K <- merge(K, c00[, .(ID, cesd = as.numeric(V00CESD))], by = "ID") else K[, cesd := 0]
+K <- K[!is.na(y) & !is.na(kl) & !is.na(age) & !is.na(bmi) & !is.na(female) & !is.na(cesd)]
+K[, `:=`(klf = factor(kl, 0:4), age10 = (age - 61) / 10, bmi5 = (bmi - 28.5) / 5, cesd10 = cesd / 10)]
+setorder(K, ID, SIDE)
+N <- nrow(K); NP <- uniqueN(K$ID)
+COVS <- c("age10", "female", "bmi5", if (HAS_CESD) "cesd10")
+COV_LAB <- c(age10 = "나이 (10세)", female = "여성", bmi5 = "BMI (5)", cesd10 = "CES-D (10점)")
+KL_LAB <- c(klf1 = "KL 1", klf2 = "KL 2", klf3 = "KL 3", klf4 = "KL 4")
+f_kl <- y ~ klf
+f_full <- as.formula(paste("y ~ klf +", paste(COVS, collapse = " + ")))
+
+# 사람 단위 군집 강건 분산(샌드위치)
+crvcov <- function(m, id) {
+  X <- model.matrix(m); u <- residuals(m, type = "response")
+  B <- vcov(m); S <- rowsum(X * u, id); G <- nrow(S)
+  B %*% crossprod(S) %*% B * G / (G - 1)
+}
+auc <- function(score, y) { r <- rank(score); n1 <- sum(y == 1); n0 <- sum(y == 0); (sum(r[y == 1]) - n1 * (n1 + 1) / 2) / (n1 * n0) }
+```
+
+```{r notice}
+#| output: asis
+if (!USE_REAL) cat("> 이 렌더는 시뮬레이션 데이터로 만든 것이다. 수치를 해석하지 않는다. 잦은 통증 변수가 없어 기준 WOMAC 통증 5점 이상을 결과로 대신 썼다.\n\n")
+```
+
+1장은 X선의 구조 손상과 통증의 관계를 다루면서 통증을 0\~20점의 점수로 두었다. 진료와 연구에서는 통증을 점수가 아니라 있음과 없음으로 묻는 일이 많다. 무릎이 자주 아픈가, 약을 먹는가, 수술을 받았는가. 무릎 골관절염의 역학 연구는 "잦은 무릎 통증"이 있는지를 결과로 삼는 것이 표준에 가깝다. 결과가 둘 중 하나일 때는 선형 회귀 대신 로지스틱 회귀를 쓴다.
+
+이 장은 1장과 같은 질문을 결과의 형태만 바꾸어 다시 분석한다. X선 손상이 큰 무릎은 통증이 잦은가. 다루는 것은 다음과 같다. 결과가 둘일 때 두 집단을 비교하는 세 가지 요약인 위험 차이, 위험비, 승산비(II장), 선형 회귀를 그대로 쓰면 생기는 일(III장), 로지스틱 회귀 모형과 추정(IV장, V장), 추정한 계수를 확률로 되돌려 읽는 법(VI장), 모형이 자료에 맞는지와 개인을 얼마나 가려내는지의 점검(VII장)이다. 승산비는 이 분야의 논문에서 가장 자주 보게 되는 숫자이고 가장 자주 잘못 읽히는 숫자다. 이 장의 절반은 그것을 읽는 법에 쓴다.
+
+## I. 질문과 자료
+
+분석 단위는 무릎이고 자료는 기준 방문이다. 결과는 그 무릎의 잦은 통증이다. OAI는 등록 때 무릎마다 지난 12개월 동안 통증, 쑤심, 뻣뻣함이 있었는지를 묻고, 있었다면 한 달의 대부분의 날에 그랬던 적이 있는지를 물었다. 한 달의 대부분의 날에 증상이 있었던 무릎을 잦은 통증이 있는 무릎으로 둔다. 주된 설명변수는 그 무릎의 기준 KL 등급(1장 I장)이고, 나이, 성별, BMI, CES-D를 함께 쓴다. 등록 전에 치환술을 받은 무릎은 빼고, 결과와 공변량이 모두 관측된 무릎 `r f0(N)`개(`r f0(NP)`명)를 쓴다. 한 사람의 두 무릎이 함께 들어가므로 표준오차는 1장 III장과 같이 사람 단위로 군집 강건하게 구한다.
+
+표 1은 KL 등급별 무릎 수와 잦은 통증이 있는 무릎의 비율이다.
+
+```{r table1}
+#| output: asis
+t1 <- K[, .(무릎 = .N, `잦은 통증` = sum(y), `비율(%)` = 100 * mean(y)), keyby = .(`KL 등급` = kl)]
+cat("**표 1. 기준 KL 등급별 잦은 무릎 통증**\n\n")
+print(tab(t1, 1))
+p_all <- K[, mean(y)]; p_k <- K[, mean(y), keyby = kl]$V1
+```
+
+표에서 잦은 통증의 비율은 KL 등급이 높을수록 크다. KL 0에서 `r pc(p_k[1])`%, KL 4에서 `r pc(p_k[5])`%다. 전체로는 `r pc(p_all)`%의 무릎에 잦은 통증이 있다. 이 결과는 드물지 않다. 이 점은 II장에서 중요해진다. 1장이 본 어긋남도 이 표에 그대로 있다. X선이 정상인 KL 0 무릎의 4분의 1 이상이 자주 아프고, 말기인 KL 4 무릎의 `r pc(1 - p_k[5], 0)`%는 자주 아프지 않다.
+
+## II. 위험, 승산, 승산비
+
+### 1. 세 가지 요약
+
+두 집단에서 결과가 일어난 비율이 다를 때 그 차이를 요약하는 방법은 셋이다. 손상이 있는 집단의 비율을 $p_1$, 없는 집단의 비율을 $p_0$라 하자. 역학에서는 이 비율을 위험이라 부른다.
+
+$$\mathrm{RD} = p_1 - p_0, \qquad \mathrm{RR} = \frac{p_1}{p_0}, \qquad \mathrm{OR} = \frac{p_1 / (1 - p_1)}{p_0 / (1 - p_0)}$$
+
+위험 차이(RD)는 두 비율의 차이이고 위험비(RR)는 두 비율의 비다. 승산비(OR)는 비율이 아니라 승산의 비다. 승산은 결과가 일어날 확률을 일어나지 않을 확률로 나눈 값 $p / (1 - p)$이다. 확률이 0.2이면 승산은 0.25이고, 0.5이면 1, 0.8이면 4다. 확률은 0과 1 사이에 있지만 승산은 0에서 무한대까지 간다. 확률이 작을 때는 승산이 확률과 거의 같고, 확률이 커질수록 승산은 확률보다 훨씬 빨리 커진다.
+
+### 2. 계산
+
+표 2는 두 가지 비교에서 세 요약을 계산한 것이다. 첫 행은 X선 골관절염이 있는 무릎(KL 2 이상)과 없는 무릎(KL 0\~1)의 비교이고, 둘째 행은 KL 4와 KL 0의 비교다. 표 1의 수를 그대로 나눈 값이며 다른 변수는 고려하지 않았다.
+
+```{r table2}
+#| output: asis
+two <- function(g1, g0, label) {
+  p1 <- K[kl %in% g1, mean(y)]; p0 <- K[kl %in% g0, mean(y)]
+  data.table(비교 = label, `p1(%)` = 100 * p1, `p0(%)` = 100 * p0, `위험 차이(%p)` = 100 * (p1 - p0), 위험비 = p1 / p0,
+             `승산 1` = p1 / (1 - p1), `승산 0` = p0 / (1 - p0), 승산비 = (p1 / (1 - p1)) / (p0 / (1 - p0)))
+}
+t2 <- rbind(two(2:4, 0:1, "KL 2 이상과 KL 0~1"), two(4, 0, "KL 4와 KL 0"))
+cat("**표 2. 두 집단의 비교: 위험 차이, 위험비, 승산비**\n\n")
+print(tab(t2, 2))
+a <- t2[1]; b <- t2[2]
+```
+
+표의 첫 행에서 X선 골관절염이 있는 무릎은 `r pc(a[["p1(%)"]] / 100)`%, 없는 무릎은 `r pc(a[["p0(%)"]] / 100)`%가 자주 아프다. 위험 차이는 `r f1(a[["위험 차이(%p)"]], 1)`%포인트, 위험비는 `r f1(a$위험비)`, 승산비는 `r f1(a$승산비)`이다. 둘째 행에서는 위험비가 `r f1(b$위험비)`인데 승산비는 `r f1(b$승산비)`이다. 같은 두 집단의 같은 비교인데 한 숫자는 `r f1(b$위험비, 1)`이고 다른 숫자는 `r f1(b$승산비, 1)`이다.
+
+### 3. 승산비는 위험비가 아니다
+
+두 숫자의 관계는 다음 식으로 정해진다.
+
+$$\mathrm{RR} = \frac{\mathrm{OR}}{1 - p_0 + p_0 \cdot \mathrm{OR}}$$
+
+비교 집단의 위험 $p_0$가 0에 가까우면 분모가 1에 가까워 위험비와 승산비가 거의 같다. 드문 병의 연구에서 승산비를 위험비처럼 읽어도 되는 것은 이 때문이다. $p_0$가 커지면 승산비는 위험비보다 1에서 더 멀어진다(Zhang and Yu, 1998). 여기서는 KL 0 무릎의 `r pc(p_k[1])`%가 이미 자주 아프다. 그래서 둘째 행의 승산비(`r f1(b$승산비, 1)`)를 "KL 4 무릎은 잦은 통증이 `r f1(b$승산비, 0)`배 흔하다"로 읽으면 틀린다. 실제로는 `r f1(b$위험비, 1)`배 흔하다. 위험이 `r pc(p_k[1], 0)`%인 집단에서 위험이 `r f1(b$승산비, 0)`배가 되는 것은 불가능하다. 100%를 넘기 때문이다.
+
+승산비를 쓰는 이유는 읽기 쉬워서가 아니라 수학적 성질 때문이다. 승산비는 비교 집단의 위험이 얼마든 0에서 무한대까지의 값을 가질 수 있어 회귀 모형으로 쓰기에 좋고(IV장), 결과에 따라 표본을 뽑는 환자-대조군 연구에서도 추정할 수 있는 유일한 요약이다. 그 대가로 직관적인 뜻이 없다. 승산비를 보고할 때는 위험 차이나 위험비를 함께 보고하는 것이 좋고, 그 방법을 VI장에서 다룬다.
+
+## III. 선형 회귀를 쓰면
+
+결과를 0과 1의 숫자로 두고 선형 회귀를 할 수도 있다. 그렇게 하면 회귀식은 결과가 1일 확률을 공변량의 선형 함수로 두는 모형이 된다.
+
+$$P(Y_i = 1 \mid x_i) = \beta_0 + x_i^\top \beta$$
+
+이 모형의 계수는 읽기 쉽다. $\beta_k$는 $x_k$가 한 단위 클 때의 확률 차이, 곧 위험 차이다. 문제는 둘이다. 확률은 0과 1 사이에 있어야 하는데 직선은 그 범위를 벗어난다. 공변량의 값이 극단적인 관측에서 예측 확률이 0보다 작거나 1보다 크게 나올 수 있다. 그리고 확률이 0이나 1에 가까운 곳에서는 공변량의 효과가 줄어들 수밖에 없는데 직선은 그것을 반영하지 못한다. 위험이 90%인 사람의 위험을 20%포인트 더 올리는 요인은 없다. 오차의 분산이 $p(1-p)$로 관측마다 다르다는 문제도 있으나 이것은 강건 표준오차로 해결된다.
+
+```{r lpm}
+m_lpm <- lm(f_full, K)
+fl <- fitted(m_lpm)
+b_lpm4 <- if ("klf4" %in% names(coef(m_lpm))) coef(m_lpm)[["klf4"]] else NA_real_
+n_out <- sum(fl < 0 | fl > 1)
+```
+
+이 자료에 선형 회귀를 적합하면 KL 4의 계수는 `r f1(b_lpm4)`이다. KL 4 무릎은 다른 공변량이 같은 KL 0 무릎보다 잦은 통증의 확률이 `r pc(b_lpm4, 0)`%포인트 높다는 뜻이다. 예측값은 `r f1(min(fl))`에서 `r f1(max(fl))` 사이에 있고, 0과 1을 벗어난 것은 `r if (n_out == 0) "없다" else paste0(f0(n_out), "개다")`. 이 자료에서는 선형 회귀가 크게 틀리지 않는다. 전체 위험이 `r pc(p_all, 0)`%로 0과 1에서 멀고, 공변량이 예측 확률을 그 범위 밖으로 밀어낼 만큼 강하지 않기 때문이다. 결과가 드물거나 아주 흔할 때, 그리고 예측 확률 자체가 필요할 때는 선형 회귀가 맞지 않는다.
+
+## IV. 로지스틱 회귀 모형
+
+### 1. 로짓 변환
+
+로지스틱 회귀는 확률 대신 승산의 로그를 공변량의 선형 함수로 둔다.
+
+$$\log\frac{p_i}{1 - p_i} = \beta_0 + x_i^\top \beta$$
+
+왼쪽을 로짓이라 한다. 확률이 0에서 1까지 움직일 때 로짓은 음의 무한대에서 양의 무한대까지 움직이므로, 오른쪽이 어떤 값이 되어도 확률로 되돌릴 수 있다. 되돌리는 식은 다음과 같다.
+
+$$p_i = \frac{\exp(\beta_0 + x_i^\top \beta)}{1 + \exp(\beta_0 + x_i^\top \beta)}$$
+
+이 함수는 S자 모양이다. 가운데에서는 가파르고 양 끝에서는 완만해져 0과 1에 가까워질 뿐 넘지 않는다. III장에서 직선이 반영하지 못한다고 한 성질이 여기에 들어 있다.
+
+### 2. 계수와 승산비
+
+계수 $\beta_k$는 다른 공변량이 같을 때 $x_k$가 한 단위 큰 무릎의 로그 승산이 얼마나 큰지다. 두 로그 승산의 차이는 승산비의 로그이므로 $\exp(\beta_k)$가 승산비다.
+
+$$\exp(\beta_k) = \frac{\mathrm{odds}(x_k + 1)}{\mathrm{odds}(x_k)}$$
+
+이 모형에서 승산비는 다른 공변량의 값이 무엇이든 같다. 이것이 로지스틱 회귀의 가정이다. 확률의 차이는 그렇지 않다. 같은 승산비 2라도 기준 확률이 0.1이면 확률이 0.18이 되어 0.08 커지고, 기준 확률이 0.5이면 0.67이 되어 0.17 커진다. 로지스틱 회귀에서 공변량 하나의 효과를 확률로 말하려면 다른 공변량의 값을 정해야 한다. VI장이 이 문제를 다룬다.
+
+### 3. 최대우도 추정
+
+선형 회귀는 잔차 제곱합을 최소화해 계수를 구하고 그 답이 식 하나로 나온다. 로지스틱 회귀는 우도를 최대화한다. 결과 $y_i$가 확률 $p_i$로 1이 되는 베르누이 변수라고 보면 자료 전체의 로그우도는 다음과 같다.
+
+$$\ell(\beta) = \sum_i \left\lbrace y_i \log p_i + (1 - y_i) \log(1 - p_i) \right\rbrace$$
+
+결과가 1인 무릎에서는 예측 확률 $p_i$가 클수록, 결과가 0인 무릎에서는 $p_i$가 작을수록 로그우도가 커진다. 로그우도를 $\beta$로 미분해 0으로 두면 다음 방정식이 나온다.
+
+$$\sum_i x_i (y_i - p_i) = 0$$
+
+잔차 $y_i - p_i$가 모든 공변량과 직교해야 한다는 조건으로, 선형 회귀의 정규방정식과 같은 꼴이다. 차이는 $p_i$가 $\beta$의 비선형 함수라는 점이다. 그래서 답이 식 하나로 나오지 않고, 초기값에서 출발해 계수를 조금씩 고쳐 가는 반복 계산으로 구한다. R의 `glm`이 이 계산을 한다. 절편이 있는 모형에서는 위 방정식 가운데 하나가 $\sum_i (y_i - p_i) = 0$이므로, 예측 확률의 평균은 언제나 관측된 비율과 같다.
+
+## V. 추정
+
+표 3은 두 모형의 승산비다. 모형 A는 KL 등급만 넣었고 모형 B는 나이, 성별, BMI, CES-D를 더했다. KL 등급은 KL 0을 기준으로 한 범주로 넣었다. 등급 사이의 간격이 같다고 가정하지 않기 위해서다. 신뢰구간은 로그 승산비의 군집 강건 표준오차로 구해 지수를 취했다.
+
+```{r table3}
+#| output: asis
+mA <- glm(f_kl, binomial, K); mB <- glm(f_full, binomial, K)
+or_tab <- function(m, lab) {
+  se <- sqrt(diag(crvcov(m, K$ID))); b <- coef(m); keep <- names(lab)[names(lab) %in% names(b)]
+  data.table(항 = unname(lab[keep]), 승산비 = exp(b[keep]), 하한 = exp(b[keep] - 1.96 * se[keep]), 상한 = exp(b[keep] + 1.96 * se[keep]))
+}
+tA <- or_tab(mA, KL_LAB); tB <- or_tab(mB, c(KL_LAB, COV_LAB))
+t3 <- merge(tB[, .(항, `B 승산비` = 승산비, `B 하한` = 하한, `B 상한` = 상한)],
+            tA[, .(항, `A 승산비` = 승산비, `A 하한` = 하한, `A 상한` = 상한)], by = "항", all.x = TRUE, sort = FALSE)
+setcolorder(t3, c("항", "A 승산비", "A 하한", "A 상한"))
+t3c <- copy(t3); for (cn in names(t3c)[-1]) t3c[, (cn) := ifelse(is.na(get(cn)), "", f1(get(cn)))]
+cat("**표 3. 잦은 무릎 통증의 승산비 (사람 단위 군집 강건 신뢰구간)**\n\n")
+print(knitr::kable(t3c, align = "lrrrrrr"))
+orA4 <- tA[항 == "KL 4", 승산비]; orB4 <- tB[항 == "KL 4", 승산비]; orB2 <- tB[항 == "KL 2", 승산비]
+se_m <- sqrt(diag(vcov(mB)))[["klf4"]]; se_c <- sqrt(diag(crvcov(mB, K$ID)))[["klf4"]]
+or_cesd <- if (HAS_CESD) tB[항 == "CES-D (10점)", 승산비] else NA_real_
+or_age <- tB[항 == "나이 (10세)", 승산비]
+```
+
+표에서 모형 A의 승산비는 표 1의 비율로 직접 계산한 값과 같다. KL 4의 승산비(`r f1(orA4)`)는 표 2의 둘째 행과 같은 숫자다. 설명변수가 범주 하나뿐이면 로지스틱 회귀는 범주별 비율을 그대로 재현하므로 회귀를 한 것이 표를 만든 것과 다르지 않다.
+
+모형 B에서 KL 등급의 승산비는 등급마다 커진다. 나이, 성별, BMI, CES-D가 같을 때 KL 2 무릎의 잦은 통증 승산은 KL 0의 `r f1(orB2)`배, KL 4는 `r f1(orB4)`배다. `r if (HAS_CESD) sprintf("CES-D가 10점 높으면 승산이 %s배다. 우울 증상이 많은 사람이 통증을 더 자주 보고한다는, 인과 추론 1장에서 본 것과 같은 방향의 결과다.", f1(or_cesd)) else ""` 나이의 승산비는 `r f1(or_age)`로 1보다 `r if (or_age < 1) "작다" else "크다"`. `r if (or_age < 1) "X선 손상이 같으면 나이가 많은 사람이 통증을 덜 자주 보고한다는 뜻이다." else ""`
+
+군집을 무시한 표준오차와 비교하면, KL 4의 로그 승산비의 표준오차가 모형 기반으로 `r f1(se_m, 3)`, 군집 강건으로 `r f1(se_c, 3)`이다. 한 사람의 두 무릎은 통증에서 닮으므로 독립이라고 보면 표준오차가 작게 나온다. 1장 III장에서 본 것과 같다.
+
+## VI. 확률로 되돌리기
+
+### 1. 표준화 위험
+
+II장에서 승산비 하나로는 확률이 얼마나 다른지 알 수 없다고 했다. 모형 B의 승산비 `r f1(orB4, 1)`도 마찬가지다. 확률로 답하려면 모형이 예측하는 확률을 직접 계산한다. 방법은 다음과 같다. 표본의 모든 무릎에 대해 다른 공변량은 그대로 두고 KL 등급만 0으로 바꾸어 예측 확률을 구하고 평균한다. KL 등급을 1, 2, 3, 4로 바꾸어 같은 일을 한다. 이렇게 구한 다섯 평균은 이 표본의 나이, 성별, BMI, CES-D 분포를 그대로 가진 무릎들이 모두 그 KL 등급이었다면 잦은 통증의 비율이 얼마였을지를 모형으로 계산한 값이다. 이것을 표준화 위험이라 한다(Muller and MacLehose, 2014).
+
+$$\hat p(k) = \frac{1}{n} \sum_i \hat P(Y = 1 \mid \mathrm{KL} = k, \ w_i)$$
+
+$w_i$는 무릎 $i$의 다른 공변량이다. 표준화 위험끼리 빼면 위험 차이, 나누면 위험비가 된다. 공변량이 같은 두 집단을 비교한 것이므로 표 2와 달리 공변량의 차이가 보정되어 있다. 신뢰구간은 사람을 복원 추출로 다시 뽑아 모형을 다시 적합하는 붓스트랩 300회로 구했다.
+
+```{r table4}
+#| output: asis
+std_risk <- function(m, data) sapply(levels(data$klf), function(l) mean(predict(m, transform(data, klf = factor(l, levels(data$klf))), type = "response")))
+sr <- std_risk(mB, K)
+rows <- split(seq_len(N), K$ID)
+set.seed(SEED)
+bs <- replicate(300, {
+  i <- unlist(rows[sample.int(length(rows), replace = TRUE)], use.names = FALSE); b <- K[i]
+  s <- std_risk(glm(f_full, binomial, b), b)
+  c(s, s - s[1], s / s[1])
+})
+ci <- apply(bs, 1, quantile, c(0.025, 0.975)); L <- length(sr)
+fmt <- function(est, lo, hi, k = 1) sprintf("%s (%s, %s)", f1(est, k), f1(lo, k), f1(hi, k))
+t4 <- data.table(`KL 등급` = levels(K$klf),
+                 `표준화 위험(%)` = fmt(100 * sr, 100 * ci[1, 1:L], 100 * ci[2, 1:L]),
+                 `위험 차이(%p)` = c("기준", fmt(100 * (sr - sr[1]), 100 * ci[1, L + 1:L], 100 * ci[2, L + 1:L])[-1]),
+                 위험비 = c("기준", fmt(sr / sr[1], ci[1, 2 * L + 1:L], ci[2, 2 * L + 1:L], 2)[-1]),
+                 승산비 = c("기준", f1(exp(coef(mB)[paste0("klf", levels(K$klf)[-1])]))))
+cat("**표 4. KL 등급별 표준화 위험과 KL 0에 대한 위험 차이, 위험비, 승산비 (모형 B, 95% 신뢰구간)**\n\n")
+print(knitr::kable(t4, align = "lrrrr"))
+rd4 <- sr[L] - sr[1]; rr4 <- sr[L] / sr[1]
+```
+
+표에서 공변량을 보정한 뒤 KL 4 무릎의 잦은 통증 위험은 `r pc(sr[L])`%, KL 0은 `r pc(sr[1])`%다. 위험 차이는 `r f1(100 * rd4, 1)`%포인트, 위험비는 `r f1(rr4)`, 승산비는 `r f1(orB4)`이다. 세 숫자가 같은 모형에서 나온 같은 비교다. 독자에게 무엇을 전하려는지에 따라 고른다. 구조 손상이 통증과 얼마나 강하게 관련되는지를 다른 연구와 비교하려면 승산비가 관행이다. 말기 손상이 있는 무릎 100개 가운데 몇 개가 더 자주 아픈지를 말하려면 위험 차이가 맞다.
+
+### 2. 한 무릎의 예측 확률
+
+같은 모형으로 특정한 무릎의 확률도 계산할 수 있다.
+
+```{r predict}
+nd <- data.table(klf = factor(c(0, 4, 0, 4), 0:4), age10 = 0, female = 1, bmi5 = 0, cesd10 = c(0.5, 0.5, 2.5, 2.5))
+pp <- predict(mB, nd, type = "response")
+```
+
+61세, BMI 28.5인 여성의 무릎을 예로 들면, CES-D가 5점일 때 예측 확률은 KL 0이면 `r pc(pp[1], 0)`%, KL 4이면 `r pc(pp[2], 0)`%다. CES-D가 25점이면 각각 `r pc(pp[3], 0)`%와 `r pc(pp[4], 0)`%다. KL 4와 KL 0의 승산비는 두 경우에 똑같이 `r f1(orB4, 1)`이지만 확률의 차이는 `r pc(pp[2] - pp[1], 0)`%포인트와 `r pc(pp[4] - pp[3], 0)`%포인트로 다르다. IV.2절에서 말한 것이다. 승산비가 일정하다는 가정은 확률의 차이가 일정하다는 뜻이 아니다.
+
+## VII. 모형의 점검
+
+모형이 낸 예측 확률이 쓸 만한지는 두 가지로 따진다(Steyerberg et al., 2010). 보정은 예측 확률이 실제 비율과 맞는지를 묻고, 판별력은 결과가 있는 무릎과 없는 무릎을 예측 확률로 구분할 수 있는지를 묻는다. 둘은 다른 성질이다.
+
+### 1. 보정
+
+예측 확률이 30%인 무릎들을 모으면 그 가운데 30%에 실제로 잦은 통증이 있어야 한다. 이것을 확인하는 간단한 방법은 예측 확률의 크기로 무릎을 열 집단으로 나누고 집단마다 예측 확률의 평균과 관측된 비율을 비교하는 것이다. 표 5가 그 결과다.
+
+```{r table5}
+#| output: asis
+K[, phat := fitted(mB)]
+K[, dec := cut(rank(phat, ties.method = "first"), 10, labels = FALSE)]
+t5 <- K[, .(무릎 = .N, `예측 확률의 평균(%)` = 100 * mean(phat), `관측 비율(%)` = 100 * mean(y)), keyby = .(십분위 = dec)]
+t5[, `차이(%p)` := `관측 비율(%)` - `예측 확률의 평균(%)`]
+cat("**표 5. 예측 확률의 십분위별 보정 (모형 B)**\n\n")
+print(tab(t5, 1))
+cal_max <- t5[, max(abs(`차이(%p)`))]
+```
+
+표에서 예측 확률의 평균과 관측 비율의 차이는 가장 큰 집단에서 `r f1(cal_max, 1)`%포인트다. 예측 확률이 낮은 집단에서 실제 비율도 낮고 높은 집단에서 높다. 이 점검에는 한계가 있다. 모형을 적합한 자료로 보정을 보면 좋게 나오게 되어 있다. IV.3절에서 본 대로 예측 확률의 전체 평균은 관측 비율과 반드시 같다. 보정이 실제로 문제가 되는 것은 모형을 다른 집단에 쓸 때다. OAI에서 만든 모형을 통증이 더 흔한 진료실 환자에게 쓰면 예측 확률이 전반적으로 낮게 나온다.
+
+### 2. 판별력
+
+판별력은 ROC 곡선으로 본다. 예측 확률이 어떤 기준값 이상이면 "잦은 통증이 있다"고 판정한다고 하자. 실제로 통증이 있는 무릎 가운데 그렇게 판정된 비율이 민감도이고, 통증이 없는 무릎 가운데 없다고 판정된 비율이 특이도다. 기준값을 낮추면 민감도는 오르고 특이도는 내린다. 기준값을 1에서 0까지 옮기며 민감도를 세로축에, 1에서 특이도를 뺀 값을 가로축에 그린 것이 ROC 곡선이다. 그림 1은 두 모형의 곡선이다.
+
+```{r fig1}
+#| fig-cap: "**그림 1. 잦은 무릎 통증에 대한 두 모형의 ROC 곡선**"
+roc <- function(score, y, name) {
+  th <- sort(unique(score), decreasing = TRUE)
+  data.table(model = name, fpr = c(0, sapply(th, function(t) mean(score[y == 0] >= t))), tpr = c(0, sapply(th, function(t) mean(score[y == 1] >= t))))
+}
+pA <- fitted(mA)
+thB <- quantile(K$phat, seq(1, 0, length.out = 201))
+rB <- data.table(model = "B. 공변량을 더함", fpr = sapply(thB, function(t) mean(K$phat[K$y == 0] >= t)), tpr = sapply(thB, function(t) mean(K$phat[K$y == 1] >= t)))
+rc <- rbind(roc(pA, K$y, "A. KL 등급만"), rbind(data.table(model = "B. 공변량을 더함", fpr = 0, tpr = 0), rB))
+ggplot(rc, aes(fpr, tpr, linetype = model)) + geom_abline(slope = 1, intercept = 0, colour = "grey70", linewidth = 0.3) +
+  geom_line(colour = "black") + scale_linetype_manual(values = c("dashed", "solid"), name = NULL) +
+  coord_equal() + labs(x = "1 - 특이도", y = "민감도") + theme(legend.direction = "vertical")
+aucA <- auc(pA, K$y); aucB <- auc(K$phat, K$y)
+# 사람 단위 5겹 교차검증
+set.seed(SEED); ids <- unique(K$ID); fold <- setNames(sample(rep(1:5, length.out = length(ids))), ids)
+K[, cvp := NA_real_]
+for (k in 1:5) { te <- fold[as.character(K$ID)] == k; K[te, cvp := predict(glm(f_full, binomial, K[!te]), K[te], type = "response")] }
+aucCV <- auc(K$cvp, K$y)
+```
+
+곡선 아래의 넓이를 AUC라 한다. AUC에는 직접적인 뜻이 있다. 잦은 통증이 있는 무릎 하나와 없는 무릎 하나를 무작위로 뽑았을 때, 통증이 있는 무릎의 예측 확률이 더 높을 확률이다(Hanley and McNeil, 1982). 0.5는 동전 던지기와 같고 1은 완전한 구분이다. 그림의 대각선이 0.5에 해당한다.
+
+AUC는 모형 A가 `r f1(aucA)`, 모형 B가 `r f1(aucB)`이다. 적합에 쓴 자료로 판별력을 평가하면 조금 좋게 나오므로, 사람을 다섯 묶음으로 나누어 네 묶음으로 적합하고 나머지 한 묶음을 예측하는 교차검증으로 다시 구하면 모형 B의 AUC는 `r f1(aucCV)`이다. 공변량이 몇 개뿐이고 표본이 커서 차이가 거의 없다.
+
+판별력은 높지 않다. KL 4의 승산비가 `r f1(orB4, 0)`에 가까운데도 그렇다. 승산비가 크다는 것과 개인을 잘 가려낸다는 것은 다르다. 그 이유는 표 1에 있다. KL 4 무릎은 `r f0(t1[5, 무릎])`개로 전체의 `r pc(t1[5, 무릎] / N, 0)`%뿐이고, 대부분의 무릎은 잦은 통증의 비율이 `r pc(p_k[1], 0)`\~`r pc(p_k[3], 0)`%인 KL 0\~2에 몰려 있다. 무릎 대부분에서 X선은 통증이 있을지 없을지를 거의 알려 주지 못한다. 1장이 순위상관으로 보인 구조와 증상의 어긋남을 이 장은 AUC로 다시 확인했다. 큰 승산비를 보고하는 연구를 읽을 때, 그 요인으로 환자를 선별하거나 예측할 수 있다고 넘겨짚지 않아야 한다.
+
+## VIII. 해석
+
+### 1. 승산비를 읽을 때
+
+이 장에서 승산비에 대해 말한 것을 모으면 넷이다. 첫째, 승산비는 위험비가 아니고 결과가 흔할수록 위험비보다 1에서 멀다(II.3절). 둘째, 승산비가 같아도 확률의 차이는 기준 확률에 따라 다르다(VI.2절). 셋째, 승산비가 커도 판별력은 낮을 수 있다(VII.2절). 넷째는 공변량을 더할 때의 성질이다.
+
+표 3에서 KL 4의 승산비는 모형 A에서 `r f1(orA4)`, 모형 B에서 `r f1(orB4)`이다. 선형 회귀라면 이 변화를 공변량이 교란 변수였다는 신호로 읽는다. 승산비에서는 그렇게만 읽을 수 없다. 승산비는 결과와 관련된 공변량을 모형에 더하면 그 공변량이 설명변수와 전혀 무관해도 1에서 더 멀어진다(Greenland et al., 1999). 공변량으로 사람들을 더 비슷한 집단으로 나누면 집단 안에서의 승산비가 전체에서의 승산비보다 커지기 때문이며, 승산이 확률의 비선형 함수라서 생기는 일이다. 위험 차이와 위험비에는 이런 성질이 없다. 그래서 보정 전후의 승산비 차이에는 교란과 이 성질이 섞여 있고 둘을 나눌 수 없다. 서로 다른 공변량을 넣은 두 연구의 승산비를 그대로 비교하기 어려운 이유이기도 하다. 표 4의 표준화 위험은 이 문제를 피한다.
+
+### 2. 이 분석이 말해 주지 않는 것
+
+이 장의 자료는 한 시점의 단면이다. KL 등급이 높은 무릎이 자주 아프다는 것은 손상이 통증을 만든다는 것과 맞지만 그것을 보인 것은 아니다. 과거의 손상이나 수술이 X선 변화와 통증을 따로 만들었을 수 있고, 무릎이 아파서 덜 쓰는 것이 구조에 영향을 주었을 수도 있다. 사람 사이의 비교이므로 통증을 보고하는 성향처럼 관측하지 않은 사람의 특성도 섞여 있다. 마지막 문제는 IX장의 방법으로 다룰 수 있다.
+
+결과를 둘로 나눈 데서 오는 손실도 있다. 한 달의 대부분의 날에 아픈 무릎과 매일 심하게 아픈 무릎이 같은 1이 되고, 가끔 아픈 무릎과 전혀 아프지 않은 무릎이 같은 0이 된다. 1장의 WOMAC 점수는 이 차이를 담는다. 점수가 있을 때 그것을 둘로 나누어 로지스틱 회귀를 하면 정보를 버리는 것이다. 이 장이 로지스틱 회귀를 쓴 것은 "잦은 통증"이 처음부터 예와 아니오로 물은 문항이고, 이 분야의 연구가 그 문항을 결과로 써 왔기 때문이다.
+
+## IX. (선택) 같은 사람의 두 무릎
+
+1장 IV장은 같은 사람의 두 무릎을 비교해 사람의 특성을 통제했다. 결과가 둘일 때 같은 일을 하는 방법이 조건부 로지스틱 회귀다. 사람마다 절편을 따로 두는 모형을 생각한다.
+
+$$\log\frac{p_{ij}}{1 - p_{ij}} = \alpha_i + x_{ij}^\top \beta$$
+
+$i$는 사람, $j$는 무릎이다. $\alpha_i$는 그 사람의 통증 보고 성향, 통증 민감도, 우울, 나이처럼 두 무릎에 공통인 모든 것을 담는다. 사람이 수천 명이면 $\alpha_i$를 모두 추정할 수 없다. 조건부 로지스틱 회귀는 사람마다 잦은 통증이 있는 무릎의 수를 조건으로 둔 우도를 써서 $\alpha_i$를 추정하지 않고 없앤다. 그 결과 두 무릎의 결과가 같은 사람은 우도에 기여하지 않는다. 두 무릎이 모두 아프거나 모두 아프지 않은 사람에게서는 KL 등급이 통증과 관련되는지를 알 수 없기 때문이다. 한쪽만 자주 아픈 사람만 정보가 되고, 추정은 그 사람들에게서 아픈 쪽 무릎의 KL 등급이 더 높은 경향이 있는지를 본다.
+
+```{r clogit}
+#| output: asis
+both <- K[, if (.N == 2) .SD, by = ID]
+disc <- both[, .(dy = uniqueN(y) == 2, dk = uniqueN(kl) == 2), by = ID]
+n_both <- uniqueN(both$ID); n_dy <- disc[, sum(dy)]; n_info <- disc[, sum(dy & dk)]
+mC <- tryCatch(clogit(y ~ klf + strata(ID), data = both), error = function(e) NULL)
+if (!is.null(mC)) {
+  s <- summary(mC)$conf.int; keep <- intersect(names(KL_LAB), rownames(s))
+  t6 <- data.table(항 = unname(KL_LAB[keep]), `조건부 승산비` = s[keep, "exp(coef)"], 하한 = s[keep, "lower .95"], 상한 = s[keep, "upper .95"],
+                   `표 3의 모형 B` = tB[match(KL_LAB[keep], 항), 승산비])
+  cat("**표 6. 같은 사람의 두 무릎을 비교한 KL 등급의 승산비 (조건부 로지스틱 회귀)**\n\n")
+  print(tab(t6, 2))
+  orC4 <- if ("klf4" %in% keep) s["klf4", "exp(coef)"] else NA_real_
+} else { cat("> 이 데이터에서는 조건부 로지스틱 회귀가 적합되지 않았다.\n\n"); orC4 <- NA_real_ }
+```
+
+두 무릎이 모두 표본에 있는 사람은 `r f0(n_both)`명이다. 그 가운데 두 무릎의 결과가 다른 사람이 `r f0(n_dy)`명이고, 그 가운데 두 무릎의 KL 등급도 다른 `r f0(n_info)`명이 KL 등급의 추정에 정보를 준다. 표 6은 그 추정을 표 3의 모형 B와 함께 제시한 것이다.
+
+표에서 KL 4의 승산비는 같은 사람 안에서 비교한 조건부 추정이 `r f1(orC4, 1)`, 모형 B가 `r f1(orB4, 1)`이다. `r if (isTRUE(orC4 > orB4)) "같은 사람의 두 무릎을 비교하면 X선 손상과 잦은 통증의 관계가 사람 사이의 비교보다 훨씬 강하게 나타난다. 사람마다 통증을 보고하는 기준이 달라서 사람 사이의 비교에서는 이 관계가 흐려져 있었다는 해석과 맞는 결과다." else "같은 사람 안의 비교에서 관계가 더 강해지지는 않았다."` 다만 두 승산비의 크기를 그대로 비교할 때는 VIII.1절의 주의가 여기에도 적용된다. 조건부 승산비는 사람이라는 공변량을 통제한 승산비이므로, 교란이 전혀 없었더라도 모형 B의 승산비보다 크게 나오는 것이 보통이다. 신뢰구간도 넓다. 정보를 주는 사람이 `r f0(n_info)`명뿐이고 그 가운데 KL 4인 무릎은 더 적기 때문이다.
+
+## X. 이 방법을 쓴 연구
+
+Neogi et al. (2009)는 IX장의 설계로 구조와 통증의 관계를 다룬 대표적인 연구다. 두 코호트에서 한 사람의 두 무릎 가운데 한쪽만 자주 아픈 사람을 골라, 아픈 쪽 무릎의 X선 손상이 더 큰지를 조건부 로지스틱 회귀로 분석했다. 사람 사이의 비교에서는 약하게 보이던 구조와 통증의 관계가 사람 안의 비교에서는 강하게 나타난다는 것이 그 연구의 결론이다. 1장 IV장과 이 장의 IX장이 OAI에서 같은 비교를 했고, 표 6의 결과는 그 결론과 같은 방향이다.
+
+OAI에서 신체활동을 다룬 Lo et al.의 두 연구도 잦은 무릎 통증을 결과로 두고 승산비를 보고했다. Lo et al. (2022)는 운동 삼아 걷는 사람에게서 새로 생긴 잦은 무릎 통증의 승산비가 0.6(95% 신뢰구간 0.4\~0.8)이라고 보고했고, Lo et al. (2024)는 근력운동 경험이 있는 사람에게서 잦은 무릎 통증의 승산비가 0.82(0.68\~0.97)라고 보고했다.
+
+```{r lo}
+rr_of <- function(or, p0) or / (1 - p0 + p0 * or)
+```
+
+이 숫자를 읽는 데 II.3절의 식을 쓸 수 있다. 승산비 0.6을 "통증이 40% 적다"로 읽을 수 있는지는 비교 집단의 위험에 달려 있다. 걷지 않는 사람 가운데 새로 잦은 통증이 생기는 비율이 10%라면 위험비는 `r f1(rr_of(0.6, 0.1))`이고 승산비와 거의 같다. 그 비율이 40%라면 위험비는 `r f1(rr_of(0.6, 0.4))`이다. 승산비만 보고한 논문을 읽을 때는 비교 집단에서 결과가 얼마나 흔했는지를 본문이나 표에서 찾아 함께 읽는다.
+
+## 참고문헌
+
+Greenland, S., Robins, J. M., and Pearl, J. (1999). "Confounding and collapsibility in causal inference." *Statistical Science* 14(1), 29–46.
+
+Hanley, J. A., and McNeil, B. J. (1982). "The meaning and use of the area under a receiver operating characteristic (ROC) curve." *Radiology* 143(1), 29–36.
+
+Lo, G. H., Richard, M. J., McAlindon, T. E., Kriska, A. M., Price, L. L., Rockette-Wagner, B., Eaton, C. B., Hochberg, M. C., Kwoh, C. K., Nevitt, M. C., and Driban, J. B. (2024). "Strength training is associated with less knee osteoarthritis: Data from the Osteoarthritis Initiative." *Arthritis & Rheumatology* 76(3), 377–383.
+
+Lo, G. H., Vinod, S., Richard, M. J., Harkey, M. S., McAlindon, T. E., Kriska, A. M., Rockette-Wagner, B., Eaton, C. B., Hochberg, M. C., Jackson, R. D., Kwoh, C. K., Nevitt, M. C., and Driban, J. B. (2022). "Association between walking for exercise and symptomatic and structural progression in individuals with knee osteoarthritis: Data from the Osteoarthritis Initiative cohort." *Arthritis & Rheumatology* 74(10), 1660–1667.
+
+Muller, C. J., and MacLehose, R. F. (2014). "Estimating predicted probabilities from logistic regression: Different methods correspond to different target populations." *International Journal of Epidemiology* 43(3), 962–970.
+
+Neogi, T., Felson, D., Niu, J., Nevitt, M., Lewis, C. E., Aliabadi, P., Sack, B., Torner, J., Bradley, L., and Zhang, Y. (2009). "Association between radiographic features of knee osteoarthritis and pain: Results from two cohort studies." *BMJ* 339, b2844.
+
+Steyerberg, E. W., Vickers, A. J., Cook, N. R., Gerds, T., Gonen, M., Obuchowski, N., Pencina, M. J., and Kattan, M. W. (2010). "Assessing the performance of prediction models: A framework for traditional and novel measures." *Epidemiology* 21(1), 128–138.
+
+Zhang, J., and Yu, K. F. (1998). "What's the relative risk? A method of correcting odds ratios in cohort studies of common outcomes." *JAMA* 280(19), 1690–1691.

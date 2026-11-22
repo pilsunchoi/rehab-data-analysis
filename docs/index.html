@@ -177,7 +177,8 @@
         <thead><tr><th>묶음</th><th>장</th><th>다루는 방법</th><th>분석 질문</th></tr></thead>
         <tbody>
           <tr><td class="b"><a href="#data" onclick="showTab('data');return false">데이터</a></td><td class="r">1</td><td>코호트 설계, 분석 단위와 군집, 척도의 성질, 결측의 기제</td><td>OAI는 누구를 무엇으로 쟀는가</td></tr>
-          <tr><td class="b"><a href="#regression" onclick="showTab('regression');return false">회귀</a></td><td class="r">1</td><td>교차표와 순위상관, 선형 회귀, 군집 강건 표준오차, 같은 사람의 두 무릎 비교</td><td>X선 손상과 통증은 얼마나 일치하는가</td></tr>
+          <tr><td class="b" rowspan="2"><a href="#regression" onclick="showTab('regression');return false">회귀</a></td><td class="r">1</td><td>교차표와 순위상관, 선형 회귀, 군집 강건 표준오차, 같은 사람의 두 무릎 비교</td><td>X선 손상과 통증은 얼마나 일치하는가</td></tr>
+          <tr><td class="r">2</td><td>승산비, 로지스틱 회귀, 표준화 위험, 보정과 판별력</td><td>X선 손상이 큰 무릎은 통증이 잦은가</td></tr>
           <tr><td class="b"><a href="#longitudinal" onclick="showTab('longitudinal');return false">종단 분석</a></td><td class="r">1</td><td>선형 혼합모형, 탈락의 점검, 잠재계층 궤적</td><td>통증은 시간에 따라 어떻게 변하는가</td></tr>
           <tr><td class="b" rowspan="2"><a href="#survival" onclick="showTab('survival');return false">생존 분석</a></td><td class="r">1</td><td>Kaplan-Meier, Cox 모형, 비례위험 점검, 시간가변 공변량</td><td>누가 언제 치환술에 이르는가</td></tr>
           <tr><td class="r">2</td><td>경쟁 사건, 누적 발생률, 원인별 위험비와 부분분포 위험비</td><td>사망은 치환술의 중도절단인가</td></tr>
@@ -385,7 +386,7 @@
   <!-- ============ 회귀 ============ -->
   <section role="tabpanel" id="tab-regression" aria-labelledby="t-regression">
     <h2 class="h">회귀</h2>
-    <p class="sub lead">한 시점의 자료에서 두 변수의 연관을 추정한다. 관측이 서로 독립이 아닐 때와 척도가 한쪽에 몰려 있을 때의 처리를 다룬다.</p>
+    <p class="sub lead">한 시점의 자료에서 두 변수의 연관을 추정한다. 관측이 서로 독립이 아닐 때, 척도가 한쪽에 몰려 있을 때, 결과가 있음과 없음의 둘일 때의 처리를 다룬다.</p>
 
     <article class="study">
       <div class="study-num">1</div>
@@ -403,6 +404,26 @@
         <div class="study-links">
           <a href="https://github.com/pilsunchoi/rehab-data-analysis/blob/main/chapters/02-structure-and-symptoms.md" target="_blank" rel="noopener">장 읽기</a>
           <a href="https://github.com/pilsunchoi/rehab-data-analysis/blob/main/chapters/02-structure-and-symptoms.qmd" target="_blank" rel="noopener">R 문서(원본)</a>
+        </div>
+      </div>
+    </article>
+
+    <article class="study">
+      <div class="study-num">2</div>
+      <div class="study-body">
+        <h4 class="study-title">로지스틱 회귀 — X선 손상이 큰 무릎은 통증이 잦은가<span class="pill warn">초고</span></h4>
+        <p class="study-sub">위험 차이, 위험비, 승산비 · 로짓 변환과 최대우도 추정 · 군집 강건 표준오차 · 표준화 위험 · 보정과 판별력(ROC, AUC) · 조건부 로지스틱 회귀</p>
+        <p class="study-desc">1장과 같은 질문을 결과의 형태만 바꾸어 다시 분석한다. 기준 방문의 무릎 8,834개에서 "지난 12개월 동안 한 달의 대부분의 날에 아팠는가"를 결과로 두고, 승산비가 무엇이고 무엇이 아닌지를 수치로 보인다.</p>
+        <p class="study-lbl">OAI에 적용한 결과</p>
+        <ul class="study-points">
+          <li>같은 비교의 세 요약이 크게 다르다. KL 4와 KL 0을 비교하면 승산비는 7.0, 위험비는 2.6, 위험 차이는 44%포인트다. 잦은 통증이 KL 0에서도 27%로 흔하기 때문이다.</li>
+          <li>승산비가 커도 판별력은 낮다. AUC가 KL 등급만으로 0.62, 나이, 성별, BMI, 우울을 더해 0.67이다. 무릎 대부분에서 X선은 통증의 유무를 거의 알려 주지 못한다.</li>
+          <li>같은 사람의 두 무릎을 비교하면 관계가 훨씬 강하게 나타난다. 조건부 로지스틱 회귀에서 KL 4의 승산비는 51(24~105)이다.</li>
+        </ul>
+        <div class="study-figs"><img src="img/ch12_roc.png" alt="두 모형의 ROC 곡선. 두 곡선 모두 대각선에서 조금만 떨어져 있고, 공변량을 더한 모형의 곡선이 조금 위에 있다" loading="lazy"></div>
+        <div class="study-links">
+          <a href="https://github.com/pilsunchoi/rehab-data-analysis/blob/main/chapters/12-logistic-regression.md" target="_blank" rel="noopener">장 읽기</a>
+          <a href="https://github.com/pilsunchoi/rehab-data-analysis/blob/main/chapters/12-logistic-regression.qmd" target="_blank" rel="noopener">R 문서(원본)</a>
         </div>
       </div>
     </article>
