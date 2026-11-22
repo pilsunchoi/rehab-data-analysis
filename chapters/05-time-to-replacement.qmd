@@ -76,7 +76,7 @@ if (!USE_REAL) cat("> 이 렌더는 시뮬레이션 데이터로 만든 것이�
 
 ```{r table1}
 #| output: asis
-t1 <- S[, .(무릎 = .N, `추적 중앙값(년)` = median(year)), keyby = .(결과 = factor(status, 0:2, c("중도절단", "치환술", "사망")))]
+t1 <- S[, .(무릎 = .N, `추적 중위값(년)` = median(year)), keyby = .(결과 = factor(status, 0:2, c("중도절단", "치환술", "사망")))]
 t1[, `비율(%)` := 100 * 무릎 / sum(무릎)]
 cat("**표 1. 무릎의 추적 결과**\n\n")
 print(tab(t1, 1))

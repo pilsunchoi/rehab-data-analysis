@@ -201,7 +201,7 @@ scales <- list(`통증 (0~20)` = c("pain", 20), `뻣뻣함 (0~8)` = c("stiff", 8
 t5 <- rbindlist(lapply(names(scales), function(s) {
   v <- base[[scales[[s]][1]]]; top <- as.numeric(scales[[s]][2]); v <- v[!is.na(v)]
   if (!length(v)) return(NULL)
-  data.table(척도 = s, 무릎 = length(v), 평균 = mean(v), 중앙값 = median(v), 표준편차 = sd(v),
+  data.table(척도 = s, 무릎 = length(v), 평균 = mean(v), 중위값 = median(v), 표준편차 = sd(v),
              `바닥(%)` = 100 * mean(v == 0), `천장(%)` = 100 * mean(v == top))
 }))
 cat("**표 5. 기준 방문의 WOMAC 하위척도 (무릎 단위)**\n\n")
@@ -256,7 +256,7 @@ PASE(Physical Activity Scale for the Elderly)는 지난 7일 동안의 걷기, �
 pz <- P[!is.na(pase), pase]
 ```
 
-기준 방문의 PASE는 `r f0(length(pz))`명이 응답했고 평균 `r f1(mean(pz), 0)`점, 표준편차 `r f1(sd(pz), 0)`점, 중앙값 `r f1(median(pz), 0)`점이다. 0점인 사람은 `r pc(mean(pz == 0))`%로 바닥 효과는 없다. 분포는 오른쪽으로 길게 늘어져 최댓값이 `r f0(max(pz))`점이다.
+기준 방문의 PASE는 `r f0(length(pz))`명이 응답했고 평균 `r f1(mean(pz), 0)`점, 표준편차 `r f1(sd(pz), 0)`점, 중위값 `r f1(median(pz), 0)`점이다. 0점인 사람은 `r pc(mean(pz == 0))`%로 바닥 효과는 없다. 분포는 오른쪽으로 길게 늘어져 최댓값이 `r f0(max(pz))`점이다.
 
 ## IV. 추적과 결측
 
@@ -283,7 +283,7 @@ P[, status := fcase(!is.na(last_month) & last_month == lastm, sprintf("%d개월 
                     died == 1, "사망 판정",
                     is.na(last_month), "마지막 접촉 기록 없음",
                     default = "그 밖의 추적 중단")]
-t8 <- P[, .(사람 = .N, `마지막 접촉 개월(중앙값)` = as.numeric(median(last_month, na.rm = TRUE))), by = .(상태 = status)]
+t8 <- P[, .(사람 = .N, `마지막 접촉 개월(중위값)` = as.numeric(median(last_month, na.rm = TRUE))), by = .(상태 = status)]
 t8[, `비율(%)` := 100 * 사람 / sum(사람)]
 t8 <- t8[order(-사람)]
 cat("**표 8. 등록자의 추적 상태**\n\n")

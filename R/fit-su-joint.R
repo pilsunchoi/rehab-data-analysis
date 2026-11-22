@@ -130,7 +130,7 @@ marg_surv <- function(f, D, times, rows = seq_len(D$N)) {
   sapply(times, function(tt) mean(pnorm(-z_of(o, rep(log(tt), length(rows)), eta, f$su)$z)))
 }
 
-# 무작위 효과가 delta 만큼 다를 때 조건부 중앙값의 비
+# 무작위 효과가 delta 만큼 다를 때 조건부 중위값의 비
 time_ratio <- function(f, D, delta) {
   o <- unpack(f$par, D, f$su)
   k <- sqrt(z_cond(o, list(s2 = 1, M11 = 1, M12 = 0, M22 = 1, detM = 1, mb1 = 0, mb2 = 0))$k2)
