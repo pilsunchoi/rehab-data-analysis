@@ -27,7 +27,7 @@ prep <- function(surv, long, form_l = ~ year * kl, form_s = ~ age_c + female + b
        xn = colnames(X), wn = colnames(W), knee = as.character(surv$knee))
 }
 
-# 모수 벡터를 이름 붙은 목록으로. su = TRUE 이면 형상 모수 lambda, log theta 가 끝에 붙는다
+# 파라미터 벡터를 이름 붙은 목록으로. su = TRUE 이면 형상 파라미터 lambda, log theta 가 끝에 붙는다
 unpack <- function(p, D, su) {
   i <- 0; take <- function(k) { v <- p[i + seq_len(k)]; i <<- i + k; v }
   o <- list(beta = take(D$pl), ls = take(1), ch = take(3), gamma = take(D$ps), lt = take(1), a = take(2))

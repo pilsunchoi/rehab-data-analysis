@@ -144,7 +144,7 @@
       <span class="tag">공개 재활 데이터로 배우는 분석 방법</span>
       <span class="wip">집필 중</span>
     </div>
-    <p class="lede">재활과 관련된 공개 데이터에 기본적인 분석 방법을 하나씩 적용하며 설명하는 교재다. 방법마다 수식과 가정, 추정 절차, 결과를 읽는 법을 자세히 적는다. 그 첫 번째로 무릎 골관절염 코호트인 <a href="https://nda.nih.gov/oai" target="_blank" rel="noopener">Osteoarthritis Initiative(OAI)</a>를 다룬다.</p>
+    <p class="lede">재활과 관련된 공개 데이터에 기본적인 분석 방법을 하나씩 적용하며 설명하는 교재다. 방법마다 수식과 가정, 추정 절차, 결과를 해석하는 법을 자세히 적는다. 그 첫 번째로 무릎 골관절염 코호트인 <a href="https://nda.nih.gov/oai" target="_blank" rel="noopener">Osteoarthritis Initiative(OAI)</a>를 다룬다.</p>
   </div>
 </header>
 
@@ -176,7 +176,7 @@
       <table class="map">
         <thead><tr><th>묶음</th><th>장</th><th>다루는 방법</th><th>분석 질문</th></tr></thead>
         <tbody>
-          <tr><td class="b" rowspan="2"><a href="#data" onclick="showTab('data');return false">데이터</a></td><td class="r">1</td><td>코호트 설계, 분석 단위와 군집, 척도의 성질, 결측의 기제</td><td>OAI는 누구를 무엇으로 쟀는가</td></tr>
+          <tr><td class="b" rowspan="2"><a href="#data" onclick="showTab('data');return false">데이터</a></td><td class="r">1</td><td>코호트 설계, 분석 단위와 군집, 척도의 성질, 결측의 기제</td><td>OAI는 누구를 무엇으로 측정했는가</td></tr>
           <tr><td class="r">2</td><td>완전 사례 분석, 다중 대체, 연쇄 방정식, Rubin의 규칙</td><td>값이 빠진 사람을 빼고 분석해도 되는가</td></tr>
           <tr><td class="b" rowspan="2"><a href="#regression" onclick="showTab('regression');return false">회귀</a></td><td class="r">1</td><td>교차표와 순위상관, 선형 회귀, 군집 강건 표준오차, 같은 사람의 두 무릎 비교</td><td>X선 손상과 통증은 얼마나 일치하는가</td></tr>
           <tr><td class="r">2</td><td>승산비, 로지스틱 회귀, 표준화 위험, 보정과 판별력</td><td>X선 손상이 큰 무릎은 통증이 잦은가</td></tr>
@@ -186,7 +186,7 @@
           <tr><td class="b" rowspan="3"><a href="#causal" onclick="showTab('causal');return false">인과 추론</a></td><td class="r">1</td><td>교란과 회귀 보정, 고정효과, 시차 모형</td><td>많이 움직이는 사람은 덜 아픈가</td></tr>
           <tr><td class="r">2</td><td>성향점수, 짝짓기와 역확률 가중, 이중 강건 추정</td><td>근력운동을 시작하면 통증이 달라지는가</td></tr>
           <tr><td class="r">3</td><td>교차 적합, 인과 숲, 효과의 이질성</td><td>그 효과는 사람마다 다른가</td></tr>
-          <tr><td class="b"><a href="#graph" onclick="showTab('graph');return false">그래프 모형</a></td><td class="r">1</td><td>부분상관, 정규 그래프 모형, 그래프 라소</td><td>통증, 기능, 우울, 활동량은 서로 어떻게 연결되는가</td></tr>
+          <tr><td class="b"><a href="#graph" onclick="showTab('graph');return false">그래프 모형</a></td><td class="r">1</td><td>부분상관, 정규 그래프 모형, 그래프 라쏘</td><td>통증, 기능, 우울, 활동량은 서로 어떻게 연결되는가</td></tr>
         </tbody>
       </table>
     </div>
@@ -285,15 +285,15 @@
           <text x="242" y="364" text-anchor="middle" font-size="11" fill="#8a929c">안쪽</text>
         </g>
       </svg>
-      <figcaption>앞에서 본 오른쪽 무릎의 모식도(직접 그림, 비례는 맞지 않는다). 그림의 왼쪽이 바깥쪽, 오른쪽이 몸의 가운데를 향한 안쪽이다. 무릎 골관절염은 체중이 더 실리는 안쪽에서 흔하다. X선에는 연골이 보이지 않으므로 연골이 닳은 정도를 관절 간격(joint space)으로 읽는다. 골극(osteophyte)과 관절 간격으로 등급을 매긴 것이 KL 등급이고(<a href="#data" onclick="showTab('data');return false">데이터</a> 탭), 연골하골 경화(subchondral sclerosis)는 연골 아래 뼈가 단단하고 두꺼워진 것이다.</figcaption>
+      <figcaption>앞에서 본 오른쪽 무릎의 모식도(직접 그림, 비례는 맞지 않는다). 그림의 왼쪽이 바깥쪽, 오른쪽이 몸의 가운데를 향한 안쪽이다. 무릎 골관절염은 체중이 더 실리는 안쪽에서 흔하다. X선에는 연골이 보이지 않으므로 연골이 닳은 정도를 관절 간격(joint space)으로 판단한다. 골극(osteophyte)과 관절 간격으로 등급을 매긴 것이 KL 등급이고(<a href="#data" onclick="showTab('data');return false">데이터</a> 탭), 연골하골 경화(subchondral sclerosis)는 연골 아래 뼈가 단단하고 두꺼워진 것이다.</figcaption>
     </figure>
 
-    <p>이 질환을 무엇으로 재는지와 이 책이 쓰는 데이터는 <a href="#data" onclick="showTab('data');return false">데이터</a> 탭에 있다.</p>
+    <p>이 질환을 무엇으로 측정하는지와 이 책이 쓰는 데이터는 <a href="#data" onclick="showTab('data');return false">데이터</a> 탭에 있다.</p>
 
     <h3>코드와 데이터</h3>
     <div class="panel">
       <p><b>장의 원본.</b> 장마다 원본은 R 코드가 든 Quarto 문서 하나이고, GitHub에서 읽는 것은 그 렌더 결과다. 본문의 수치는 손으로 적지 않고 코드가 낸다.</p>
-      <p><b>왜 R인가.</b> 이 책이 다루는 방법(혼합모형, 생존 분석, 성향점수, 인과 숲, 그래프 라소)은 대부분 그 방법을 만든 연구자들이 직접 관리하는 R 패키지가 표준 구현이다. 모든 장을 한 언어로 써서, 앞 장에서 만든 표와 함수를 뒤 장이 그대로 이어 쓴다.</p>
+      <p><b>왜 R인가.</b> 이 책이 다루는 방법(혼합모형, 생존 분석, 성향점수, 인과 숲, 그래프 라쏘)은 대부분 그 방법을 만든 연구자들이 직접 관리하는 R 패키지가 표준 구현이다. 모든 장을 한 언어로 써서, 앞 장에서 만든 표와 함수를 뒤 장이 그대로 이어 쓴다.</p>
       <p><b>공통 코드.</b> 모든 장은 같은 함수로 OAI 파일을 읽고 분석용 표를 만든다. 원데이터가 없으면 같은 형식의 시뮬레이션 데이터로 끝까지 돈다. 시뮬레이션 데이터로 낸 수치는 해석하지 않는다.</p>
       <div class="study-links" style="border-top:none;padding-top:0">
         <a href="https://github.com/pilsunchoi/rehab-data-analysis/blob/main/R/oai.R" target="_blank" rel="noopener">R/oai.R — 읽기, 분석용 표, 시뮬레이션 데이터</a>
@@ -307,10 +307,10 @@
   <!-- ============ 데이터 ============ -->
   <section role="tabpanel" id="tab-data" aria-labelledby="t-data">
     <h2 class="h">데이터</h2>
-    <p class="sub lead">무릎 골관절염을 무엇으로 재고, 이 책은 어떤 데이터를 쓰는가.</p>
+    <p class="sub lead">무릎 골관절염을 무엇으로 측정하고, 이 책은 어떤 데이터를 쓰는가.</p>
 
-    <h3>무엇으로 재는가</h3>
-    <p>이 저서의 분석은 구조, 증상, 활동, 사건의 네 층을 잰 값을 쓴다. 구조와 증상은 생각보다 덜 맞물린다. X선 손상이 큰데 아프지 않은 무릎도, 손상이 거의 없는데 아픈 무릎도 흔하다(아래의 1장과 <a href="#regression" onclick="showTab('regression');return false">회귀</a> 탭의 1장).</p>
+    <h3>무엇으로 측정하는가</h3>
+    <p>이 저서의 분석은 구조, 증상, 활동, 사건의 네 층을 측정한 값을 쓴다. 구조와 증상은 생각보다 덜 맞물린다. X선 손상이 큰데 아프지 않은 무릎도, 손상이 거의 없는데 아픈 무릎도 흔하다(아래의 1장과 <a href="#regression" onclick="showTab('regression');return false">회귀</a> 탭의 1장).</p>
     <div class="tblwrap">
       <table>
         <caption>측정의 네 층</caption>
@@ -328,7 +328,7 @@
     <h3>우리가 쓰는 데이터 — Osteoarthritis Initiative</h3>
     <div class="panel">
       <p><b>무엇인가.</b> 무릎 골관절염이 있거나 생길 위험이 있는 45~79세 4,796명을 2004~2006년에 미국의 여러 임상센터에서 모아, 해마다 다시 부른 전향적 코호트(prospective cohort)다. 방문마다 설문(통증, 기능, 활동), 신체 계측(anthropometry), 무릎 X선과 MRI를 했고, 치환술은 의무기록으로 판정했다.</p>
-      <p><b>왜 이 데이터인가.</b> 같은 사람의 두 무릎을 16년 가까이 따라가며 구조, 증상, 활동, 수술을 함께 잰 공개 데이터는 드물다. 궤적과 사건을 함께 다루는 재활의 질문에 맞는다.</p>
+      <p><b>왜 이 데이터인가.</b> 같은 사람의 두 무릎을 16년 가까이 따라가며 구조, 증상, 활동, 수술을 함께 측정한 공개 데이터는 드물다. 궤적과 사건을 함께 다루는 재활의 질문에 맞는다.</p>
       <p><b>어디서 받나.</b> 미국 국립정신보건원 데이터 보관소(<a href="https://nda.nih.gov/oai" target="_blank" rel="noopener">NIMH Data Archive</a>)에서 로그인하고 이용 약관에 동의하면 받을 수 있다.</p>
     </div>
 
@@ -340,7 +340,7 @@
       <div class="stat"><div class="n">47%</div><div class="k">192개월 방문까지 추적된 사람</div></div>
       <div class="stat"><div class="n">44%</div><div class="k">기준 방문에 통증이 0점인 무릎</div></div>
     </div>
-    <p class="sub">2026-11-20에 받은 판을 1장(<a href="https://github.com/pilsunchoi/rehab-data-analysis/blob/main/chapters/01-data-and-measures.md" target="_blank" rel="noopener">데이터와 측정</a>)이 읽어 낸 값이다. 무릎 수와 치환술은 등록자 전체의 무릎을 센 것이고, 장마다 분석에 쓴 무릎은 그 장의 표본 정의에 따라 조금씩 다르다.</p>
+    <p class="sub">2026-11-20에 받은 판을 1장(<a href="https://github.com/pilsunchoi/rehab-data-analysis/blob/main/chapters/01-data-and-measures.md" target="_blank" rel="noopener">데이터와 측정</a>)이 계산한 값이다. 무릎 수와 치환술은 등록자 전체의 무릎을 센 것이고, 장마다 분석에 쓴 무릎은 그 장의 표본 정의에 따라 조금씩 다르다.</p>
 
     <h3>분석 단위와 정의</h3>
     <div class="tblwrap">
@@ -348,10 +348,10 @@
         <caption>공통 정의</caption>
         <thead><tr><th>항목</th><th>정의</th></tr></thead>
         <tbody>
-          <tr><td>분석 단위(unit of analysis)</td><td>통증·기능·치환술은 무릎. 한 사람의 두 무릎은 군집(cluster)으로 다룬다. 활동량(PASE)은 사람 단위로 재므로 그 분석은 사람·방문 단위</td></tr>
+          <tr><td>분석 단위(unit of analysis)</td><td>통증·기능·치환술은 무릎. 한 사람의 두 무릎은 군집(cluster)으로 다룬다. 활동량(PASE)은 사람 단위로 측정하므로 그 분석은 사람·방문 단위</td></tr>
           <tr><td>사건</td><td>판정이 확정된 치환술만 센다. 자기 보고만 있는 것은 세지 않는다</td></tr>
           <tr><td>시간 원점(time origin)</td><td>등록 방문(V00)</td></tr>
-          <tr><td>치환술 뒤</td><td>그 무릎의 이후 측정은 쓰지 않는다. 수술 뒤의 점수는 다른 관절을 재는 셈이다</td></tr>
+          <tr><td>치환술 뒤</td><td>그 무릎의 이후 측정은 쓰지 않는다. 수술 뒤의 점수는 다른 관절을 측정하는 셈이다</td></tr>
           <tr><td>사망</td><td>치환술의 경쟁 위험(competing risk)이다. 생존 분석 1장은 사망을 중도절단(censoring)으로 두고, 2장은 경쟁 사건으로 둔다</td></tr>
         </tbody>
       </table>
@@ -366,7 +366,7 @@
     <article class="study">
       <div class="study-num">1</div>
       <div class="study-body">
-        <h4 class="study-title">데이터와 측정 — OAI는 누구를 무엇으로 쟀는가<span class="pill warn">초고</span></h4>
+        <h4 class="study-title">데이터와 측정 — OAI는 누구를 무엇으로 측정했는가<span class="pill warn">초고</span></h4>
         <p class="study-sub">코호트 설계 · 분석 단위와 군집(급내상관, 설계효과) · 척도의 성질(순서 척도, 합산 척도, 바닥 효과) · 결측의 기제와 생존자 선택</p>
         <p class="study-desc">다른 탭의 장들이 공통으로 쓰는 데이터를 다룬다. 등록자 4,796명이 누구이고, 무릎을 어떤 척도로 측정했으며, 16년 동안 무엇이 빠져나갔는지를 보고, 그 결과로부터 뒤 장에서 모형을 고를 때 고려해야 할 점을 정리한다.</p>
         <p class="study-lbl">OAI에 적용한 결과</p>
@@ -491,7 +491,7 @@
         <ul class="study-points">
           <li>치환술의 위험은 기준 KL 등급에 따라 가장 크게 달라진다. 15년 누적 치환술은 KL 0이 2%, KL 3이 34%, KL 4가 66%이고, KL 4는 5년 안에 31%가 수술을 받았다.</li>
           <li>같은 등급 안에서 수술 직전의 기능이 중요하다. 직전 방문의 기능 10점당 위험비는 1.76으로, 등록 시점 기능(1.24)보다 크다.</li>
-          <li>KL 등급의 위험비는 시간에 따라 변한다. 비례위험 가정이 성립하지 않으므로 위험비는 추적 기간 전체의 평균적인 비로 읽는다.</li>
+          <li>KL 등급의 위험비는 시간에 따라 변한다. 비례위험 가정이 성립하지 않으므로 위험비는 추적 기간 전체의 평균적인 비로 해석한다.</li>
         </ul>
         <div class="study-figs"><img src="img/ch05_km_by_kl.png" alt="기준 KL 등급별 누적 치환술 비율. KL 4가 가장 가파르게 오르고 KL 0은 거의 평평하다" loading="lazy"></div>
         <div class="study-links">
@@ -596,13 +596,13 @@
       <div class="study-num">1</div>
       <div class="study-body">
         <h4 class="study-title">부분상관 네트워크 — 통증, 기능, 우울은 서로 어떻게 연결되는가<span class="pill warn">초고</span></h4>
-        <p class="study-sub">부분상관 · 정밀도 행렬과 조건부 독립 · 정규 그래프 모형 · 그래프 라소와 EBIC · 그래프를 읽는 법 · 노드의 선택 · 순위 기반 추정과 붓스트랩</p>
+        <p class="study-sub">부분상관 · 정밀도 행렬과 조건부 독립 · 정규 그래프 모형 · 그래프 라쏘와 EBIC · 그래프를 읽는 법 · 노드의 선택 · 순위 기반 추정과 붓스트랩</p>
         <p class="study-desc">결과 변수 하나를 정하지 않고 여러 변수 사이의 관계를 한꺼번에 본다. 기준 방문의 4,177명에서 증상, 심리, 전반적 건강, 수행, 구조, 나이의 13개 노드를 두고, 두 변수의 상관이 나머지를 조건으로 두어도 남는지를 78쌍 모두에 대해 추정해 그래프로 그린다.</p>
         <p class="study-lbl">OAI에 적용한 결과</p>
         <ul class="study-points">
           <li>통증과 KL 등급의 상관은 0.26인데 나머지 노드를 조건으로 둔 부분상관은 0.03이다. 상관 그래프는 78쌍 가운데 54쌍에 선이 있고 부분상관 그래프는 24쌍에 선이 있다(절대값 0.1 이상).</li>
-          <li>표본이 작으면 벌점이 필요하다. 100명으로 추정하면 벌점 없는 추정은 실제로는 0에 가까운 변 가운데 평균 7개를 0.15보다 크게 추정하고, 그래프 라소에서는 0.2개다.</li>
-          <li>그래프는 고른 노드에 따라 달라진다. 무릎 증상을 재는 다른 점수들을 조건에서 빼면 통증과 KL 등급의 부분상관이 0.03에서 0.18로 커진다.</li>
+          <li>표본이 작으면 벌점이 필요하다. 100명으로 추정하면 벌점 없는 추정은 실제로는 0에 가까운 변 가운데 평균 7개를 0.15보다 크게 추정하고, 그래프 라쏘에서는 0.2개다.</li>
+          <li>그래프는 고른 노드에 따라 달라진다. 무릎 증상을 측정하는 다른 점수들을 조건에서 빼면 통증과 KL 등급의 부분상관이 0.03에서 0.18로 커진다.</li>
         </ul>
         <div class="study-figs"><img src="img/ch11_graphs.png" alt="13개 노드를 원 위에 놓은 두 그래프. 왼쪽 상관 그래프는 거의 모든 노드가 이어져 있고, 오른쪽 부분상관 그래프는 선이 훨씬 적다" loading="lazy"></div>
         <div class="study-links">
