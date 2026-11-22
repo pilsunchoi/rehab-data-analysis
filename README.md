@@ -1,6 +1,6 @@
 # 재활 데이터 분석 I (집필 중)
 
-재활과 관련된 공개 데이터로 분석 방법을 가르치는 교재의 저장소다. 데이터에 기본적인 분석 방법을 하나씩 적용하고, 방법마다 수식과 가정, 추정 절차, 결과를 읽는 법을 자세히 설명한다. 장은 방법의 계열(회귀, 종단 분석, 생존 분석, 인과 추론)로 묶는다. 그 첫 번째인 I권은 무릎 골관절염 공개 코호트인 Osteoarthritis Initiative(OAI)를 다룬다. 분석은 모두 R로 한다.
+재활과 관련된 공개 데이터로 분석 방법을 가르치는 교재의 저장소다. 데이터에 기본적인 분석 방법을 하나씩 적용하고, 방법마다 수식과 가정, 추정 절차, 결과를 읽는 법을 자세히 설명한다. 장은 방법의 계열(회귀, 종단 분석, 생존 분석, 인과 추론, 그래프 모형)로 묶는다. 그 첫 번째인 I권은 무릎 골관절염 공개 코호트인 Osteoarthritis Initiative(OAI)를 다룬다. 분석은 모두 R로 한다.
 
 소개 대시보드: <https://pilsunchoi.github.io/rehab-data-analysis/>
 
@@ -9,7 +9,7 @@
 ```
 rehab-data-analysis/
 ├── README.md
-├── chapters/                                 무릎 골관절염 편(10개 장)
+├── chapters/                                 무릎 골관절염 편(11개 장)
 │   ├── _quarto.yml                           렌더 설정(렌더 뒤 MD 손질)
 │   ├── 01-data-and-measures.qmd              데이터 1장 원본(R 코드 포함)
 │   ├── 01-data-and-measures.md               데이터 1장 렌더 결과(GitHub에서 읽는 본문)
@@ -37,7 +37,10 @@ rehab-data-analysis/
 │   ├── 09-competing-risks.qmd                생존 분석 2장 원본(경쟁 위험)
 │   ├── 09-competing-risks.md                 생존 분석 2장 렌더 결과(그림 없음)
 │   ├── 10-joint-model.qmd                    결합모형과 동적 예측 장 원본(outputs/jm-01.rds를 읽는다)
-│   └── 10-joint-model.md                     결합모형과 동적 예측 장 렌더 결과(그림 없음)
+│   ├── 10-joint-model.md                     결합모형과 동적 예측 장 렌더 결과(그림 없음)
+│   ├── 11-graphical-model.qmd                그래프 모형 1장 원본(부분상관 네트워크)
+│   ├── 11-graphical-model.md                 그래프 모형 1장 렌더 결과
+│   └── 11-graphical-model_files/             그래프 모형 1장 그림
 ├── docs/
 │   ├── index.html                            소개 대시보드(GitHub Pages)
 │   ├── img/                                  대시보드의 그림(장의 그림을 복사)
@@ -75,7 +78,7 @@ OAI 데이터가 없어도 장은 끝까지 돈다. `data/raw/`가 비어 있으
 필요한 패키지는 다음과 같다.
 
 ```r
-install.packages(c("data.table", "survival", "lme4", "nlme", "JMbayes2", "lcmm", "grf", "MatchIt", "ggplot2", "gridExtra", "scales", "knitr", "rmarkdown"))
+install.packages(c("data.table", "survival", "lme4", "nlme", "JMbayes2", "lcmm", "grf", "MatchIt", "glasso", "ggplot2", "gridExtra", "scales", "knitr", "rmarkdown"))
 ```
 
 ## 원데이터로 바꾸기

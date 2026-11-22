@@ -157,6 +157,7 @@
       <button role="tab" aria-selected="false" aria-controls="tab-longitudinal" id="t-longitudinal">종단 분석</button>
       <button role="tab" aria-selected="false" aria-controls="tab-survival" id="t-survival">생존 분석</button>
       <button role="tab" aria-selected="false" aria-controls="tab-causal" id="t-causal">인과 추론</button>
+      <button role="tab" aria-selected="false" aria-controls="tab-graph" id="t-graph">그래프 모형</button>
       <button role="tab" aria-selected="false" aria-controls="tab-research" id="t-research">연구</button>
     </div>
   </div>
@@ -170,7 +171,7 @@
     <h2 class="h">개요</h2>
     <p class="sub lead">공개 재활 데이터 하나에 기본적인 분석 방법을 하나씩 적용하며 설명한다.</p>
     <h3>분석 방법의 묶음</h3>
-    <p>장은 방법의 계열로 묶었다. 묶음의 순서는 데이터의 구조를 따른다. 한 시점의 단면, 반복 측정, 사건까지의 시간, 처치의 효과의 순서다. 묶음 이름을 누르면 그 탭으로 간다.</p>
+    <p>장은 방법의 계열로 묶었다. 묶음의 순서는 데이터의 구조를 따른다. 한 시점의 단면, 반복 측정, 사건까지의 시간, 처치의 효과, 여러 변수 사이의 관계의 순서다. 묶음 이름을 누르면 그 탭으로 간다.</p>
     <div class="tblwrap">
       <table class="map">
         <thead><tr><th>묶음</th><th>장</th><th>다루는 방법</th><th>분석 질문</th></tr></thead>
@@ -183,7 +184,7 @@
           <tr><td class="b" rowspan="3"><a href="#causal" onclick="showTab('causal');return false">인과 추론</a></td><td class="r">1</td><td>교란과 회귀 보정, 고정효과, 시차 모형</td><td>많이 움직이는 사람은 덜 아픈가</td></tr>
           <tr><td class="r">2</td><td>성향점수, 짝짓기와 역확률 가중, 이중 강건 추정</td><td>근력운동을 시작하면 통증이 달라지는가</td></tr>
           <tr><td class="r">3</td><td>교차 적합, 인과 숲, 효과의 이질성</td><td>그 효과는 사람마다 다른가</td></tr>
-          <tr><td class="b">그래프 모형</td><td class="r s">준비 중</td><td>부분상관, 정규 그래프 모형, 그래프 라소</td><td>통증, 기능, 우울, 활동량은 서로 어떻게 연결되는가</td></tr>
+          <tr><td class="b"><a href="#graph" onclick="showTab('graph');return false">그래프 모형</a></td><td class="r">1</td><td>부분상관, 정규 그래프 모형, 그래프 라소</td><td>통증, 기능, 우울, 활동량은 서로 어떻게 연결되는가</td></tr>
         </tbody>
       </table>
     </div>
@@ -290,7 +291,7 @@
     <h3>코드와 데이터</h3>
     <div class="panel">
       <p><b>장의 원본.</b> 장마다 원본은 R 코드가 든 Quarto 문서 하나이고, GitHub에서 읽는 것은 그 렌더 결과다. 본문의 수치는 손으로 적지 않고 코드가 낸다.</p>
-      <p><b>왜 R인가.</b> 이 책이 다루는 방법(혼합모형, 생존 분석, 성향점수, 인과 숲)은 대부분 그 방법을 만든 연구자들이 직접 관리하는 R 패키지가 표준 구현이다. 모든 장을 한 언어로 써서, 앞 장에서 만든 표와 함수를 뒤 장이 그대로 이어 쓴다.</p>
+      <p><b>왜 R인가.</b> 이 책이 다루는 방법(혼합모형, 생존 분석, 성향점수, 인과 숲, 그래프 라소)은 대부분 그 방법을 만든 연구자들이 직접 관리하는 R 패키지가 표준 구현이다. 모든 장을 한 언어로 써서, 앞 장에서 만든 표와 함수를 뒤 장이 그대로 이어 쓴다.</p>
       <p><b>공통 코드.</b> 모든 장은 같은 함수로 OAI 파일을 읽고 분석용 표를 만든다. 원데이터가 없으면 같은 형식의 시뮬레이션 데이터로 끝까지 돈다. 시뮬레이션 데이터로 낸 수치는 해석하지 않는다.</p>
       <div class="study-links" style="border-top:none;padding-top:0">
         <a href="https://github.com/pilsunchoi/rehab-data-analysis/blob/main/R/oai.R" target="_blank" rel="noopener">R/oai.R — 읽기, 분석용 표, 시뮬레이션 데이터</a>
@@ -544,6 +545,32 @@
     </article>
   </section>
 
+  <!-- ============ 그래프 모형 ============ -->
+  <section role="tabpanel" id="tab-graph" aria-labelledby="t-graph">
+    <h2 class="h">그래프 모형</h2>
+    <p class="sub lead">여러 변수 사이의 관계를 한꺼번에 본다. 두 변수의 연관이 나머지 변수를 조건으로 두어도 남는지를 다룬다.</p>
+
+    <article class="study">
+      <div class="study-num">1</div>
+      <div class="study-body">
+        <h4 class="study-title">부분상관 네트워크 — 통증, 기능, 우울은 서로 어떻게 연결되는가<span class="pill warn">초고</span></h4>
+        <p class="study-sub">부분상관 · 정밀도 행렬과 조건부 독립 · 정규 그래프 모형 · 그래프 라소와 EBIC · 그래프를 읽는 법 · 노드의 선택 · 순위 기반 추정과 붓스트랩</p>
+        <p class="study-desc">결과 변수 하나를 정하지 않고 여러 변수 사이의 관계를 한꺼번에 본다. 기준 방문의 4,177명에서 증상, 심리, 전반적 건강, 수행, 구조, 나이의 13개 노드를 두고, 두 변수의 상관이 나머지를 조건으로 두어도 남는지를 78쌍 모두에 대해 추정해 그래프로 그린다.</p>
+        <p class="study-lbl">OAI에 적용한 결과</p>
+        <ul class="study-points">
+          <li>통증과 KL 등급의 상관은 0.26인데 나머지 노드를 조건으로 둔 부분상관은 0.03이다. 상관 그래프는 78쌍 가운데 54쌍에 선이 있고 부분상관 그래프는 24쌍에 선이 있다(절대값 0.1 이상).</li>
+          <li>표본이 작으면 벌점이 필요하다. 100명으로 추정하면 벌점 없는 추정은 실제로는 0에 가까운 변 가운데 평균 7개를 0.15보다 크게 추정하고, 그래프 라소에서는 0.2개다.</li>
+          <li>그래프는 고른 노드에 따라 달라진다. 무릎 증상을 재는 다른 점수들을 조건에서 빼면 통증과 KL 등급의 부분상관이 0.03에서 0.18로 커진다.</li>
+        </ul>
+        <div class="study-figs"><img src="img/ch11_graphs.png" alt="13개 노드를 원 위에 놓은 두 그래프. 왼쪽 상관 그래프는 거의 모든 노드가 이어져 있고, 오른쪽 부분상관 그래프는 선이 훨씬 적다" loading="lazy"></div>
+        <div class="study-links">
+          <a href="https://github.com/pilsunchoi/rehab-data-analysis/blob/main/chapters/11-graphical-model.md" target="_blank" rel="noopener">장 읽기</a>
+          <a href="https://github.com/pilsunchoi/rehab-data-analysis/blob/main/chapters/11-graphical-model.qmd" target="_blank" rel="noopener">R 문서(원본)</a>
+        </div>
+      </div>
+    </article>
+  </section>
+
   <!-- ============ 연구 ============ -->
   <section role="tabpanel" id="tab-research" aria-labelledby="t-research">
     <h2 class="h">연구</h2>
@@ -602,7 +629,7 @@
 </footer>
 
 <script>
-  var TABS = ["overview","data","regression","longitudinal","survival","causal","research"];
+  var TABS = ["overview","data","regression","longitudinal","survival","causal","graph","research"];
   var ALIAS = {knee: "overview"};   // 예전 주소
   function showTab(name){
     TABS.forEach(function(t){

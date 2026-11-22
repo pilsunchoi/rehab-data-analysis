@@ -11,5 +11,4 @@ outputs/
 analysis/Choi/
 
 # 내부 작업용 계획 문서. 공개하지 않는다
-docs/book-plan.md
-docs/causal-inference-plan.md
+docs/*-plan.md
