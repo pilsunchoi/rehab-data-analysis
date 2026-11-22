@@ -176,7 +176,8 @@
       <table class="map">
         <thead><tr><th>묶음</th><th>장</th><th>다루는 방법</th><th>분석 질문</th></tr></thead>
         <tbody>
-          <tr><td class="b"><a href="#data" onclick="showTab('data');return false">데이터</a></td><td class="r">1</td><td>코호트 설계, 분석 단위와 군집, 척도의 성질, 결측의 기제</td><td>OAI는 누구를 무엇으로 쟀는가</td></tr>
+          <tr><td class="b" rowspan="2"><a href="#data" onclick="showTab('data');return false">데이터</a></td><td class="r">1</td><td>코호트 설계, 분석 단위와 군집, 척도의 성질, 결측의 기제</td><td>OAI는 누구를 무엇으로 쟀는가</td></tr>
+          <tr><td class="r">2</td><td>완전 사례 분석, 다중 대체, 연쇄 방정식, Rubin의 규칙</td><td>값이 빠진 사람을 빼고 분석해도 되는가</td></tr>
           <tr><td class="b" rowspan="2"><a href="#regression" onclick="showTab('regression');return false">회귀</a></td><td class="r">1</td><td>교차표와 순위상관, 선형 회귀, 군집 강건 표준오차, 같은 사람의 두 무릎 비교</td><td>X선 손상과 통증은 얼마나 일치하는가</td></tr>
           <tr><td class="r">2</td><td>승산비, 로지스틱 회귀, 표준화 위험, 보정과 판별력</td><td>X선 손상이 큰 무릎은 통증이 잦은가</td></tr>
           <tr><td class="b"><a href="#longitudinal" onclick="showTab('longitudinal');return false">종단 분석</a></td><td class="r">1</td><td>선형 혼합모형, 탈락의 점검, 잠재계층 궤적</td><td>통증은 시간에 따라 어떻게 변하는가</td></tr>
@@ -360,7 +361,7 @@
     <div class="note warn"><b>원데이터는 이 저장소에 없다.</b> OAI 이용 약관에 따라 데이터를 다시 배포하지 않는다. 대신 분석 코드가 원데이터와 같은 파일, 열 이름, 부호 형식의 시뮬레이션 데이터를 만들어 데이터 없이도 끝까지 돈다. 시뮬레이션 데이터로 낸 수치는 해석하지 않는다.</div>
 
     <h3>이 데이터를 다루는 장</h3>
-    <p>1장은 다른 탭의 모든 장이 쓰는 데이터와 척도를 다룬다. 분석 방법의 장을 읽기 전에 먼저 읽는다.</p>
+    <p>1장은 다른 탭의 모든 장이 쓰는 데이터와 척도를 다룬다. 분석 방법의 장을 읽기 전에 먼저 읽는다. 2장은 값이 빠진 자료를 분석하는 방법이며 회귀 탭의 두 장 뒤에 읽는다.</p>
 
     <article class="study">
       <div class="study-num">1</div>
@@ -378,6 +379,26 @@
         <div class="study-links">
           <a href="https://github.com/pilsunchoi/rehab-data-analysis/blob/main/chapters/01-data-and-measures.md" target="_blank" rel="noopener">장 읽기</a>
           <a href="https://github.com/pilsunchoi/rehab-data-analysis/blob/main/chapters/01-data-and-measures.qmd" target="_blank" rel="noopener">R 문서(원본)</a>
+        </div>
+      </div>
+    </article>
+
+    <article class="study">
+      <div class="study-num">2</div>
+      <div class="study-body">
+        <h4 class="study-title">결측의 다중 대체 — 값이 빠진 사람을 빼고 분석해도 되는가<span class="pill warn">초고</span></h4>
+        <p class="study-sub">완전 사례 분석 · 평균 대체와 회귀 대체 · 참값을 아는 지우기 실험 · 연쇄 방정식과 예측 평균 맞춤 · Rubin의 규칙 · 대체 모형에 넣을 변수 · 대체의 점검</p>
+        <p class="study-desc">1장이 결측의 기제를 설명했고, 이 장은 값이 빠진 자료를 실제로 어떻게 분석하는지를 다룬다. 기준 방문의 통증을 구조 손상, 근력, 소득 등에 회귀하면서, 결측을 다루는 방식만 바꾸었을 때 계수와 표준오차가 어떻게 달라지는지를 본다. 선형 회귀와 로지스틱 회귀를 쓰므로 회귀 탭의 두 장을 먼저 읽는 것이 좋다.</p>
+        <p class="study-lbl">OAI에 적용한 결과</p>
+        <ul class="study-points">
+          <li>변수 하나의 결측은 12%를 넘지 않지만, 회귀의 변수가 모두 있는 사람은 4,796명 가운데 3,720명이다. 완전 사례 분석은 22%를 버리고, 통증이 심한 사람이 더 많이 빠져 있다.</li>
+          <li>값을 일부러 지운 실험에서, 통증에 따라 지우면 완전 사례 분석의 근력 계수는 참값 -0.57에서 -0.40으로 벗어나고 다중 대체는 -0.60으로 참값 근처에 있다. 평균 대체는 완전 무작위로 지워도 틀린다.</li>
+          <li>실제 자료에서 다중 대체는 표준오차를 3~10% 줄이고 소득과 성별의 계수를 19% 안팎 키운다. 결론은 같고 계수의 크기와 정밀도가 달라진다.</li>
+        </ul>
+        <div class="study-figs"><img src="img/ch13_imputed.png" alt="대퇴사두근 근력의 관측값과 채운 값의 분포. 두 분포의 모양이 비슷하고 채운 값이 조금 낮은 쪽에 있다" loading="lazy"></div>
+        <div class="study-links">
+          <a href="https://github.com/pilsunchoi/rehab-data-analysis/blob/main/chapters/13-multiple-imputation.md" target="_blank" rel="noopener">장 읽기</a>
+          <a href="https://github.com/pilsunchoi/rehab-data-analysis/blob/main/chapters/13-multiple-imputation.qmd" target="_blank" rel="noopener">R 문서(원본)</a>
         </div>
       </div>
     </article>
