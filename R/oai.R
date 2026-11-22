@@ -9,7 +9,10 @@
 #   outcome_columns   Outcomes99.txt의 V99E 열
 #   read_oai_cols     파일에서 필요한 열만 읽는다
 #   build_analysis    원데이터 폴더에서 분석용 표 세 개를 만든다
-#   cohort_data       1장용 표: 사람, 무릎, 무릎·방문(치환술 뒤 측정 표시)
+#   cohort_data       데이터 1장용 표: 사람, 무릎, 무릎·방문(치환술 뒤 측정 표시)
+#   event_table       생존 분석용 무릎의 사건 시간 표(치환술, 사망, 중도절단)
+#   exercise_panel    운동 항목과 시간가변 공변량의 사람·방문 표
+#   trial_table       운동의 시작(또는 중단)을 처치로 한 모사 시험의 사람·시험 표
 #   make_synthetic    OAI와 같은 형식의 시뮬레이션 데이터를 만든다
 
 suppressPackageStartupMessages(library(data.table))
@@ -272,7 +275,7 @@ read_oai_cols <- function(path, pattern) {
   dt
 }
 
-# 1장(데이터와 측정)용 표. 치환술 뒤의 측정도 지우지 않고 표시만 한다.
+# 데이터 1장(데이터와 측정)용 표. 치환술 뒤의 측정도 지우지 않고 표시만 한다.
 #   person  사람 하나에 한 줄. 하위 코호트, 기관, 기준 특성, 마지막 접촉 방문(개월), 사망 판정과 시각(개월)
 #   knees   무릎 하나에 한 줄. 기준 KL, 치환술 여부와 시각(개월)
 #   kv      무릎·방문 하나에 한 줄. WOMAC 통증·기능·뻣뻣함, 치환술 뒤 측정 표시(after_tkr)
@@ -332,6 +335,151 @@ cohort_data <- function(raw_dir) {
   list(person = person[], knees = knees[], kv = kv[])
 }
 
+
+# 무릎의 사건 시간 표. 생존 분석의 장들이 함께 쓴다. cohort_data()의 결과를 받는다.
+#   time     사건 또는 중도절단까지의 개월
+#   status   0 중도절단, 1 치환술, 2 사망
+#   year, klf, func10, age10, bmi5, knee   분석에 쓰는 변환
+# 대상: 기준 KL 판독, 기준 WOMAC 기능, 나이, 성별, BMI가 있고 등록 전에 치환술을 받지 않은 무릎.
+# 중도절단: 그 사람의 마지막 접촉 방문과 그 무릎의 마지막 WOMAC 방문 가운데 늦은 쪽. 추적은 마지막 방문 개월에서 끝낸다.
+# 사망은 마지막 접촉 뒤 다음 예정 방문 전에 일어났을 때만 센다. 그보다 늦은 사망은 마지막 접촉에서 중도절단한다.
+event_table <- function(d) {
+  P <- d$person; K <- d$knees; KV <- d$kv
+  CAP <- max(VISIT_MONTHS)
+  base <- KV[month == 0 & !after_tkr, .(ID, SIDE, pain0 = pain, func0 = func)]
+  S <- merge(K[!is.na(kl) & (is.na(tkr_month) | tkr_month > 0)], base, by = c("ID", "SIDE"))
+  S <- merge(S, P[, .(ID, age, female, bmi, last_month, died, death_month)], by = "ID")
+  S <- S[!is.na(func0) & !is.na(age) & !is.na(bmi) & !is.na(female)]
+  lastw <- KV[!after_tkr & !is.na(func), .(lastw = max(month)), by = .(ID, SIDE)]
+  S <- merge(S, lastw, by = c("ID", "SIDE"), all.x = TRUE)
+  S[, cens := pmax(fifelse(is.na(last_month), 0, last_month), fifelse(is.na(lastw), 0, lastw))]
+  next_visit <- function(m) vapply(m, function(x) { v <- VISIT_MONTHS[VISIT_MONTHS > x]; if (length(v)) min(v) else CAP }, 1)
+  S[, nextv := next_visit(cens)]
+  S[, `:=`(time = cens, status = 0L)]
+  S[!is.na(death_month) & death_month <= nextv, `:=`(time = death_month, status = 2L)]
+  S[tkr == 1 & (status != 2 | tkr_month <= death_month), `:=`(time = tkr_month, status = 1L)]
+  S[time > CAP, `:=`(time = CAP, status = 0L)]
+  S <- S[time > 0]
+  S[, `:=`(year = time / 12, klf = factor(kl, 0:4), func10 = func0 / 10, age10 = (age - 61) / 10, bmi5 = (bmi - 28.5) / 5,
+           knee = paste(ID, SIDE, sep = "-"))]
+  setorder(S, ID, SIDE)
+  S[]
+}
+
+# ---------------------------------------------------------------- 모사 시험 (docs/causal-inference-plan.md 1장, 6장)
+
+# PASE를 잰 0~96개월 방문. 이웃한 세 방문이 직전·지표·결과 방문이 된다.
+EXERCISE_VISITS <- c("00", "01", "03", "05", "06", "08", "10")
+
+# 방문마다 읽는 사람 단위 변수: 이름 -> V{v} 뒤의 열 이름. 그 방문에 열이 없으면 NA다.
+# 기준 방문의 BMI와 손 통증은 접두어가 P01이다.
+EXERCISE_VARS <- c(
+  pase = "PASE", sit = "PASE1", walk = "PASE2", sport_l = "PASE3", sport_m = "PASE4", sport_s = "PASE5",
+  strength = "PASE6", strength_hr = "PASE6HR",
+  pain_r = "WOMKPR", pain_l = "WOMKPL", func_r = "WOMADLR", func_l = "WOMADLL",
+  stiff_r = "WOMSTFR", stiff_l = "WOMSTFL", koosqol = "KOOSQOL",
+  cesd = "CESD", comorb = "COMORB", bmi = "BMI", pcs = "HSPSS", mcs = "HSMSS",
+  nsaid = "NSAIDS", pnmed = "PNMEDT", narc = "RXNARC", inj = "KNINJ",
+  pace = "20MPACE", chair = "CSPACE", quad_r = "REMAXF", quad_l = "LEMAXF",
+  employed = "CUREMP", hand_r = "OJPNRH", hand_l = "OJPNLH")
+
+# 시험 표에 직전 방문(_p)과 지표 방문(_i)의 값으로 넣는 시간가변 공변량
+TRIAL_COVARIATES <- c("pase", "sit", "walk", "sport_l", "sport_m", "sport_s", "strength",
+                      "pain", "func", "stiff", "koosqol", "cesd", "comorb", "bmi", "pcs", "mcs",
+                      "nsaid", "pnmed", "narc", "inj", "pace", "chair", "quad", "employed", "hand")
+
+# 운동 항목과 시간가변 공변량의 사람·방문 표.
+#   person  사람 하나에 한 줄. 고정 특성과 가장 이른 확정 치환술의 개월(tkr_month)
+#   pv      사람·방문 하나에 한 줄. pain, func, stiff는 두 무릎 가운데 나쁜 쪽, quad는 두 다리의 평균,
+#           hand는 어느 한 손이라도 통증이 있으면 1, 없으면 0. 동반질환 지수는 격년으로 재므로 직전 값을 유지한다
+exercise_panel <- function(raw_dir) {
+  opt <- function(dt, col) if (col %in% names(dt)) dt[[col]] else NA
+  enr <- read_oai_txt(find_file(raw_dir, "Enrollees.txt"))
+  person <- data.table(ID = enr$ID, female = as.numeric(enr[[require_column(names(enr), "sex")]] == 2),
+                       race = as.numeric(opt(enr, "P02RACE")), cohort = as.numeric(opt(enr, "V00COHORT")),
+                       site = as.numeric(factor(as.character(opt(enr, "V00SITE")))))
+  c00 <- read_oai_cols(find_file(raw_dir, "AllClinical00.txt"),
+                       "^(V00AGE|V00EDCV|V00INCOME|V00[RL]KALNMT|P01INJ[RL]|P01KSURG[RL])$")
+  num <- function(col) as.numeric(opt(c00, col))
+  worse <- function(a, b) { x <- pmax(a, b, na.rm = TRUE); x[is.infinite(x)] <- NA; x }
+  person <- merge(person, data.table(ID = c00$ID, age = num("V00AGE"), edu = num("V00EDCV"), income = num("V00INCOME"),
+                                     align_r = num("V00RKALNMT"), align_l = num("V00LKALNMT"),
+                                     injury = worse(num("P01INJR"), num("P01INJL")),
+                                     surgery = worse(num("P01KSURGR"), num("P01KSURGL"))),
+                  by = "ID", all.x = TRUE)
+
+  xr <- read_oai_txt(find_file(raw_dir, "kXR_SQ_BU00.txt"))
+  klcol <- require_column(names(xr), "kl")
+  person <- merge(person, xr[!is.na(get(klcol)), .(kl = as.numeric(max(get(klcol)))), by = ID], by = "ID", all.x = TRUE)
+
+  out <- read_oai_txt(find_file(raw_dir, "Outcomes99.txt"))
+  ev <- wide_to_knee(out, c("tkr_event", "tkr_days"), "99")
+  person <- merge(person, ev[tkr_event %in% TKR_CONFIRMED, .(tkr_month = min(tkr_days / DAYS_PER_MONTH)), by = ID],
+                  by = "ID", all.x = TRUE)
+
+  pv <- rbindlist(lapply(EXERCISE_VISITS, function(v) {
+    p <- find_file(raw_dir, sprintf("AllClinical%s.txt", v))
+    if (is.na(p)) return(NULL)
+    pre <- if (v == "00") "(V00|P01)" else paste0("V", v)
+    dt <- read_oai_cols(p, sprintf("^%s(%s)$", pre, paste(EXERCISE_VARS, collapse = "|")))
+    x <- data.table(ID = dt$ID, visit = v, month = VISIT_MONTHS[[v]])
+    for (nm in names(EXERCISE_VARS)) {
+      col <- intersect(paste0(c(paste0("V", v), "P01"), EXERCISE_VARS[[nm]]), names(dt))
+      x[, (nm) := if (length(col)) as.numeric(dt[[col[1]]]) else NA_real_]
+    }
+    x
+  }))
+  if (all(is.na(pv$strength)) || all(is.na(pv$walk)))
+    stop("PASE 항목(PASE2, PASE6) 열이 없다. 시뮬레이션 데이터라면 make_synthetic()으로 다시 만든다.")
+  pv[, `:=`(pain = worse(pain_r, pain_l), func = worse(func_r, func_l), stiff = worse(stiff_r, stiff_l),
+            hand = worse(hand_r, hand_l), quad = rowMeans(cbind(quad_r, quad_l), na.rm = TRUE))]
+  pv[is.nan(quad), quad := NA_real_]
+  # 다른 관절의 통증은 표시한 칸만 1이고 표시하지 않은 칸은 결측 부호다. 그 방문에 응답한 사람의 빈칸은 0으로 본다
+  pv[, hand := fifelse(!is.na(hand), 1, fifelse(!is.na(pase) | !is.na(pain), 0, NA_real_))]
+  setorder(pv, ID, month)
+  pv[, comorb := nafill(comorb, type = "locf"), by = ID]
+  list(person = person[], pv = pv[])
+}
+
+# 모사 시험의 사람·시험 표. 이웃한 세 방문(직전, 지표, 결과)마다 시험 하나를 만들어 쌓는다.
+#   treatment  "strength": 근력운동 항목이 0이다가 1 이상(주 1일 이상)이 됨
+#              "walk": 운동 삼아 걷기 항목이 1 이하(주 2일 이하)이다가 2 이상(주 3일 이상)이 됨
+#   direction  "start": 직전 방문에 하지 않던 사람 가운데 지표 방문에 하는 사람이 처치군(a = 1)
+#              "stop": 직전 방문에 하던 사람 가운데 지표 방문에 하지 않는 사람이 처치군
+# 대상: 직전 방문의 상태가 조건에 맞고, 지표 방문의 그 항목과 통증이 관측되고, 지표 방문까지 치환술이 없다.
+# 결과(y_*)는 결과 방문의 값이며, 결과 방문까지 치환술을 받았으면 NA이고 tkr_out이 1이다.
+# 공변량은 직전 방문(_p)과 지표 방문(_i)의 값이다. pain_pp는 직전 방문보다 한 방문 앞의 통증이다(첫 시험은 NA).
+trial_table <- function(raw_dir, treatment = c("strength", "walk"), direction = c("start", "stop"), panel = NULL) {
+  treatment <- match.arg(treatment); direction <- match.arg(direction)
+  on <- c(strength = 1, walk = 2)[[treatment]]
+  if (is.null(panel)) panel <- exercise_panel(raw_dir)
+  pv <- panel$pv
+  at <- function(v, vars, suffix) {
+    x <- pv[visit == v, c("ID", vars), with = FALSE]
+    setnames(x, vars, paste0(vars, suffix))
+    x
+  }
+  V <- EXERCISE_VISITS
+  tr <- rbindlist(lapply(2:(length(V) - 1), function(k) {
+    x <- merge(at(V[k - 1], TRIAL_COVARIATES, "_p"), at(V[k], TRIAL_COVARIATES, "_i"), by = "ID")
+    x <- merge(x, at(V[k + 1], c("pain", "func", "pace", "chair", "hand"), "_y"), by = "ID", all.x = TRUE)
+    x <- merge(x, if (k > 2) at(V[k - 2], "pain", "_pp") else data.table(ID = x$ID, pain_pp = NA_real_), by = "ID", all.x = TRUE)
+    x[, `:=`(trial = VISIT_MONTHS[[V[k]]], month_p = VISIT_MONTHS[[V[k - 1]]], month_y = VISIT_MONTHS[[V[k + 1]]])]
+  }))
+  tr <- merge(tr, panel$person, by = "ID")
+  prev <- tr[[paste0(treatment, "_p")]]; idx <- tr[[paste0(treatment, "_i")]]
+  tr[, a := if (direction == "start") as.integer(idx >= on) else as.integer(idx < on)]
+  tr <- tr[!is.na(prev) & (if (direction == "start") prev < on else prev >= on) &
+             !is.na(a) & !is.na(pain_i) & (is.na(tkr_month) | tkr_month > trial)]
+  tr[, tkr_out := as.integer(!is.na(tkr_month) & tkr_month <= month_y)]
+  for (y in c("pain", "func", "pace", "chair", "hand")) {
+    tr[, (paste0("y_", y)) := fifelse(tkr_out == 1, NA_real_, get(paste0(y, "_y")))]
+    tr[, (paste0(y, "_y")) := NULL]
+  }
+  tr[, `:=`(age_i = age + trial / 12, gap = (month_y - trial) / 12)]
+  setorder(tr, trial, ID)
+  tr[]
+}
 
 # ---------------------------------------------------------------- 공용 준비
 
@@ -431,6 +579,15 @@ make_synthetic <- function(out_dir, n = 1500, seed = 20261118) {
       pase <- pmax(round(level - 2 * m / 12 - 3 * ifelse(is.finite(worst), worst, 0) + rnorm(n, 0, 45)), 0)
       dt[, (sprintf("V%sPASE", v)) := ifelse(attend, as.character(pase), miss)]
       if (v != "00") dt[, (sprintf("V%sBMI", v)) := ifelse(attend, as.character(round(bmi + rnorm(n, 0, 0.8), 1)), miss)]
+      # PASE 항목(걷기 PASE2, 근력운동 PASE6). 사람마다 성향이 있고 그 방문의 통증이 높으면 덜 한다.
+      # 운동이 통증에 주는 효과는 없다.
+      lab <- c("0: Never", "1: Seldom (1-2 days)", "2: Sometimes (3-4 days)", "3: Often (5-7 days)")
+      for (item in c(2L, 6L)) {
+        set.seed(seed + 3000L + item); liking <- rnorm(n)
+        set.seed(seed + 3100L + 20L * item + as.integer(v))
+        z <- liking + rnorm(n, 0, 0.8) - 0.05 * ifelse(is.finite(worst), worst, 0) + if (item == 2L) 0.7 else -0.3
+        dt[, (sprintf("V%sPASE%d", v, item)) := ifelse(attend, lab[findInterval(z, c(-0.2, 0.5, 1.2)) + 1L], miss)]
+      }
       .Random.seed <<- keep
     }
     fwrite(dt, file.path(out_dir, sprintf("AllClinical%s.txt", v)), sep = "|")

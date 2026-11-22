@@ -1,0 +1,149 @@
+---
+title: "생존 분석 2장. 경쟁 위험 — 사망은 치환술의 중도절단인가"
+lang: ko
+format:
+  gfm:
+    toc: true
+    toc-depth: 2
+    df-print: kable
+    wrap: none
+execute:
+  echo: false
+  warning: false
+  message: false
+knitr:
+  opts_chunk:
+    dev: png
+    dpi: 300
+    fig.width: 6
+    fig.height: 3
+---
+
+```{r setup}
+#| include: false
+suppressPackageStartupMessages({
+  library(data.table); library(ggplot2); library(survival); library(lme4)
+})
+ROOT <- if (file.exists("../R/oai.R")) dirname(getwd()) else getwd()
+source(file.path(ROOT, "R", "oai.R"))
+
+windowsFonts(malgun = windowsFont("Malgun Gothic"))
+theme_set(theme_classic(base_family = "malgun", base_size = 9) +
+            theme(panel.grid.major.y = element_line(colour = "grey87", linewidth = 0.3),
+                  strip.background = element_blank(), legend.position = "bottom"))
+
+src <- pick_data(ROOT)
+USE_REAL <- src$real
+d <- cohort_data(src$dir)
+P <- d$person; K <- d$knees; KV <- d$kv
+
+f0 <- function(x) format(round(x), big.mark = ",", scientific = FALSE, trim = TRUE)
+f1 <- function(x, k = 1) formatC(x, format = "f", digits = k, big.mark = ",")
+pc <- function(x, k = 1) formatC(100 * x, format = "f", digits = k)
+tab <- function(x, digits = 2) knitr::kable(x, digits = digits, format.args = list(big.mark = ","))
+fp <- function(p) ifelse(p < 0.001, "<0.001", formatC(p, format = "f", digits = 3))
+kl_lab <- c(klf1 = "KL 1", klf2 = "KL 2", klf3 = "KL 3", klf4 = "KL 4")
+hr_tab <- function(fit, keep, lab) {
+  s <- summary(fit)$coefficients; ci <- summary(fit)$conf.int
+  se_col <- if ("robust se" %in% colnames(s)) "robust se" else "se(coef)"
+  data.table(항 = lab[keep], 위험비 = ci[keep, "exp(coef)"], 하한 = ci[keep, "lower .95"], 상한 = ci[keep, "upper .95"],
+             p = fp(s[keep, ncol(s)]))
+}
+
+
+# 무릎의 사건 시간 표(R/oai.R의 event_table)
+CAP <- max(VISIT_MONTHS)                           # 추적의 끝(개월)
+S <- event_table(d)
+HAS_DEATH <- S[, any(status == 2)]
+```
+
+```{r notice}
+#| output: asis
+if (!USE_REAL) cat("> 이 렌더는 시뮬레이션 데이터로 만든 것이다. 수치를 해석하지 않는다.\n\n")
+```
+
+```{r model-a}
+#| include: false
+mA <- coxph(Surv(year, status == 1) ~ klf + func10 + age10 + female + bmi5, data = S, cluster = ID, ties = "efron")
+labA <- c(kl_lab, func10 = "기준 기능 (10점)", age10 = "나이 (10세)", female = "여성", bmi5 = "BMI (5)")
+hrA <- exp(coef(mA))
+n_tkr <- S[status == 1, .N]; n_death <- S[status == 2, .N]
+```
+
+1장은 치환술까지의 시간을 분석하면서 사망을 중도절단으로 두었다. 중도절단은 그 시각 이후를 모른다는 뜻이고, 중도절단된 무릎이 남은 무릎과 같은 위험으로 사건을 겪을 것이라는 가정 위에서 추정이 이루어진다. 사망은 사정이 다르다. 사망한 사람은 그 뒤에 치환술을 받을 수 없다. 관심 사건이 일어나는 것을 막는 이런 사건을 경쟁 사건이라 한다.
+
+이 장은 경쟁 사건이 있을 때 무엇이 달라지는지를 다룬다. 사건의 누적 비율을 추정하는 방법(I장, II장)과 공변량의 효과를 추정하는 두 가지 회귀(III장)다. 데이터와 정의는 1장 I.1절과 같다. 무릎 `r f0(nrow(S))`개 가운데 `r f0(n_tkr)`개가 추적 중에 치환술을 받았고, `r f0(n_death)`개는 치환술 없이 그 사람이 사망했다. 사망은 마지막 접촉 뒤 다음 예정 방문 전에 일어났을 때만 경쟁 사건으로 센다.
+
+## I. 사망은 중도절단이 아니다
+
+1장 II장의 Kaplan-Meier는 사망을 중도절단으로 다루었다. 사망을 중도절단으로 두면, 사망한 사람이 계속 살았다면 같은 위험으로 치환술을 받았을 것처럼 계산한다. 이렇게 하면 $1 - \hat S(t)$는 실제로 관측될 치환술의 누적 비율보다 크게 나온다(Putter et al., 2007; Austin et al., 2016). 그 값은 사망이 없는 가상의 세계에서의 치환술 비율이고, 실제로 몇 명이 수술을 받게 되는지를 묻는 질문의 답이 아니다.
+
+경쟁 위험에서는 원인별 위험을 따로 둔다. 치환술의 원인별 위험 $h_1(t)$와 사망의 원인별 위험 $h_2(t)$가 있을 때, 치환술의 누적 발생률은 다음과 같다.
+
+$$F_1(t) = \int_0^t S(s^-) h_1(s) ds, \qquad S(t) = \exp\left( -\int_0^t \left(h_1(s) + h_2(s)\right) ds \right)$$
+
+$S(s^-)$는 시각 $s$ 직전까지 치환술도 사망도 없었을 확률이다. 사망이 많아질수록 $S$가 작아지고, 치환술의 누적 발생률은 $1 - \hat S(t)$보다 작아진다. 표본에서의 추정은 Aalen-Johansen 추정량으로 한다(Aalen and Johansen, 1978).
+
+## II. 누적 발생률
+
+표 1은 KL 등급을 셋으로 묶어, 15년 시점의 누적 치환술 비율을 사망을 중도절단으로 둔 Kaplan-Meier($1 - \hat S$)와 사망을 경쟁 사건으로 둔 누적 발생률로 함께 제시한 것이다. 마지막 열은 같은 시점의 사망 누적 발생률이다.
+
+```{r table5}
+#| output: asis
+S[, klg := factor(fcase(kl <= 1, "KL 0-1", kl == 2, "KL 2", kl >= 3, "KL 3-4"), c("KL 0-1", "KL 2", "KL 3-4"))]
+cmp <- function(dt, label) {
+  k1 <- summary(survfit(Surv(year, status == 1) ~ 1, dt), times = 15, extend = TRUE)
+  out <- data.table(집단 = label, 무릎 = nrow(dt), `1 - KM(%)` = 100 * (1 - k1$surv))
+  if (HAS_DEATH) {
+    cr <- summary(survfit(Surv(year, factor(status, 0:2, c("c", "tkr", "death"))) ~ 1, dt), times = 15, extend = TRUE)
+    ps <- cr$pstate; colnames(ps) <- cr$states
+    out[, `:=`(`누적 발생률(%)` = 100 * ps[1, "tkr"], `사망 누적 발생률(%)` = 100 * ps[1, "death"])]
+  }
+  out
+}
+t5 <- rbindlist(c(list(cmp(S, "전체")), lapply(levels(S$klg), function(g) cmp(S[klg == g], g))), fill = TRUE)
+cat("**표 1. 15년 누적 치환술 비율: 사망을 중도절단으로 둘 때와 경쟁 사건으로 둘 때 (%)**\n\n")
+print(tab(t5, 1))
+gap <- if (HAS_DEATH) t5[, `1 - KM(%)` - `누적 발생률(%)`] else rep(NA_real_, nrow(t5))
+```
+
+표에서 사망을 중도절단으로 두면 치환술 비율이 모든 집단에서 더 크게 나온다. 차이는 전체에서 `r f1(gap[1])`%포인트, KL 3\~4에서 `r f1(gap[4])`%포인트다. 차이가 작은 것은 이 코호트가 등록 당시 비교적 젊어(평균 61세) 15년 동안의 사망 누적 발생률이 7% 안팎이기 때문이다. 차이는 치환술의 위험이 큰 집단에서 더 크다. 사망 위험이 큰 고령 환자 집단이라면 같은 계산의 차이가 훨씬 커진다. 이 코호트에서는 사망을 중도절단으로 둔 Kaplan-Meier도 실용적으로 큰 문제가 없지만, 그 이유가 데이터의 성질에 있다는 것을 확인한 뒤에 쓰는 것이다.
+
+## III. 원인별 위험비와 부분분포 위험비
+
+공변량의 효과에도 두 가지가 있다. 원인별 위험모형은 치환술의 원인별 위험 $h_1(t)$에 Cox 모형을 둔다. 사망한 무릎을 사망 시각에 중도절단하는 보통의 Cox 모형과 같으므로 1장 III.2절의 모형 A가 그대로 원인별 위험모형이고, 위험비는 아직 살아 있고 수술받지 않은 무릎 사이의 치환술 속도의 비다. Fine and Gray (1999)의 부분분포 위험모형은 누적 발생률 $F_1(t)$에 직접 연결되는 위험을 모형화한다. 사망한 무릎을 위험집합에 남겨 두고(가중치를 주어), 위험비가 누적 발생률의 차이로 바로 읽힌다. 원인을 묻는 질문에는 원인별 위험비가, 예측과 자원 계획에는 부분분포 위험비가 맞다(Austin et al., 2016).
+
+```{r table6}
+#| output: asis
+if (HAS_DEATH) {
+  S[, ev3 := factor(status, 0:2, c("cens", "tkr", "death"))]
+  fg <- finegray(Surv(year, ev3) ~ ., data = S[, .(ID, year, ev3, klf, func10, age10, female, bmi5)], etype = "tkr")
+  mFG <- coxph(Surv(fgstart, fgstop, fgstatus) ~ klf + func10 + age10 + female + bmi5, data = fg, weights = fgwt, cluster = ID)
+  keep <- c(names(kl_lab), "func10", "age10")
+  t6 <- merge(hr_tab(mA, keep, labA)[, .(항, `원인별 위험비` = 위험비, `원인별 하한` = 하한, `원인별 상한` = 상한)],
+              hr_tab(mFG, keep, labA)[, .(항, `부분분포 위험비` = 위험비, `부분분포 하한` = 하한, `부분분포 상한` = 상한)], by = "항", sort = FALSE)
+  cat("**표 2. 원인별 위험비와 부분분포 위험비**\n\n")
+  print(tab(t6, 2))
+  hfg <- exp(coef(mFG))
+} else cat("> 이 데이터에는 사망 시각이 없어 부분분포 위험모형을 적합하지 않았다.\n\n")
+```
+
+표 2는 공변량마다 두 위험비와 그 신뢰구간을 함께 제시한 것이다. 원인별 위험비는 1장 표 3의 값과 같다. 두 위험비는 KL 등급과 기능에서 거의 같다. 표 1에서 보듯 사망의 누적 발생률이 KL 등급에 따라 크게 다르지 않기 때문이다. 나이에서만 작은 차이가 보인다(원인별 `r f1(hrA["age10"], 2)`, 부분분포 `r if (HAS_DEATH) f1(hfg["age10"], 2) else "NA"`). 방향은 예상과 같다. 나이가 많은 사람은 살아 있는 동안의 수술 속도가 크게 다르지 않더라도 사망이 먼저 오기 쉬워, 실제로 수술에 이르는 비율은 더 낮다. 다만 이 데이터에서 그 차이는 신뢰구간에 견주어 작다. 사망 위험이 나이에 따라 크게 다른 고령 집단에서는 두 위험비가 더 벌어진다.
+
+## IV. 정리와 한계
+
+이 장의 결과는 둘이다. 첫째, 사망을 경쟁 사건으로 다루면 치환술에 이르는 비율은 사망을 중도절단으로 둔 Kaplan-Meier보다 작아진다. 이 코호트는 등록 당시 비교적 젊어 그 차이가 작다. 둘째, 원인별 위험비와 부분분포 위험비는 이 데이터에서 거의 같고 나이에서만 조금 다르다.
+
+방법의 관점에서 기억할 것은 질문에 따라 추정량을 고른다는 점이다. 실제로 몇 명이 수술에 이르는지를 묻는다면 누적 발생률과 부분분포 위험비를 쓴다. 살아 있고 아직 수술받지 않은 사람에게서 무엇이 수술의 속도를 높이는지를 묻는다면 원인별 위험비를 쓴다. 사망을 중도절단으로 둔 Kaplan-Meier의 $1 - \hat S(t)$는 어느 질문의 답도 아니지만, 경쟁 사건이 드물면 누적 발생률과 가깝다. 두 값을 함께 계산해 차이를 확인한 뒤에 어느 쪽을 보고할지 정한다.
+
+한계는 둘이다. 첫째, 사망은 마지막 접촉 뒤 다음 예정 방문 전에 일어났을 때만 경쟁 사건으로 세었다. 그보다 늦은 사망은 그 사이의 치환술을 확인할 길이 없어 마지막 접촉에서 중도절단했으므로, 사망의 누적 발생률은 실제보다 작게 추정된다. 둘째, 한 사람의 두 무릎은 사망을 함께 겪는다. 표준오차는 사람 단위로 군집 강건하게 구했으나 누적 발생률의 추정은 무릎을 독립으로 다루었다.
+
+## 참고문헌
+
+Aalen, O. O., and Johansen, S. (1978). "An empirical transition matrix for non-homogeneous Markov chains based on censored observations." *Scandinavian Journal of Statistics* 5(3), 141–150.
+
+Austin, P. C., Lee, D. S., and Fine, J. P. (2016). "Introduction to the analysis of survival data in the presence of competing risks." *Circulation* 133(6), 601–609.
+
+Fine, J. P., and Gray, R. J. (1999). "A proportional hazards model for the subdistribution of a competing risk." *Journal of the American Statistical Association* 94(446), 496–509.
+
+Putter, H., Fiocco, M., and Geskus, R. B. (2007). "Tutorial in biostatistics: Competing risks and multi-state models." *Statistics in Medicine* 26(11), 2389–2430.

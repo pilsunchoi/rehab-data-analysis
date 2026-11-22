@@ -1,11 +1,11 @@
-# 6장의 다변량 정규 결합모형을 적합하고 요약만 outputs/su-joint-06.rds 에 저장한다.
+# SU정규 결합모형 장의 다변량 정규 결합모형을 적합하고 요약만 outputs/su-joint-06.rds 에 저장한다.
 # 종단 하위모형의 무작위 효과와 변환한 치환술 시간이 함께 다변량 정규분포를 따른다.
 # 치환술 시간의 주변분포는 로그정규 또는 SU정규(Johnson S_U) 가속수명 모형이다.
 #
 #   Rscript R/fit-su-joint.R        전체: 적합, 분포의 비교, 동적 예측, 모의 검증 20회(약 25분)
 #   Rscript R/fit-su-joint.R 0      모의 검증 없이(약 5분)
 #
-# 표본은 5장 VI장의 결합모형과 같은 정의(jm_data)다. 동적 예측은 5장의 JMbayes2와 같은 무릎으로 적합하고
+# 표본은 결합모형과 동적 예측 장 I장의 결합모형과 같은 정의(jm_data)다. 동적 예측은 그 장의 JMbayes2와 같은 무릎으로 적합하고
 # 같은 무릎에서 평가한다(outputs/jm-01.rds 가 있을 때).
 
 suppressPackageStartupMessages({library(data.table); library(survival)})
@@ -217,7 +217,7 @@ if (sys.nframe() == 0) {
                             su = dnorm((asinh(u) - o_su$lam) / exp(o_su$lth)) * cosh(o_su$lam) / sqrt(1 + u^2))
   say("주변분포 계산 끝")
 
-  # --- 3. 동적 예측: 5장의 JMbayes2와 같은 무릎으로 적합하고, 같은 무릎에서 4년 시점의 2년 위험을 예측한다
+  # --- 3. 동적 예측: 결합모형과 동적 예측 장의 JMbayes2와 같은 무릎으로 적합하고, 같은 무릎에서 4년 시점의 2년 위험을 예측한다
   jm_path <- file.path(ROOT, "outputs", "jm-01.rds")
   jmr <- if (file.exists(jm_path)) readRDS(jm_path) else NULL
   if (!is.null(jmr) && isTRUE(jmr$real_data == src$real)) {

@@ -50,7 +50,7 @@ saveRDS(list(fit = jm_fit, fit_knees = fit_knees), file.path(ROOT, "outputs", "j
 say("적합 객체 저장")
 
 # 동적 예측: 4년 시점(랜드마크)에 치환술 없이 남은 무릎에서, 그때까지의 기능 점수로 2년 안의 치환술 확률을 예측한다.
-# 적합에 쓰지 않은 무릎 가운데 무작위로 고른 2,500개에서 한다(표본 밖 평가). 5장이 같은 무릎으로 랜드마크 Cox와 비교한다.
+# 적합에 쓰지 않은 무릎 가운데 무작위로 고른 2,500개에서 한다(표본 밖 평가). 결합모형과 동적 예측 장이 같은 무릎으로 랜드마크 Cox와 비교한다.
 LM <- 4; H <- 2
 pred <- tryCatch({
   at_risk <- setdiff(as.character(j$surv$knee[j$surv$time_y > LM]), fit_knees)
