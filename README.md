@@ -4,8 +4,6 @@
 
 소개 대시보드: <https://pilsunchoi.github.io/rehab-data-analysis/>
 
-장 구성과 서술 형식은 `docs/book-plan.md`에 있다.
-
 ## 구조
 
 ```
@@ -43,8 +41,6 @@ rehab-data-analysis/
 ├── docs/
 │   ├── index.html                            소개 대시보드(GitHub Pages)
 │   ├── img/                                  대시보드의 그림(장의 그림을 복사)
-│   ├── book-plan.md                          장 구성 계획
-│   ├── causal-inference-plan.md              인과 추론 묶음의 새 장 둘(성향점수, 인과 기계학습) 계획
 │   ├── oai-variables.md                      받을 파일, 변수 이름의 형식, 사건 정의
 │   └── stroke-data-sources.md                뇌졸중 재활 데이터 후보와 접근 조건(I권에서는 쓰지 않는다)
 ├── R/
@@ -61,7 +57,7 @@ rehab-data-analysis/
     └── synthetic/                            시뮬레이션 데이터
 ```
 
-`archive/`의 세 편은 장 구성을 정하기 전에 쓴 첫 분석이다. 그 내용은 회귀, 종단 분석, 인과 추론, 생존 분석의 장으로 옮겨 다시 썼다(`docs/book-plan.md` 2장).
+`archive/`의 세 편은 장 구성을 정하기 전에 쓴 첫 분석이다. 그 내용은 회귀, 종단 분석, 인과 추론, 생존 분석의 장으로 옮겨 다시 썼다.
 
 ## 렌더하기
 

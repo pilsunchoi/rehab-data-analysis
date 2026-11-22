@@ -9,3 +9,7 @@ outputs/
 
 # 공개 전 연구 폴더. 공개할 때 이 줄만 지운다
 analysis/Choi/
+
+# 내부 작업용 계획 문서. 공개하지 않는다
+docs/book-plan.md
+docs/causal-inference-plan.md

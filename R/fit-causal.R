@@ -1,5 +1,5 @@
 # 근력운동과 걷기의 시작(과 중단)을 처치로 한 모사 시험의 평균 효과를 추정하고
-# 요약만 outputs/causal-07.rds에 저장한다(docs/causal-inference-plan.md 6장. 장에서는 쓰지 않는 쌓은 시험의 추정이다).
+# 요약만 outputs/causal-07.rds에 저장한다. 장에서는 쓰지 않는, 여러 시점의 시험을 쌓은 추정이다.
 #
 #   Rscript R/fit-causal.R          나무 2,000그루(10분 안팎)
 #   Rscript R/fit-causal.R 500      나무 수를 줄여 빨리 돌린다
