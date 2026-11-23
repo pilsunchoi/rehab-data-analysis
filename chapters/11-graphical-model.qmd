@@ -378,7 +378,7 @@ worst <- E[order(-abs(pcr - ps))][1]
 sign_flip <- E[abs(pcr) > 0.1 & sign(pcr) != sign(ps), .N]
 ```
 
-`r EDGES`쌍에서 두 방식의 부분상관은 상관이 `r f1(sp_cor, 3)`이다. 가장 크게 다른 쌍은 `r LABELS[[worst$j]]`, `r LABELS[[worst$k]]`이며 Pearson 기반이 `r f1(worst$pcr)`, Spearman 기반이 `r f1(worst$ps)`이다. 부분상관의 절대값이 0.1을 넘는 쌍 가운데 두 방식에서 부호가 다른 것은 `r if (sign_flip == 0) "없다" else paste0(sign_flip, "쌍이다")`. 이 데이터에서는 정규 가정이 깨진 정도가 그래프의 모양을 바꾸지 않는다. 엣지의 굵기는 일부 달라진다.
+`r EDGES`쌍에서 두 방식의 부분상관은 상관이 `r f1(sp_cor, 3)`이다. 가장 크게 다른 쌍은 `r LABELS[[worst$j]]`, `r LABELS[[worst$k]]`이며 Pearson 기반이 `r f1(worst$pcr)`, Spearman 기반이 `r f1(worst$ps)`이다. 부분상관의 절대값이 0.1을 넘는 쌍 가운데 두 방식에서 부호가 다른 것은 `r if (sign_flip == 0) "없다" else paste0(sign_flip, "쌍이다")`. 이 데이터에서는 정규 가정이 깨진 정도가 그래프의 모양을 바꾸지 않는다. 엣지의 굵기는 일부 달라진다. 이 점검을 nonparanormal 모형으로 세워 다시 추정하고, 그 결과를 시뮬레이션으로 확인한 분석은 Nonparanormal 그래프 모형 장(연구 탭)에 있다.
 
 ### 2. 엣지의 안정성
 

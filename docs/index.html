@@ -617,7 +617,7 @@
   <section role="tabpanel" id="tab-research" aria-labelledby="t-research">
     <h2 class="h">연구</h2>
     <p class="sub lead">교재의 구성에 넣지 않고 따로 진행하는 연구다. 기본 방법의 설명이 아니다.</p>
-    <div class="note"><b>두 장의 관계.</b> 1장은 종단 측정과 사건 시간을 한 모형에 넣는 결합모형으로, 생존 분석 1장이 남긴 문제에서 출발한다. 2장은 그 결합모형을 다른 구조로 다시 세워 무릎 전체로 빠르게 적합한다.</div>
+    <div class="note"><b>세 장의 관계.</b> 1장은 종단 측정과 사건 시간을 한 모형에 넣는 결합모형으로, 생존 분석 1장이 남긴 문제에서 출발한다. 2장은 그 결합모형을 다른 구조로 다시 세워 무릎 전체로 빠르게 적합한다. 3장은 그래프 모형 1장의 정규 가정을 풀어 같은 그래프를 다시 추정한다.</div>
 
     <article class="study">
       <div class="study-num">1</div>
@@ -642,7 +642,7 @@
       <div class="study-num">2</div>
       <div class="study-body">
         <h4 class="study-title">기능 궤적과 치환술 시간의 SU정규 결합모형 — 결합모형을 1분 안에 적합할 수 있는가<span class="pill warn">초고</span></h4>
-        <p class="study-sub">다변량 정규 결합모형(닫힌 형태의 가능도) · 가속수명 모형 · SU정규 분포와 로그정규 · 가능도비 검정 · 모의 검증 · 동적 예측</p>
+        <p class="study-sub">다변량 정규 결합모형(닫힌 형태의 가능도) · 가속수명 모형 · SU정규 분포와 로그정규 · 가능도비 검정 · 시뮬레이션 검증 · 동적 예측</p>
         <p class="study-desc">종단 측정의 무작위 효과와 변환한 치환술 시간을 함께 다변량 정규로 두면 가능도가 적분 없이 닫힌 형태가 된다. 치환술 시간의 분포로 로그정규를 포함하는 SU정규를 쓰고, 무릎 8,909개 전체로 적합해 1장의 JMbayes2 결합모형과 비교한다.</p>
         <p class="study-lbl">OAI에 적용한 결과</p>
         <ul class="study-points">
@@ -655,6 +655,26 @@
           <a href="https://github.com/pilsunchoi/rehab-data-analysis/blob/main/chapters/06-su-normal-joint-model.md" target="_blank" rel="noopener">장 읽기</a>
           <a href="https://github.com/pilsunchoi/rehab-data-analysis/blob/main/chapters/06-su-normal-joint-model.qmd" target="_blank" rel="noopener">R 문서(원본)</a>
           <a href="https://github.com/pilsunchoi/rehab-data-analysis/blob/main/R/fit-su-joint.R" target="_blank" rel="noopener">결합모형 적합</a>
+        </div>
+      </div>
+    </article>
+
+    <article class="study">
+      <div class="study-num">3</div>
+      <div class="study-body">
+        <h4 class="study-title">Nonparanormal 그래프 모형 — 정규 가정을 풀면 증상의 네트워크가 달라지는가<span class="pill warn">초고</span></h4>
+        <p class="study-sub">Nonparanormal(정규 코퓰라) · 절단한 경험분포함수와 정규 점수 · 순위 상관에서 구하는 추정 · 그래프 라쏘와 EBIC · 동점의 한계 · 참 그래프를 아는 시뮬레이션</p>
+        <p class="study-desc">그래프 모형 1장의 정규 그래프 모형을 Liu, Lafferty and Wasserman (2009)의 nonparanormal로 바꾸어 다시 추정한다. 변수마다 단조 변환을 하면 다변량 정규가 된다고 가정하고, 변환은 데이터에서 추정한다. 같은 13개 노드, 같은 4,177명으로 두 그래프를 비교하고, 그 차이가 방법에서 오는지 데이터의 모양에서 오는지를 시뮬레이션으로 가려낸다.</p>
+        <p class="study-lbl">OAI에 적용한 결과</p>
+        <ul class="study-points">
+          <li>세 방법(정규, nonparanormal, 순위 기반)의 그래프가 거의 같다. 부분상관의 일치는 0.99이고, 절대값 0.1 이상인 엣지 24쌍이 모두 남는다.</li>
+          <li>가장 크게 달라진 엣지는 CES-D와 SF-12 정신 점수(-0.71에서 -0.61)다. 오른쪽 꼬리의 소수에 Pearson 상관이 주는 무게가 정규 점수에서는 줄어든다.</li>
+          <li>시뮬레이션에서 치우친 연속 분포라면 정규 그래프 모형은 200명일 때 참 엣지의 29%만 찾고 nonparanormal은 61%를 찾는다. 바닥 효과와 순서 척도는 두 방법 모두 고치지 못하며, OAI의 증상 점수가 그 경우다.</li>
+        </ul>
+        <div class="study-figs"><img src="img/ch14_graphs.png" alt="정규 그래프 모형과 nonparanormal의 부분상관 그래프. 두 그래프의 엣지 배치가 거의 같다" loading="lazy"></div>
+        <div class="study-links">
+          <a href="https://github.com/pilsunchoi/rehab-data-analysis/blob/main/chapters/14-nonparanormal.md" target="_blank" rel="noopener">장 읽기</a>
+          <a href="https://github.com/pilsunchoi/rehab-data-analysis/blob/main/chapters/14-nonparanormal.qmd" target="_blank" rel="noopener">R 문서(원본)</a>
         </div>
       </div>
     </article>

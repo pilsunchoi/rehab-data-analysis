@@ -2,8 +2,8 @@
 # 종단 하위모형의 무작위 효과와 변환한 치환술 시간이 함께 다변량 정규분포를 따른다.
 # 치환술 시간의 주변분포는 로그정규 또는 SU정규(Johnson S_U) 가속수명 모형이다.
 #
-#   Rscript R/fit-su-joint.R        전체: 적합, 분포의 비교, 동적 예측, 모의 검증 20회(약 25분)
-#   Rscript R/fit-su-joint.R 0      모의 검증 없이(약 5분)
+#   Rscript R/fit-su-joint.R        전체: 적합, 분포의 비교, 동적 예측, 시뮬레이션 검증 20회(약 25분)
+#   Rscript R/fit-su-joint.R 0      시뮬레이션 검증 없이(약 5분)
 #
 # 표본은 결합모형과 동적 예측 장 I장의 결합모형과 같은 정의(jm_data)다. 동적 예측은 그 장의 JMbayes2와 같은 무릎으로 적합하고
 # 같은 무릎에서 평가한다(outputs/jm-01.rds 가 있을 때).
@@ -251,7 +251,7 @@ if (sys.nframe() == 0) {
                          ll = c(lognormal = g_ln$ll, su = g_su$ll))
   say("동적 예측 끝:", nrow(pred), "무릎")
 
-  # --- 4. 모의 검증: SU정규 적합값을 참값으로 두고 데이터를 생성해 다시 추정한다
+  # --- 4. 시뮬레이션 검증: SU정규 적합값을 참값으로 두고 데이터를 생성해 다시 추정한다
   if (N_REP > 0) {
     rec <- rbindlist(lapply(seq_len(N_REP), function(sd) {
       set.seed(1000 + sd)
@@ -262,7 +262,7 @@ if (sys.nframe() == 0) {
       Ds$n <- tabulate(Ds$g, D$N)
       Ds$st <- as.vector(rowsum(Ds$t, factor(Ds$g, levels = 1:D$N))); Ds$stt <- as.vector(rowsum(Ds$t^2, factor(Ds$g, levels = 1:D$N)))
       fs <- fit(Ds, TRUE, start = f_su$par)
-      say("모의 검증", sd, "/", N_REP)
+      say("시뮬레이션 검증", sd, "/", N_REP)
       data.table(rep = sd, term = names(fs$par), est = unname(fs$par), se = unname(fs$se), truth = unname(f_su$par),
                  events = sum(sm$event), pd = fs$pd)
     }))

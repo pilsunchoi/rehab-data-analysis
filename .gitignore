@@ -16,3 +16,6 @@ docs/*-plan.md
 # 작업 문서. 저장소에는 최종 결과물만 둔다(2026-11-23)
 docs/stroke-data-sources.md
 archive/
+
+# 논문 원문(PDF). 저작권이 저자와 학술지에 있어 올리지 않는다
+references/*.pdf

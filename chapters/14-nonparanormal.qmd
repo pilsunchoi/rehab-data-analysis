@@ -1,0 +1,397 @@
+---
+title: "Nonparanormal 그래프 모형 — 정규 가정을 풀면 증상의 네트워크가 달라지는가"
+lang: ko
+format:
+  gfm:
+    toc: true
+    toc-depth: 2
+    df-print: kable
+    wrap: none
+execute:
+  echo: false
+  warning: false
+  message: false
+knitr:
+  opts_chunk:
+    dev: png
+    dpi: 300
+    fig.width: 7
+    fig.height: 3.2
+---
+
+```{r setup}
+#| include: false
+suppressPackageStartupMessages({
+  library(data.table); library(ggplot2); library(glasso); library(MASS)
+})
+ROOT <- if (file.exists("../R/oai.R")) dirname(getwd()) else getwd()
+source(file.path(ROOT, "R", "oai.R"))
+
+windowsFonts(malgun = windowsFont("Malgun Gothic"))
+theme_set(theme_classic(base_family = "malgun", base_size = 9) +
+            theme(panel.grid.major.y = element_line(colour = "grey87", linewidth = 0.3),
+                  strip.background = element_blank()))
+
+src <- pick_data(ROOT)
+USE_REAL <- src$real
+panel <- tryCatch(exercise_panel(src$dir), error = function(e) {
+  if (USE_REAL) stop(e)
+  make_synthetic(src$dir)
+  exercise_panel(src$dir)
+})
+
+f0 <- function(x) format(round(x), big.mark = ",", scientific = FALSE, trim = TRUE)
+f1 <- function(x, k = 2) formatC(as.numeric(x), format = "f", digits = k, big.mark = ",")
+pc <- function(x, k = 0) formatC(100 * as.numeric(x), format = "f", digits = k)
+tab <- function(x, digits = 2) knitr::kable(x, digits = digits, format.args = list(big.mark = ","))
+SEED <- 20261123L
+
+# 그래프 모형 1장과 동일한 데이터: 기준 방문, 사람 하나에 한 행
+d0 <- merge(panel$pv[visit == "00"], panel$person[, .(ID, age, kl)], by = "ID")
+LABELS <- c(pain = "WOMAC 통증", func = "WOMAC 기능", stiff = "WOMAC 뻣뻣함", koosqol = "KOOS 삶의 질",
+            cesd = "CES-D", pcs = "SF-12 신체", mcs = "SF-12 정신", bmi = "BMI", pase = "PASE",
+            pace = "보행 속도", chair = "의자 일어서기", kl = "KL 등급", age = "나이")
+usable <- function(v) v %in% names(d0) && sum(!is.na(d0[[v]])) > 0.5 * nrow(d0) && uniqueN(d0[[v]], na.rm = TRUE) > 2
+NODES <- names(LABELS)[vapply(names(LABELS), usable, TRUE)]
+X <- as.matrix(d0[, NODES, with = FALSE]); storage.mode(X) <- "double"
+X <- X[complete.cases(X), , drop = FALSE]
+N <- nrow(X); P <- ncol(X)
+UT <- upper.tri(diag(P))
+EDGES <- sum(UT)
+lab <- function(v) unname(LABELS[v])
+
+# ---- 세 가지 상관행렬
+delta_n <- function(n) 1 / (4 * n^0.25 * sqrt(pi * log(n)))
+npn_scores <- function(X) {               # Liu et al. (2009)의 절단한 정규 점수
+  dl <- delta_n(nrow(X))
+  Z <- apply(X, 2, function(x) qnorm(pmin(pmax(ecdf(x)(x), dl), 1 - dl)))
+  colnames(Z) <- colnames(X); Z
+}
+pd_fix <- function(R) {                   # 순위 상관에서 만든 행렬이 양의 정부호가 아닐 때만 고친다
+  e <- eigen(R, symmetric = TRUE)
+  if (min(e$values) >= 1e-4) return(R)
+  R2 <- e$vectors %*% diag(pmax(e$values, 1e-4)) %*% t(e$vectors); R2 <- cov2cor(R2); dimnames(R2) <- dimnames(R); R2
+}
+skeptic <- function(X) pd_fix(2 * sin(pi / 6 * cor(X, method = "spearman")))
+pcor <- function(R) { M <- -cov2cor(solve(R)); diag(M) <- 1; dimnames(M) <- dimnames(R); M }
+
+# ---- 그래프 라쏘와 EBIC: 그래프 모형 1장 V장과 동일
+LAMS <- exp(seq(log(0.5), log(0.002), length.out = 40))
+fit_glasso <- function(S, n, lams = LAMS, gamma = 0.5) {
+  path <- rbindlist(lapply(lams, function(l) {
+    Th <- glasso(S, l, penalize.diagonal = FALSE)$wi
+    e <- sum(abs(Th[upper.tri(Th)]) > 1e-8)
+    ll <- n / 2 * (as.numeric(determinant(Th, logarithm = TRUE)$modulus) - sum(S * Th))
+    data.table(lambda = l, edges = e, ebic = -2 * ll + e * log(n) + 4 * gamma * e * log(ncol(S)))
+  }))
+  best <- path[which.min(ebic)]
+  M <- -cov2cor(glasso(S, best$lambda, penalize.diagonal = FALSE)$wi); diag(M) <- 1; dimnames(M) <- dimnames(S)
+  list(pcor = M, lambda = best$lambda, edges = best$edges)
+}
+
+Z <- npn_scores(X)
+R_g <- cor(X); R_n <- cor(Z); R_s <- skeptic(X)
+R_sp <- cor(X, method = "spearman")
+G <- fit_glasso(R_g, N); Np <- fit_glasso(R_n, N); Sk <- fit_glasso(R_s, N)
+E <- data.table(j = NODES[row(R_g)[UT]], k = NODES[col(R_g)[UT]],
+                rg = R_g[UT], rn = R_n[UT], gg = G$pcor[UT], gn = Np$pcor[UT], gs = Sk$pcor[UT])
+pr <- function(a, b, col) { x <- E[(j == a & k == b) | (j == b & k == a)][[col]]; if (length(x)) x else NA_real_ }
+skew <- function(x) mean((x - mean(x))^3) / sd(x)^3
+```
+
+```{r notice}
+#| output: asis
+if (!USE_REAL) cat("> 이 렌더는 시뮬레이션 데이터로 만든 것이다. 수치를 해석하지 않는다.\n\n")
+```
+
+> 이 장은 교재의 구성에 넣지 않은 장이다. 그래프 모형 1장의 정규 그래프 모형을 Liu et al. (2009)의 nonparanormal로 바꾸어 다시 추정하고, 두 그래프를 비교한 분석이다.
+
+그래프 모형 1장은 OAI 기준 방문의 `r P`개 변수로 부분상관 그래프를 그렸다. 그 장의 방법은 변수들이 다변량 정규분포를 따른다고 가정한다. 실제 변수는 그렇지 않다. WOMAC 점수는 0점에 몰려 있고, CES-D는 오른쪽으로 길게 늘어져 있으며, KL 등급은 값이 다섯 가지뿐이다. 그 장의 IX.1절은 Spearman 순위상관으로 바꾸어도 그래프가 거의 같다는 것만 확인하고 넘어갔다.
+
+이 장은 그 점검을 방법 하나로 세운다. Liu, Lafferty and Wasserman (2009)의 nonparanormal은 변수마다 알 수 없는 단조 변환을 하면 다변량 정규가 된다고 가정한다. 변환은 데이터에서 추정하고, 그래프는 변환한 변수의 정밀도 행렬로 정한다. 모형과 추정(II장), OAI에 적용한 결과(III장), 참 그래프를 아는 시뮬레이션(IV장)의 순서로 간다. 데이터와 노드는 그래프 모형 1장 I.2절과 같고 `r f0(N)`명이다.
+
+## I. 질문
+
+### 1. 정규 가정이 하는 일
+
+정규 그래프 모형에서 정규 가정은 두 곳에 쓰인다. 첫째, 정밀도 행렬의 원소가 0이라는 것이 조건부 독립과 같다는 해석이다. 정규분포가 아니면 부분상관이 0이어도 비선형 의존이 남을 수 있다. 둘째, 그래프 라쏘의 목적함수와 EBIC가 다변량 정규의 로그가능도다.
+
+정규가 아닌 정도는 변수마다 다르다. 표 1은 노드마다 왜도, 가장 낮은 값에 있는 사람의 비율, 서로 다른 값의 수를 제시한 것이다. 왜도는 정규분포에서 0이다.
+
+```{r table1}
+#| output: asis
+t1 <- data.table(노드 = lab(NODES), 왜도 = apply(X, 2, skew),
+                 `최저값의 비율(%)` = apply(X, 2, function(x) 100 * mean(x == min(x))),
+                 `최고값의 비율(%)` = apply(X, 2, function(x) 100 * mean(x == max(x))),
+                 `값의 수` = apply(X, 2, uniqueN))
+cat("**표 1. 노드의 분포 모양 (기준 방문)**\n\n")
+print(tab(t1, 1))
+sk_max <- t1[which.max(abs(왜도))]
+```
+
+표에서 왜도의 절대값이 가장 큰 노드는 `r sk_max$노드`(`r f1(sk_max$왜도)`)다. WOMAC의 세 점수는 왜도가 1 안팎이고 최저값인 0점에 `r pc(min(t1[노드 %in% lab(c("pain", "func", "stiff")), "최저값의 비율(%)"]) / 100)`\~`r pc(max(t1[노드 %in% lab(c("pain", "func", "stiff")), "최저값의 비율(%)"]) / 100)`%가 있다. SF-12의 두 점수, 보행 속도, BMI는 값의 수가 많은 연속 변수에 가깝다. 정규 가정이 깨지는 방식이 두 가지라는 점이 이 장의 결과를 정한다. 하나는 연속이지만 치우친 분포이고, 다른 하나는 같은 값에 사람이 몰린 분포다.
+
+### 2. 이 장의 질문
+
+질문은 셋이다. 정규 가정을 풀면 OAI의 그래프가 달라지는가. 달라진다면 어느 엣지가 왜 달라지는가. 그리고 그 차이가 방법의 차이인지, 데이터의 모양에서 오는 한계인지를 참 그래프를 아는 시뮬레이션으로 가려낸다.
+
+## II. Nonparanormal
+
+### 1. 모형
+
+확률 벡터 $X = (X_1, \dots, X_p)$가 nonparanormal 분포를 따른다는 것은, 단조 증가 함수 $f_1, \dots, f_p$가 있어서 변환한 벡터가 다변량 정규라는 뜻이다(Liu et al., 2009).
+
+$$f(X) = \big(f_1(X_1), \dots, f_p(X_p)\big) \sim N(\mu, \Sigma)$$
+
+함수 $f_j$에는 단조라는 것 말고 제약이 없다. 그래서 각 변수의 주변 분포는 어떤 모양이든 될 수 있고, 변수들 사이의 의존 구조만 정규분포의 것을 따른다. 주변 분포와 의존 구조를 나누어 생각하는 이 방식을 코퓰라라 하고, nonparanormal은 정규 코퓰라(Gaussian copula)의 한 형태다(Sklar, 1959). 이름은 저자들이 정규분포(normal)를 넘어선다는 뜻으로 붙인 것이다.
+
+회귀와 비교하면 이 모형의 위치가 분명하다. 선형 회귀의 직선을 변수마다 매끄러운 함수로 바꾼 것이 가법 모형이듯, 다변량 정규의 변수마다 단조 함수를 씌운 것이 nonparanormal이다. 그래프 라쏘가 정규 그래프 모형에 벌점을 준 것이듯, nonparanormal에도 같은 벌점을 줄 수 있다.
+
+그래프가 어디에 들어 있는지가 핵심이다. $f_j$가 단조이므로 $X_j$를 아는 것과 $f_j(X_j)$를 아는 것은 같은 정보다. 따라서 $X$의 조건부 독립은 $f(X)$의 조건부 독립과 같고, $f(X)$는 정규이므로 그것은 $\Theta = \Sigma^{-1}$의 0과 같다.
+
+$$X_j \perp X_k \mid X_{\mathrm{rest}} \iff \theta_{jk} = 0$$
+
+정규 그래프 모형에서와 달리 이 등식은 변수의 주변 분포가 정규가 아니어도 성립한다. 대신 의존 구조가 정규 코퓰라라는 가정을 한다.
+
+### 2. 변환의 추정
+
+$f_j$를 알아야 하는 것은 아니다. $X_j$의 분포함수를 $F_j$, 표준정규의 분포함수를 $\Phi$라 하면 $\Phi^{-1}(F_j(X_j))$는 표준정규를 따르고, 이것은 $f_j(X_j)$를 평균 0, 분산 1로 표준화한 것과 같다. 그래서 변환은 분포함수를 추정해 표준정규의 분위수로 바꾸는 것으로 충분하다. 정밀도 행렬의 0의 위치는 표준화에 따라 바뀌지 않는다.
+
+분포함수는 경험분포함수 $\hat F_j$로 추정한다. 다만 표본의 최댓값에서 $\hat F_j = 1$이 되어 $\Phi^{-1}(1) = \infty$가 되므로 양 끝을 잘라 낸다(Liu et al., 2009, 식 6).
+
+$$\tilde F_j(x) = \min\big\lbrace\max\big(\hat F_j(x), \delta_n\big), 1 - \delta_n\big\rbrace, \qquad \delta_n = \frac{1}{4 n^{1/4}\sqrt{\pi \log n}}$$
+
+$\delta_n$은 자르는 정도이고, 저자들이 이론적인 수렴 속도에 맞추어 정한 값이다. 이 데이터에서는 $n$ = `r f0(N)`이므로 $\delta_n$ = `r f1(delta_n(N), 4)`이다. 변환한 값 $\Phi^{-1}(\tilde F_j(X_j))$의 상관행렬을 구하고, 그 다음은 그래프 모형 1장 V장과 동일하다. 그래프 라쏘로 적합하고 EBIC로 $\lambda$를 고른다. R로는 네 줄이다.
+
+```r
+dl <- 1 / (4 * n^0.25 * sqrt(pi * log(n)))
+Z  <- apply(X, 2, function(x) qnorm(pmin(pmax(ecdf(x)(x), dl), 1 - dl)))
+S  <- cor(Z)
+fit <- glasso(S, rho = lambda, penalize.diagonal = FALSE)
+```
+
+첫 단계에는 고를 파라미터가 없고 반복 계산도 없다. 변환을 데이터에서 추정한 대가는 표본이 작을 때의 정확도 손실이며, 데이터가 실제로 정규일 때 그 손실은 작다(IV장).
+
+### 3. 순위 상관에서 바로 구하는 방법
+
+변환을 거치지 않고 순위 상관에서 $\Sigma$를 바로 구하는 방법도 있다(Liu et al., 2012; Xue and Zou, 2012). 정규분포에서 Spearman 순위상관 $\rho^S$와 Pearson 상관 $\rho$ 사이에는 다음 관계가 있다.
+
+$$\rho = 2\sin\left(\frac{\pi}{6}\rho^S\right)$$
+
+순위는 단조 변환에 따라 바뀌지 않으므로, $X$의 Spearman 상관을 이 식에 넣으면 $f(X)$의 상관을 추정한 것이 된다. 이렇게 만든 행렬이 양의 정부호가 아닐 수 있어 그때는 가장 가까운 양의 정부호 행렬로 바꾼다. 이 장은 이것을 순위 기반 추정이라 부르고 셋째 방법으로 함께 적합한다.
+
+그래프 모형 1장 IX.1절이 Spearman 상관을 그대로 쓴 것은 이 식의 보정을 생략한 것이다. 보정은 상관의 크기를 조금 키우는데, 이 데이터에서 가장 큰 차이는 `r f1(max(abs(R_s - R_sp)[UT]), 3)`이다. 그래서 그 절의 결론은 그대로다.
+
+### 4. 동점
+
+II.1절의 모형은 변수가 연속이라고 가정한다. 경험분포함수는 같은 값을 가진 사람들에게 같은 값을 준다. WOMAC 통증이 0점인 `r pc(mean(X[, "pain"] == min(X[, "pain"])))`%는 모두 같은 정규 점수 하나를 받는다. 변환한 변수는 그 점에 사람이 몰린 분포가 되고, 정규가 되지 않는다. 동점이 많은 변수에서 nonparanormal의 변환은 분포를 정규로 만들지 못한다. 그 영향은 III.1절에서 보고 IV장에서 따로 점검한다.
+
+## III. OAI에 적용한 결과
+
+### 1. 추정한 변환
+
+그림 1은 네 노드의 추정한 변환이다. 가로축은 원래 점수, 세로축은 변환한 정규 점수다. 점 하나가 값 하나다.
+
+```{r fig1}
+#| fig-cap: "**그림 1. 네 노드의 추정한 변환 (원래 점수와 정규 점수)**"
+#| fig-height: 2.6
+show_nodes <- intersect(c("pain", "cesd", "pase", "kl"), NODES)
+tr <- rbindlist(lapply(show_nodes, function(v) unique(data.table(node = lab(v), x = X[, v], z = Z[, v]))))
+tr[, node := factor(node, lab(show_nodes))]
+ggplot(tr, aes(x, z)) + geom_step(colour = "grey60", linewidth = 0.3) + geom_point(size = 0.5) +
+  facet_wrap(~node, nrow = 1, scales = "free_x") + labs(x = "원래 점수", y = "정규 점수")
+```
+
+그림에서 PASE는 값의 수가 많아 변환이 매끄러운 곡선이고, 오른쪽 꼬리를 눌러 분포를 정규에 가깝게 만든다. CES-D의 변환은 낮은 점수 쪽에서 가파르고 높은 점수 쪽에서 완만하다. 높은 점수의 차이를 작게 만든다는 뜻이다. WOMAC 통증은 0점에 사람이 몰려 있어 그 점 하나에서 변환이 시작되고, KL 등급은 다섯 점이 전부다. 네 변환 모두 위쪽 끝이 평평한 것은 II.2절의 $\delta_n$으로 자른 곳이다. 표본의 위쪽 `r pc(delta_n(N), 1)`%에 드는 값은 모두 같은 정규 점수를 받는다.
+
+표 2는 변환 전후의 왜도다. 마지막 열은 최저값과 최고값 가운데 사람이 더 많이 몰린 쪽의 비율이다.
+
+```{r table2}
+#| output: asis
+ends <- apply(X, 2, function(x) 100 * max(mean(x == min(x)), mean(x == max(x))))
+t2 <- data.table(노드 = lab(NODES), `변환 전` = apply(X, 2, skew), `변환 후` = apply(Z, 2, skew),
+                 `한쪽 끝에 몰린 비율(%)` = ends)
+cat("**표 2. 변환 전후의 왜도**\n\n")
+print(knitr::kable(t2[order(-abs(`변환 후`))], digits = c(0, 2, 2, 1)))
+cont <- t2[ends[NODES] < 5]; mid <- t2[ends[NODES] >= 5 & ends[NODES] < 20]; tied <- t2[ends[NODES] >= 20]
+rng <- function(d) paste0(f1(min(abs(d[["변환 후"]]))), "\\~", f1(max(abs(d[["변환 후"]]))))
+```
+
+표에서 한쪽 끝에 몰린 사람이 5%보다 적은 `r nrow(cont)`개 노드는 변환 후 왜도의 절대값이 `r f1(max(abs(cont[["변환 후"]])))` 이하로 줄어든다. 원래 왜도의 절대값이 1을 넘던 SF-12의 두 점수도 여기에 든다. `r if (nrow(mid)) paste0("5\\~20%가 몰린 노드(", paste(mid$노드, collapse = ", "), ")는 왜도의 절대값이 ", rng(mid), "에 남고, ") else ""`20% 넘게 몰린 `r nrow(tied)`개 노드는 `r rng(tied)`에 남는다. KL 등급처럼 원래 대칭에 가까웠던 노드는 오히려 왜도가 커진다. II.4절에서 말한 동점의 한계다. 이 데이터에서 nonparanormal의 변환이 분포를 바로잡는 것은 연속 변수에서이고, 증상 점수에서는 아니다.
+
+### 2. 세 그래프
+
+표 3은 세 방법으로 추정한 그래프를 요약한 것이다. 상관과 부분상관의 일치는 `r EDGES`쌍의 값을 정규 그래프 모형의 값과 상관시킨 것이다.
+
+```{r table3}
+#| output: asis
+sumrow <- function(f, Rm, col) data.table(λ = f$lambda, `0이 아닌 엣지` = f$edges,
+  `절대값 0.1 이상인 엣지` = sum(abs(f$pcor[UT]) >= 0.1),
+  `상관의 일치` = cor(R_g[UT], Rm[UT]), `부분상관의 일치` = cor(G$pcor[UT], f$pcor[UT]))
+t3 <- rbind(cbind(방법 = "정규 그래프 모형", sumrow(G, R_g)), cbind(방법 = "Nonparanormal", sumrow(Np, R_n)),
+            cbind(방법 = "순위 기반", sumrow(Sk, R_s)))
+cat("**표 3. 세 방법의 그래프 (EBIC로 고른 그래프 라쏘)**\n\n")
+print(knitr::kable(t3, digits = c(0, 4, 0, 0, 3, 3)))
+only_n <- sum(abs(G$pcor[UT]) <= 1e-8 & abs(Np$pcor[UT]) > 1e-8)
+only_g <- sum(abs(G$pcor[UT]) > 1e-8 & abs(Np$pcor[UT]) <= 1e-8)
+new_max <- if (only_n > 0) max(abs(Np$pcor[UT][abs(G$pcor[UT]) <= 1e-8])) else NA
+both10 <- sum(abs(G$pcor[UT]) >= 0.1 & abs(Np$pcor[UT]) >= 0.1)
+```
+
+표에서 세 그래프는 거의 같다(부분상관의 일치: nonparanormal `r f1(t3[["부분상관의 일치"]][2], 3)`, 순위 기반 `r f1(t3[["부분상관의 일치"]][3], 3)`). `r if (only_n > 0 && only_g == 0) sprintf("정규 그래프 모형의 엣지는 nonparanormal에도 모두 있고, nonparanormal에만 있는 엣지가 %d쌍 더 있다. 그 엣지들의 부분상관은 절대값이 모두 %s 이하여서 그림에는 나타나지 않는다.", only_n, f1(new_max, 3)) else sprintf("Nonparanormal에만 있는 엣지는 %d쌍, 정규 그래프 모형에만 있는 엣지는 %d쌍이다.", only_n, only_g)` `r if (both10 == t3[1, 4][[1]]) sprintf("절대값 0.1 이상인 엣지 %d쌍은 nonparanormal에서도 모두 0.1 이상이다.", both10) else sprintf("절대값 0.1 이상인 엣지는 정규 그래프 모형의 %d쌍 가운데 %d쌍이 nonparanormal에서도 0.1 이상이다.", t3[1, 4][[1]], both10)` 그래프 모형 1장 VIII.3절에서 그래프로 알아낸 것, 즉 증상 점수의 묶음, 수행 검사의 묶음, 우울과 정신 점수의 묶음은 세 방법에서 같다.
+
+### 3. 달라진 엣지
+
+표 4는 정규 그래프 모형과 nonparanormal의 부분상관이 가장 크게 다른 여섯 쌍이다.
+
+```{r table4}
+#| output: asis
+d6 <- E[order(-abs(gg - gn))][1:min(6, .N)]
+t4 <- d6[, .(`두 노드` = paste(lab(j), lab(k), sep = ", "), `상관 (Pearson)` = rg, `상관 (정규 점수)` = rn,
+             `부분상관 (정규)` = gg, `부분상관 (nonparanormal)` = gn, `부분상관 (순위 기반)` = gs)]
+cat("**표 4. 두 방법의 부분상관이 가장 크게 다른 여섯 쌍**\n\n")
+print(tab(t4, 2))
+top <- d6[1]
+```
+
+표에서 가장 크게 다른 쌍은 `r lab(top$j)`, `r lab(top$k)`이다. 부분상관이 정규 그래프 모형에서 `r f1(top$gg)`, nonparanormal에서 `r f1(top$gn)`이며, 차이는 상관 자체에서 이미 나타난다. Pearson 상관은 `r f1(top$rg)`, 정규 점수의 상관은 `r f1(top$rn)`이다.
+
+```{r cesd}
+cm <- has_cm <- all(c("cesd", "mcs") %in% NODES)
+if (has_cm) {
+  hi <- X[, "cesd"] >= 16
+  r_lo <- cor(X[!hi, "cesd"], X[!hi, "mcs"]); r_hi <- cor(X[hi, "cesd"], X[hi, "mcs"])
+  share_hi <- mean(hi)
+} else r_lo <- r_hi <- share_hi <- NA_real_
+```
+
+CES-D와 SF-12 정신 점수의 경우 그 이유는 분포의 꼬리에 있다. CES-D는 16점 이상을 우울 증상의 선별 기준으로 쓰며, 이 표본에서 16점 이상인 사람은 `r pc(share_hi)`%다. 두 점수의 상관을 16점 이상인 사람들 안에서 구하면 `r f1(r_hi)`, 16점 미만인 사람들 안에서 구하면 `r f1(r_lo)`이어서 둘 다 전체의 Pearson 상관보다 약하다. 전체의 상관이 강한 것은 16점 이상인 소수가 CES-D에서도 SF-12 정신 점수에서도 나머지와 멀리 떨어져 있기 때문이다. Pearson 상관은 원래 점수의 크기를 그대로 쓰므로 멀리 떨어진 사람일수록 무게를 많이 받는다. 정규 점수는 그림 1에서 보았듯 CES-D의 높은 점수 사이의 간격을 줄이므로, 그 소수의 무게가 작아진다.
+
+두 값 가운데 어느 것이 맞는지는 이 데이터가 정하지 않는다. 두 방법은 서로 다른 것을 추정한다. 정규 그래프 모형의 부분상관은 원래 점수의 척도에서 선형 관계의 강도이고, nonparanormal의 부분상관은 변수마다 단조 변환을 허락했을 때 정규 코퓰라의 파라미터다. CES-D의 점수가 우울의 정도에 비례하는 척도라고 본다면 앞의 것이, 점수의 순서만 의미가 있다고 본다면 뒤의 것이 질문에 맞다.
+
+그림 2는 두 방법의 그래프를 함께 그린 것이다. 그래프 모형 1장 그림 1의 오른쪽과 같은 방식으로, 절대값 0.1 이상인 엣지만 그렸다.
+
+```{r fig2}
+#| fig-cap: "**그림 2. 정규 그래프 모형과 nonparanormal의 부분상관 그래프 (절대값 0.1 이상인 엣지)**"
+ang <- pi / 2 - 2 * pi * (seq_len(P) - 1) / P
+pos <- data.table(node = NODES, x = cos(ang), y = sin(ang), label = lab(NODES))
+edge_dt <- function(M, name) {
+  e <- data.table(j = NODES[row(M)[UT]], k = NODES[col(M)[UT]], w = M[UT])[abs(w) >= 0.1]
+  e <- merge(merge(e, pos[, .(j = node, x, y)], by = "j"), pos[, .(k = node, xend = x, yend = y)], by = "k")
+  e[, `:=`(graph = name, sign = ifelse(w > 0, "양", "음"))]
+}
+GN <- c("정규 그래프 모형", "Nonparanormal")
+ed <- rbind(edge_dt(G$pcor, GN[1]), edge_dt(Np$pcor, GN[2])); ed[, graph := factor(graph, GN)]
+nd <- rbind(cbind(pos, graph = GN[1]), cbind(pos, graph = GN[2])); nd[, graph := factor(graph, GN)]
+ggplot() +
+  geom_segment(data = ed, aes(x, y, xend = xend, yend = yend, linewidth = abs(w), linetype = sign), colour = "grey25") +
+  geom_point(data = nd, aes(x, y), shape = 21, size = 2.6, fill = "white", colour = "black") +
+  geom_text(data = nd, aes(1.1 * x, ifelse(abs(x) < 0.2, 1.2, 1.1) * y, label = label, hjust = ifelse(abs(x) < 0.2, 0.5, ifelse(x > 0, 0, 1))), size = 2.5, family = "malgun") +
+  scale_linewidth(range = c(0.2, 2.4), limits = c(0.1, 1), guide = "none") +
+  scale_linetype_manual(values = c(양 = "solid", 음 = "22"), name = NULL) +
+  facet_wrap(~graph) + coord_equal(xlim = c(-2.3, 2.3), ylim = c(-1.3, 1.3)) +
+  theme_void(base_family = "malgun", base_size = 9) + theme(legend.position = "bottom", strip.text = element_text(size = 9))
+```
+
+```{r fig2-diff}
+add10 <- E[abs(gn) >= 0.1 & abs(gg) < 0.1]
+same_sign <- E[abs(gg) >= 0.1, all(sign(gg) == sign(gn))]
+add_txt <- if (nrow(add10)) paste(add10[, sprintf("%s, %s (%s)", lab(j), lab(k), f1(gn))], collapse = "; ") else ""
+```
+
+그림에서 정규 그래프 모형의 엣지는 nonparanormal에도 모두 `r if (same_sign) "같은 부호로 " else ""`있고, 굵기만 조금 다르다. `r if (nrow(add10)) sprintf("Nonparanormal에는 절대값이 0.1을 조금 넘는 엣지가 %d쌍 더 있다. 두 쌍은 %s이고, 괄호 안은 nonparanormal의 부분상관이다. 정규 그래프 모형에서는 절대값이 0.1보다 작았다.", nrow(add10), add_txt) else ""` 이 데이터에서는 정규 가정을 풀어도 그래프의 모양이 거의 바뀌지 않는다.
+
+## IV. 시뮬레이션
+
+### 1. 설계
+
+III장의 결과만으로는 두 방법이 비슷한 이유를 알 수 없다. nonparanormal이 할 일이 없어서인지(데이터가 정규에 가까워서), 할 수 없어서인지(동점 때문에) 구분되지 않는다. 참 그래프를 정해 두고 데이터를 만들어 이것을 가려낸다.
+
+```{r sim-setup}
+# 참 그래프: OAI 정규 점수의 상관에 큰 벌점을 준 그래프 라쏘. 작은 부분상관은 0으로 둔다
+Th0 <- glasso(R_n, 0.05, penalize.diagonal = FALSE)$wi
+P0 <- -cov2cor(Th0); diag(P0) <- 1
+Th0[abs(P0) < 0.03] <- 0
+if (min(eigen(Th0, symmetric = TRUE)$values) <= 0) Th0 <- glasso(R_n, 0.05, penalize.diagonal = FALSE)$wi
+S0 <- cov2cor(solve(Th0)); P0 <- -cov2cor(Th0); diag(P0) <- 1
+truth <- abs(P0[UT]) > 1e-8
+floor_share <- apply(X, 2, function(x) mean(x == min(x)))
+kl_cut <- if ("kl" %in% NODES) qnorm(cumsum(table(X[, "kl"])) / N)[-uniqueN(X[, "kl"])] else NULL
+gen <- function(n, sc) {
+  Zs <- mvrnorm(n, rep(0, P), S0); colnames(Zs) <- NODES
+  if (sc == "skew") for (j in seq_len(P)) Zs[, j] <- if (j %% 2 == 1) exp(1.2 * Zs[, j]) else Zs[, j]^3
+  if (sc == "floor") {
+    for (j in seq_len(P)) if (floor_share[j] >= 0.05 && NODES[j] != "kl") Zs[, j] <- pmax(Zs[, j], qnorm(floor_share[j]))
+    if (!is.null(kl_cut)) Zs[, "kl"] <- findInterval(Zs[, "kl"], kl_cut)
+  }
+  Zs
+}
+SC <- c(normal = "정규", skew = "치우친 연속 분포", floor = "OAI와 같은 바닥과 순서 척도")
+NS <- c(200, 1000); REPS <- 100
+LAMS_SIM <- exp(seq(log(0.5), log(0.002), length.out = 30))
+```
+
+참 그래프는 OAI 데이터에서 가져온다. III장의 정규 점수 상관에 큰 벌점($\lambda$ = 0.05)을 준 그래프 라쏘로 정밀도 행렬을 구하고, 부분상관의 절대값이 0.03보다 작은 원소는 0으로 둔다. 그렇게 정한 참 그래프는 `r EDGES`쌍 가운데 `r sum(truth)`쌍에 엣지가 있다. 이 정밀도 행렬로 다변량 정규 $Z$를 만들고, 세 가지 방식으로 관측값 $X$를 만든다.
+
+- 정규: $X = Z$. Nonparanormal이 할 일이 없는 경우다.
+- 치우친 연속 분포: 홀수 번째 노드는 $X_j = \exp(1.2 Z_j)$, 짝수 번째 노드는 $X_j = Z_j^3$이다. 단조 변환이므로 nonparanormal의 가정은 맞고 정규 그래프 모형의 가정은 틀린다.
+- OAI와 같은 바닥과 순서 척도: 최저값에 5% 이상 몰린 노드는 OAI와 같은 비율이 최저값에 오도록 $Z_j$를 아래에서 자르고, KL 등급은 OAI의 등급별 비율대로 다섯 단계로 나눈다. 나머지 노드는 $X_j = Z_j$다.
+
+표본 크기는 200명과 1,000명이고, 조건마다 `r REPS`번 되풀이했다. 세 방법 모두 그래프 라쏘를 EBIC로 골라 적합했다. 평가 지표는 셋이다. 참 엣지 가운데 찾아낸 비율, 참 그래프에 없는 엣지를 그린 수, 그리고 부분상관이 참값에서 벗어난 정도(평균제곱오차의 제곱근)다. 마지막 지표의 참값은 $Z$의 부분상관이다.
+
+### 2. 결과
+
+표 5는 조건마다 세 방법의 평균이다. 없는 엣지를 그린 수가 1,000명에서 더 많은 것은 표본이 커지면 EBIC가 작은 벌점을 고르고, 그래프 라쏘가 참 엣지와 상관된 쌍에 작은 값을 남기기 때문이다. 세 방법에 공통이어서 방법의 비교에는 영향을 주지 않는다.
+
+```{r sim}
+#| output: asis
+set.seed(SEED)
+sim1 <- function(Xs, n) {
+  Ss <- list(`정규 그래프 모형` = cor(Xs), Nonparanormal = cor(npn_scores(Xs)), `순위 기반` = skeptic(Xs))
+  rbindlist(lapply(Ss, function(S) {
+    M <- fit_glasso(S, n, LAMS_SIM)$pcor; est <- abs(M[UT]) > 1e-8
+    data.table(tpr = mean(est[truth]), fp = sum(est & !truth), rmse = sqrt(mean((M[UT] - P0[UT])^2)))
+  }), idcol = "방법")
+}
+SIM <- rbindlist(lapply(names(SC), function(sc) rbindlist(lapply(NS, function(n)
+  rbindlist(lapply(seq_len(REPS), function(r) sim1(gen(n, sc), n)))[, `:=`(sc = sc, n = n)]))))
+sm <- SIM[, .(tpr = mean(tpr), fp = mean(fp), rmse = mean(rmse)), by = .(sc, n, 방법)]
+t5 <- sm[, .(`데이터` = SC[sc], 표본 = f0(n), 방법, `참 엣지를 찾은 비율(%)` = f1(100 * tpr, 0),
+              `없는 엣지를 그린 수` = f1(fp, 1), `부분상관의 오차` = f1(rmse, 3))]
+cat(sprintf("**표 5. 참 그래프를 아는 시뮬레이션 (%d회 반복의 평균, 참 엣지 %d쌍, 없는 엣지 %d쌍)**\n\n", REPS, sum(truth), sum(!truth)))
+print(knitr::kable(t5, align = "lllrrr"))
+GM <- "정규 그래프 모형"
+g <- function(s, nn, m, v) sm[sm$sc == s & sm$n == nn & sm$방법 == m][[v]]
+```
+
+표에서 정규 데이터에서는 세 방법이 거의 같다. 1,000명일 때 참 엣지를 찾은 비율이 정규 그래프 모형 `r f1(100 * g("normal", 1000, GM, "tpr"), 0)`%, nonparanormal `r f1(100 * g("normal", 1000, "Nonparanormal", "tpr"), 0)`%이고, 200명일 때는 nonparanormal이 `r f1(100 * (g("normal", 200, GM, "tpr") - g("normal", 200, "Nonparanormal", "tpr")), 0)`%포인트 낮다. 변환을 데이터에서 추정한 대가이며, 정규 가정이 맞을 때 nonparanormal을 써서 잃는 것은 이 정도다.
+
+치우친 연속 분포에서는 결과가 갈린다. 정규 그래프 모형은 200명일 때 참 엣지의 `r f1(100 * g("skew", 200, GM, "tpr"), 0)`%만 찾고, 1,000명에서도 `r f1(100 * g("skew", 1000, GM, "tpr"), 0)`%다. 1,000명일 때 부분상관의 오차는 정규 데이터일 때의 `r f1(g("skew", 1000, GM, "rmse") / g("normal", 1000, GM, "rmse"), 1)`배다. 없는 엣지를 그린 수가 적은 것은 장점이 아니라, 엣지를 전반적으로 적게 그린 결과다. Nonparanormal과 순위 기반 추정은 정규 데이터일 때와 거의 같은 성적을 낸다. 순위는 단조 변환에 따라 바뀌지 않으므로, 이 두 방법에게 치우친 데이터와 정규 데이터는 같은 데이터다. Liu et al. (2009)의 시뮬레이션이 보인 결과와 같다.
+
+OAI와 같은 바닥과 순서 척도에서는 세 방법이 다시 비슷하다. 1,000명일 때 부분상관의 오차가 거의 같고(정규 그래프 모형 `r f1(g("floor", 1000, GM, "rmse"), 3)`, nonparanormal `r f1(g("floor", 1000, "Nonparanormal", "rmse"), 3)`), 정규 데이터일 때보다 조금 크다. 동점은 세 방법 모두에게 같은 정보 손실이고, nonparanormal의 변환은 그것을 되돌리지 못한다. III장에서 두 방법이 비슷했던 이유가 여기에 있다. OAI의 연속 변수는 치우쳐 있어도 시뮬레이션의 지수 변환이나 세제곱만큼 심하지 않다. 정규에서 크게 벗어난 증상 점수는 동점 때문에 벗어난 것이어서 nonparanormal이 고칠 수 있는 종류가 아니다.
+
+## V. 정리와 한계
+
+이 장의 결과는 셋이다. 첫째, OAI 기준 방문의 `r P`개 노드에서 nonparanormal은 정규 그래프 모형과 거의 같은 그래프를 준다. 두 방법의 부분상관은 거의 일치한다(표 3, 일치 `r f1(t3[["부분상관의 일치"]][2], 3)`). 둘째, 가장 크게 달라진 엣지는 CES-D처럼 연속이면서 오른쪽 꼬리가 긴 변수에 붙은 것이고, 그 차이는 두 방법이 꼬리의 사람에게 주는 무게에서 온다. 셋째, 시뮬레이션에서 nonparanormal은 치우친 연속 분포에서 정규 그래프 모형보다 훨씬 낫고, 정규 데이터에서 잃는 것은 작으며, 바닥 효과와 순서 척도는 고치지 못한다.
+
+분석의 관점에서 남는 교훈은 정규 가정이 깨지는 방식을 먼저 구분하라는 것이다. 연속이지만 치우친 변수가 많다면 nonparanormal이나 순위 기반 추정을 쓸 이유가 분명하고, 정규 그래프 모형 대신 써도 잃는 것이 적다. 같은 값에 사람이 몰린 변수가 문제라면 nonparanormal은 답이 아니다. 그때는 관측한 점수를 연속인 잠재 변수가 잘린 것으로 다루는 방법이 필요하다(Fan et al., 2017).
+
+한계는 넷이다. 첫째, 동점이 많은 변수를 잠재 변수로 다루는 방법은 적합하지 않았다. 둘째, nonparanormal에서도 EBIC는 변환한 변수의 정규 가능도로 계산했다. 변환을 추정한 불확실성은 반영되지 않는다. 셋째, 엣지의 붓스트랩 신뢰구간은 구하지 않았다. 표본이 `r f0(N)`명이어서 그래프 모형 1장 IX.2절처럼 구간이 좁을 것으로 보이지만 확인하지 않았다. 넷째, 시뮬레이션의 참 그래프는 OAI 데이터에서 가져온 하나뿐이고, 변환의 종류도 두 가지뿐이다.
+
+## 참고문헌
+
+Chen, J., and Chen, Z. (2008). "Extended Bayesian information criteria for model selection with large model spaces." *Biometrika* 95(3), 759–771.
+
+Fan, J., Liu, H., Ning, Y., and Zou, H. (2017). "High dimensional semiparametric latent graphical model for mixed data." *Journal of the Royal Statistical Society: Series B* 79(2), 405–421.
+
+Foygel, R., and Drton, M. (2010). "Extended Bayesian information criteria for Gaussian graphical models." *Advances in Neural Information Processing Systems* 23, 604–612.
+
+Friedman, J., Hastie, T., and Tibshirani, R. (2008). "Sparse inverse covariance estimation with the graphical lasso." *Biostatistics* 9(3), 432–441.
+
+Liu, H., Han, F., Yuan, M., Lafferty, J., and Wasserman, L. (2012). "High-dimensional semiparametric Gaussian copula graphical models." *Annals of Statistics* 40(4), 2293–2326.
+
+Liu, H., Lafferty, J., and Wasserman, L. (2009). "The nonparanormal: Semiparametric estimation of high dimensional undirected graphs." *Journal of Machine Learning Research* 10, 2295–2328.
+
+Sklar, A. (1959). "Fonctions de répartition à n dimensions et leurs marges." *Publications de l'Institut de Statistique de l'Université de Paris* 8, 229–231.
+
+Xue, L., and Zou, H. (2012). "Regularized rank-based estimation of high-dimensional nonparanormal graphical models." *Annals of Statistics* 40(5), 2541–2571.
