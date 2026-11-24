@@ -172,7 +172,7 @@
     <h2 class="h">개요</h2>
     <p class="sub lead">공개 재활 데이터 하나에 기본적인 분석 방법을 하나씩 적용하며 설명한다.</p>
     <h3>분석 방법의 묶음</h3>
-    <p>장은 방법의 계열로 묶었다. 묶음의 순서는 데이터의 구조를 따른다. 한 시점의 단면, 반복 측정, 사건까지의 시간, 처치의 효과, 여러 변수 사이의 관계의 순서다. 묶음 이름을 누르면 그 탭으로 간다.</p>
+    <p>장은 방법의 계열로 묶었다. 묶음의 순서는 데이터의 구조를 따른다. 한 시점의 횡단면, 반복 측정, 사건까지의 시간, 처치의 효과, 여러 변수 사이의 관계의 순서다. 묶음 이름을 누르면 그 탭으로 간다.</p>
     <div class="tblwrap">
       <table class="map">
         <thead><tr><th>묶음</th><th>장</th><th>분석 방법</th><th>분석 질문</th></tr></thead>
@@ -180,7 +180,7 @@
           <tr><td class="b" rowspan="2"><a href="#data" onclick="showTab('data');return false">데이터</a></td><td class="r">1</td><td>코호트 설계, 분석 단위와 군집, 척도의 성질, 결측의 기제</td><td>OAI는 누구를 무엇으로 측정했는가</td></tr>
           <tr><td class="r">2</td><td>완전 사례 분석, 다중 대체, 연쇄 방정식, Rubin의 규칙</td><td>값이 빠진 사람을 빼고 분석해도 되는가</td></tr>
           <tr><td class="b" rowspan="2"><a href="#regression" onclick="showTab('regression');return false">회귀</a></td><td class="r">1</td><td>교차표와 순위상관, 선형 회귀, 군집 강건 표준오차, 같은 사람의 두 무릎 비교</td><td>X선 손상과 통증은 얼마나 일치하는가</td></tr>
-          <tr><td class="r">2</td><td>승산비, 로지스틱 회귀, 표준화 위험, 보정과 판별력</td><td>X선 손상이 큰 무릎은 통증이 잦은가</td></tr>
+          <tr><td class="r">2</td><td>오즈비, 로지스틱 회귀, 표준화 위험, 보정과 판별력</td><td>X선 손상이 큰 무릎은 통증이 잦은가</td></tr>
           <tr><td class="b"><a href="#longitudinal" onclick="showTab('longitudinal');return false">종단 분석</a></td><td class="r">1</td><td>선형 혼합모형, 탈락의 점검, 잠재계층 궤적</td><td>통증은 시간에 따라 어떻게 변하는가</td></tr>
           <tr><td class="b" rowspan="2"><a href="#survival" onclick="showTab('survival');return false">생존 분석</a></td><td class="r">1</td><td>Kaplan-Meier, Cox 모형, 비례위험 점검, 시간가변 공변량</td><td>누가 언제 치환술에 이르는가</td></tr>
           <tr><td class="r">2</td><td>경쟁 사건, 누적 발생률, 원인별 위험비와 부분분포 위험비</td><td>사망은 치환술의 중도절단인가</td></tr>
@@ -308,7 +308,7 @@
   <!-- ============ 데이터 ============ -->
   <section role="tabpanel" id="tab-data" aria-labelledby="t-data">
     <h2 class="h">데이터</h2>
-    <p class="sub lead">무릎 골관절염을 무엇으로 측정하고, 이 책은 어떤 데이터를 쓰는가.</p>
+    <p class="sub lead">무릎 골관절염(osteoarthritis)을 무엇으로 측정하고, 이 책은 어떤 데이터를 쓰는가.</p>
 
     <h3>무엇으로 측정하는가</h3>
     <p>이 저서의 분석은 구조, 증상, 활동, 사건의 네 층을 측정한 값을 쓴다. 구조와 증상은 생각보다 덜 맞물린다. X선 손상이 큰데 아프지 않은 무릎도, 손상이 거의 없는데 아픈 무릎도 흔하다(아래의 1장과 <a href="#regression" onclick="showTab('regression');return false">회귀</a> 탭의 1장).</p>
@@ -328,7 +328,7 @@
 
     <h3>우리가 쓰는 데이터 — Osteoarthritis Initiative</h3>
     <div class="panel">
-      <p><b>무엇인가.</b> 무릎 골관절염이 있거나 생길 위험이 있는 45~79세 4,796명을 2004~2006년에 미국의 여러 임상센터에서 모아, 해마다 다시 부른 전향적 코호트(prospective cohort)다. 방문마다 설문(통증, 기능, 활동), 신체 계측(anthropometry), 무릎 X선과 MRI를 했고, 치환술은 의무기록으로 판정했다.</p>
+      <p><b>무엇인가.</b> 무릎 골관절염이 있거나 생길 위험이 있는 45~79세 4,796명을 2004~2006년에 미국의 여러 임상센터에서 모아, 해마다 다시 부른 전향적 코호트(prospective cohort)다. 방문마다 설문(통증, 기능, 활동), 신체 계측(anthropometry), 무릎 X선과 MRI를 했고, 치환술(total knee replacement)은 의무기록으로 판정했다.</p>
       <p><b>왜 이 데이터인가.</b> 같은 사람의 두 무릎을 16년 가까이 따라가며 구조, 증상, 활동, 수술을 함께 측정한 공개 데이터는 드물다. 궤적과 사건을 함께 다루는 재활의 질문에 맞는다.</p>
       <p><b>어디서 받나.</b> 미국 국립정신보건원 데이터 보관소(<a href="https://nda.nih.gov/oai" target="_blank" rel="noopener">NIMH Data Archive</a>)에서 로그인하고 이용 약관에 동의하면 받을 수 있다.</p>
     </div>
@@ -368,11 +368,11 @@
       <div class="study-num">1</div>
       <div class="study-body">
         <h4 class="study-title">데이터와 측정 — OAI는 누구를 무엇으로 측정했는가<span class="pill warn">초고</span></h4>
-        <p class="study-sub">코호트 설계 · 분석 단위와 군집(급내상관, 설계효과) · 척도의 성질(순서 척도, 합산 척도, 바닥 효과) · 결측의 기제와 생존자 선택</p>
+        <p class="study-sub">코호트 설계 · 분석 단위와 군집(급내상관, 설계효과) · 척도의 성질(순서 척도, 합산 척도, 바닥 효과) · 결측의 기제와 생존자 선택(survivor bias)</p>
         <p class="study-desc">다른 탭의 장들이 공통으로 쓰는 데이터를 다룬다. 등록자 4,796명이 누구이고, 무릎을 어떤 척도로 측정했으며, 16년 동안 무엇이 빠져나갔는지를 보고, 그 결과로부터 뒤 장에서 모형을 고를 때 고려해야 할 점을 정리한다.</p>
         <p class="study-lbl">OAI에 적용한 결과</p>
         <ul class="study-points">
-          <li>한 사람의 두 무릎은 닮는다. 급내상관이 통증 0.48, 기능 0.64로, 기능 점수는 무릎보다 사람의 상태를 더 많이 반영한다.</li>
+          <li>한 사람의 두 무릎은 닮는다. 급내상관(intraclass correlation)이 통증 0.48, 기능 0.64로, 기능 점수는 무릎보다 사람의 상태를 더 많이 반영한다.</li>
           <li>WOMAC은 바닥에 몰린 척도다. 기준 방문에서 통증 0점인 무릎이 44%이고, KL 3 무릎도 30%가 통증 0점이다.</li>
           <li>결측은 완전 무작위가 아니다. 기준 통증이 높고 덜 활동적인 사람이 8년 방문에 더 많이 빠졌고, 뒤 방문일수록 처음부터 덜 아팠던 사람들이 남는다.</li>
         </ul>
@@ -388,12 +388,12 @@
       <div class="study-num">2</div>
       <div class="study-body">
         <h4 class="study-title">결측의 다중 대체 — 값이 빠진 사람을 빼고 분석해도 되는가<span class="pill warn">초고</span></h4>
-        <p class="study-sub">완전 사례 분석 · 평균 대체와 회귀 대체 · 참값을 아는 지우기 실험 · 연쇄 방정식과 예측 평균 맞춤 · Rubin의 규칙 · 대체 모형에 넣을 변수 · 대체의 점검</p>
-        <p class="study-desc">1장이 결측의 기제를 설명했고, 이 장은 값이 빠진 데이터를 실제로 어떻게 분석하는지를 다룬다. 기준 방문의 통증을 구조 손상, 근력, 소득 등에 회귀하면서, 결측을 다루는 방식만 바꾸었을 때 계수와 표준오차가 어떻게 달라지는지를 본다. 선형 회귀와 로지스틱 회귀를 쓰므로 회귀 탭의 두 장을 먼저 읽는 것이 좋다.</p>
+        <p class="study-sub">완전 사례 분석(complete-case analysis) · 평균 대체(mean imputation)와 회귀 대체(regression imputation) · 참값을 아는 지우기 실험 · 연쇄 방정식(chained equations)과 예측 평균 맞춤(predictive mean matching) · Rubin의 규칙 · 대체 모형에 넣을 변수 · 대체의 점검</p>
+        <p class="study-desc">1장이 결측의 기제를 설명했고, 이 장은 값이 빠진 데이터를 실제로 어떻게 분석하는지를 다룬다. 기준 방문의 통증을 구조 손상, 근력, 소득 등에 회귀하면서, 결측을 다루는 방식만 바꾸었을 때 계수와 표준오차가 어떻게 달라지는지를 본다. 선형 회귀(linear regression)와 로지스틱 회귀(logistic regression)를 쓰므로 회귀 탭의 두 장을 먼저 읽는 것이 좋다.</p>
         <p class="study-lbl">OAI에 적용한 결과</p>
         <ul class="study-points">
           <li>변수 하나의 결측은 12%를 넘지 않지만, 회귀의 변수가 모두 있는 사람은 4,796명 가운데 3,720명이다. 완전 사례 분석은 22%를 버리고, 통증이 심한 사람이 더 많이 빠져 있다.</li>
-          <li>값을 일부러 지운 실험에서, 통증에 따라 지우면 완전 사례 분석의 근력 계수는 참값 -0.57에서 -0.40으로 벗어나고 다중 대체는 -0.60으로 참값 근처에 있다. 평균 대체는 완전 무작위로 지워도 틀린다.</li>
+          <li>값을 일부러 지운 실험에서, 통증에 따라 지우면 완전 사례 분석의 근력 계수는 참값 -0.57에서 -0.40으로 벗어나고 다중 대체(multiple imputation)는 -0.60으로 참값 근처에 있다. 평균 대체는 완전 무작위로 지워도 틀린다.</li>
           <li>실제 데이터에서 다중 대체는 표준오차를 3~10% 줄이고 소득과 성별의 계수를 19% 안팎 키운다. 결론은 같고 계수의 크기와 정밀도가 달라진다.</li>
         </ul>
         <div class="study-figs"><img src="img/ch13_imputed.png" alt="대퇴사두근 근력의 관측값과 채운 값의 분포. 두 분포의 모양이 비슷하고 채운 값이 조금 낮은 쪽에 있다" loading="lazy"></div>
@@ -414,13 +414,13 @@
       <div class="study-num">1</div>
       <div class="study-body">
         <h4 class="study-title">구조와 증상 — X선 손상과 통증은 얼마나 일치하는가<span class="pill warn">초고</span></h4>
-        <p class="study-sub">순서 척도의 연관 · 군집 강건 표준오차 · 같은 사람의 두 무릎을 비교하는 사람 안 설계 · 바닥 효과를 다루는 모형(검열 정규, 두 부분 모형)</p>
+        <p class="study-sub">순서 척도(ordinal scale)의 연관 · 군집 강건 표준오차 · 같은 사람의 두 무릎을 비교하는 사람 안 설계 · 바닥 효과(floor effect)를 다루는 모형(검열 정규, 두 부분 모형)</p>
         <p class="study-desc">재활을 찾는 이유는 통증인데 진단은 X선에서 시작한다. 기준 방문의 무릎 8,944개로 KL 등급과 WOMAC 통증의 어긋남을 측정하고, 그 어긋남이 사람마다 다른 통증 보고에서 오는지, 무릎의 차이에서 오는지를 구분한다.</p>
         <p class="study-lbl">OAI에 적용한 결과</p>
         <ul class="study-points">
-          <li>연관은 같은 방향이지만 약하다. 순위상관은 0.27이고, KL 3 이상인 무릎의 26%는 통증이 없으며 KL 0~1인 무릎의 13%는 통증이 5점 이상이다.</li>
+          <li>연관은 같은 방향이지만 약하다. 순위상관(rank correlation)은 0.27이고, KL 3 이상인 무릎의 26%는 통증이 없으며 KL 0~1인 무릎의 13%는 통증이 5점 이상이다.</li>
           <li>같은 사람의 두 무릎을 비교해도 연관은 크게 바뀌지 않는다. 어긋남은 주로 사람이 아니라 무릎 사이의 차이에서 온다.</li>
-          <li>바닥 효과를 따로 모형화하면 X선 손상은 통증이 생기는지와 통증의 크기에 다르게 작용한다. 통증 0의 비율은 두 부분 모형이 검열 정규 모형보다 잘 재현한다.</li>
+          <li>바닥 효과를 따로 모형화하면 X선 손상은 통증이 생기는지와 통증의 크기에 다르게 작용한다. 통증 0의 비율은 두 부분 모형(two-part model)이 검열 정규 모형(censored normal model)보다 잘 재현한다.</li>
         </ul>
         <div class="study-figs"><img src="img/ch02_pain_by_kl.png" alt="KL 등급별 WOMAC 통증 점수의 분포. KL 0부터 3까지는 0점이 가장 많고, KL 4는 봉우리가 오른쪽에 있다" loading="lazy"></div>
         <div class="study-links">
@@ -434,13 +434,13 @@
       <div class="study-num">2</div>
       <div class="study-body">
         <h4 class="study-title">로지스틱 회귀 — X선 손상이 큰 무릎은 통증이 잦은가<span class="pill warn">초고</span></h4>
-        <p class="study-sub">위험 차이, 위험비, 승산비 · 로짓 변환과 최대가능도 추정 · 군집 강건 표준오차 · 표준화 위험 · 보정과 판별력(ROC, AUC) · 조건부 로지스틱 회귀</p>
-        <p class="study-desc">1장과 동일한 질문을 결과의 형태만 바꾸어 다시 분석한다. 기준 방문의 무릎 8,834개에서 "지난 12개월 동안 한 달의 대부분의 날에 아팠는가"를 결과로 두고, 승산비가 무엇이고 무엇이 아닌지를 수치로 보인다.</p>
+        <p class="study-sub">위험 차이(risk difference), 위험비(risk ratio), 오즈비(odds ratio) · 로짓(logit) 변환과 최대가능도 추정(maximum likelihood estimation) · 군집 강건 표준오차 · 표준화 위험(standardized risk) · 보정과 판별력(ROC, AUC) · 조건부 로지스틱 회귀(conditional logistic regression)</p>
+        <p class="study-desc">1장과 동일한 질문을 결과의 형태만 바꾸어 다시 분석한다. 기준 방문의 무릎 8,834개에서 "지난 12개월 동안 한 달의 대부분의 날에 아팠는가"를 결과로 두고, 오즈비가 무엇이고 무엇이 아닌지를 수치로 보인다.</p>
         <p class="study-lbl">OAI에 적용한 결과</p>
         <ul class="study-points">
-          <li>같은 비교의 세 요약이 크게 다르다. KL 4와 KL 0을 비교하면 승산비는 7.0, 위험비는 2.6, 위험 차이는 44%포인트다. 잦은 통증이 KL 0에서도 27%로 흔하기 때문이다.</li>
-          <li>승산비가 커도 판별력은 낮다. AUC가 KL 등급만으로 0.62, 나이, 성별, BMI, 우울을 더해 0.67이다. 무릎 대부분에서 X선은 통증의 유무를 거의 알려 주지 못한다.</li>
-          <li>같은 사람의 두 무릎을 비교하면 관계가 훨씬 강하게 나타난다. 조건부 로지스틱 회귀에서 KL 4의 승산비는 51(24~105)이다.</li>
+          <li>같은 비교의 세 요약이 크게 다르다. KL 4와 KL 0을 비교하면 오즈비는 7.0, 위험비는 2.6, 위험 차이는 44%포인트다. 잦은 통증이 KL 0에서도 27%로 흔하기 때문이다.</li>
+          <li>오즈비가 커도 판별력(discrimination)은 낮다. AUC가 KL 등급만으로 0.62, 나이, 성별, BMI, 우울을 더해 0.67이다. 무릎 대부분에서 X선은 통증의 유무를 거의 알려 주지 못한다.</li>
+          <li>같은 사람의 두 무릎을 비교하면 관계가 훨씬 강하게 나타난다. 조건부 로지스틱 회귀에서 KL 4의 오즈비는 51(24~105)이다.</li>
         </ul>
         <div class="study-figs"><img src="img/ch12_roc.png" alt="두 모형의 ROC 곡선. 두 곡선 모두 대각선에서 조금만 떨어져 있고, 공변량을 더한 모형의 곡선이 조금 위에 있다" loading="lazy"></div>
         <div class="study-links">
@@ -460,13 +460,13 @@
       <div class="study-num">1</div>
       <div class="study-body">
         <h4 class="study-title">통증의 궤적 — 시간에 따라 어떻게 변하고 누가 나빠지는가<span class="pill warn">초고</span></h4>
-        <p class="study-sub">선형 혼합모형(무작위 절편과 기울기, 사람 수준) · 무작위 결측 아래의 추정 · BLUP와 수축 · 평균으로의 회귀 · 잠재계층 궤적 모형</p>
-        <p class="study-desc">무릎 8,909개의 통증 관측 9만여 개로 16년의 궤적을 추정한다. 방문마다 남은 무릎의 평균과 무릎 안의 변화를 모은 혼합모형이 왜 다른 그림을 주는지를 보이고, 무릎마다의 궤적이 얼마나 흩어지는지, 그 흩어짐을 기준 특성이 얼마나 설명하는지를 본다.</p>
+        <p class="study-sub">선형 혼합모형(linear mixed model; 무작위 절편과 기울기, 사람 수준) · 무작위 결측(missing at random) 아래의 추정 · BLUP와 수축(shrinkage) · 평균으로의 회귀(regression to the mean) · 잠재계층 궤적 모형(latent class trajectory model)</p>
+        <p class="study-desc">무릎 8,909개의 통증 관측 9만여 개로 16년의 궤적을 추정한다. 방문마다 남은 무릎의 평균과 무릎 안의 변화를 모은 혼합모형(mixed model)이 왜 다른 그림을 주는지를 보이고, 무릎마다의 궤적이 얼마나 흩어지는지, 그 흩어짐을 기준 특성이 얼마나 설명하는지를 본다.</p>
         <p class="study-lbl">OAI에 적용한 결과</p>
         <ul class="study-points">
-          <li>방문별 평균은 통증이 줄어드는 것처럼 보이지만(2.33점에서 1.89점), 혼합모형의 평균 궤적은 거의 평평하다(연 0.02점). 차이는 아픈 무릎이 빠져나간 생존자 선택이다.</li>
+          <li>방문별 평균은 통증이 줄어드는 것처럼 보이지만(2.33점에서 1.89점), 혼합모형의 평균 궤적은 거의 평평하다(연 0.02점). 차이는 아픈 무릎이 빠져나간 생존자 선택(survivor bias)이다.</li>
           <li>평균은 평평해도 무릎마다의 기울기는 흩어져 있어, 10년 동안 3점 가까이 나빠지는 무릎과 좋아지는 무릎이 함께 있다. 기준 KL 등급, 나이, BMI는 그 흩어짐을 작게만 설명한다.</li>
-          <li>치환술을 받은 무릎의 기울기는 전체의 10배 남짓이다. 이 무릎들에게는 무작위 결측 가정이 성립하지 않으며, 종단 측정과 사건 시간을 함께 다루는 결합모형(연구 탭)이 필요한 이유다.</li>
+          <li>치환술(total knee replacement)을 받은 무릎의 기울기는 전체의 10배 남짓이다. 이 무릎들에게는 무작위 결측 가정이 성립하지 않으며, 종단 측정과 사건 시간을 함께 다루는 결합모형(연구 탭)이 필요한 이유다.</li>
         </ul>
         <div class="study-figs"><img src="img/ch03_mean_vs_model.png" alt="방문별 평균 통증(점)은 시간에 따라 낮아지고, 혼합모형의 평균 궤적(선)은 거의 평평하다" loading="lazy"></div>
         <div class="study-links">
@@ -486,12 +486,12 @@
       <div class="study-num">1</div>
       <div class="study-body">
         <h4 class="study-title">인공관절 치환술까지의 시간 — 누가 언제 수술에 이르는가<span class="pill warn">초고</span></h4>
-        <p class="study-sub">사건 시간과 중도절단 · Kaplan-Meier · Cox 모형과 부분가능도 · 비례위험 가정의 점검 · 시간가변 공변량(계수 과정 표현, 내부 공변량)</p>
-        <p class="study-desc">무릎 8,912개의 16년 추적에서 치환술 875건을 분석한다. 중도절단된 관측을 어떻게 쓰는지에서 시작해, 한 공변량의 수준별 비교, 여러 공변량을 함께 넣는 회귀, 시간에 따라 바뀌는 공변량의 순서로 간다.</p>
+        <p class="study-sub">사건 시간과 중도절단(censoring) · Kaplan-Meier · Cox 모형과 부분가능도(partial likelihood) · 비례위험 가정(proportional hazards assumption)의 점검 · 시간가변 공변량(time-varying covariate; 계수 과정 표현, 내부 공변량)</p>
+        <p class="study-desc">무릎 8,912개의 16년 추적에서 치환술(total knee replacement) 875건을 분석한다. 중도절단된 관측을 어떻게 쓰는지에서 시작해, 한 공변량의 수준별 비교, 여러 공변량을 함께 넣는 회귀, 시간에 따라 바뀌는 공변량의 순서로 간다.</p>
         <p class="study-lbl">OAI에 적용한 결과</p>
         <ul class="study-points">
           <li>치환술의 위험은 기준 KL 등급에 따라 가장 크게 달라진다. 15년 누적 치환술은 KL 0이 2%, KL 3이 34%, KL 4가 66%이고, KL 4는 5년 안에 31%가 수술을 받았다.</li>
-          <li>같은 등급 안에서 수술 직전의 기능이 중요하다. 직전 방문의 기능 10점당 위험비는 1.76으로, 등록 시점 기능(1.24)보다 크다.</li>
+          <li>같은 등급 안에서 수술 직전의 기능이 중요하다. 직전 방문의 기능 10점당 위험비(hazard ratio)는 1.76으로, 등록 시점 기능(1.24)보다 크다.</li>
           <li>KL 등급의 위험비는 시간에 따라 변한다. 비례위험 가정이 성립하지 않으므로 위험비는 추적 기간 전체의 평균적인 비로 해석한다.</li>
         </ul>
         <div class="study-figs"><img src="img/ch05_km_by_kl.png" alt="기준 KL 등급별 누적 치환술 비율. KL 4가 가장 가파르게 오르고 KL 0은 거의 평평하다" loading="lazy"></div>
@@ -506,7 +506,7 @@
       <div class="study-num">2</div>
       <div class="study-body">
         <h4 class="study-title">경쟁 위험 — 사망은 치환술의 중도절단인가<span class="pill warn">초고</span></h4>
-        <p class="study-sub">경쟁 사건 · 원인별 위험과 누적 발생률(Aalen-Johansen) · 원인별 위험모형 · 부분분포 위험모형(Fine-Gray)</p>
+        <p class="study-sub">경쟁 사건(competing event) · 원인별 위험(cause-specific hazard)과 누적 발생률(cumulative incidence; Aalen-Johansen) · 원인별 위험모형 · 부분분포 위험모형(subdistribution hazard model; Fine-Gray)</p>
         <p class="study-desc">사망한 사람은 그 뒤에 치환술을 받을 수 없다. 1장은 사망을 중도절단으로 두었고, 이 장은 사망을 치환술의 경쟁 사건으로 다룰 때 누적 비율과 위험비가 어떻게 달라지는지를 같은 무릎 8,912개로 비교한다.</p>
         <p class="study-lbl">OAI에 적용한 결과</p>
         <ul class="study-points">
@@ -526,17 +526,17 @@
   <section role="tabpanel" id="tab-causal" aria-labelledby="t-causal">
     <h2 class="h">인과 추론</h2>
     <p class="sub lead">관찰 데이터에서 처치의 효과를 추정한다. 처치를 받은 사람과 받지 않은 사람이 처음부터 다르다는 문제를 다룬다.</p>
-    <div class="note"><b>세 장의 관계.</b> 1장은 회귀 보정과 고정효과로 교란을 다루고 처치가 연속인 활동량이다. 2장과 3장은 처치가 한 번 정해지는 이진 처치이고, 누구와 누구를 비교하는지를 먼저 정한 뒤 그 비교를 보정한다. 2장과 3장은 같은 예, 같은 데이터를 쓴다.</div>
+    <div class="note"><b>세 장의 관계.</b> 1장은 회귀 보정(regression adjustment)과 고정효과(fixed effects)로 교란(confounding)을 다루고 처치가 연속인 활동량이다. 2장과 3장은 처치가 한 번 정해지는 이진 처치이고, 누구와 누구를 비교하는지를 먼저 정한 뒤 그 비교를 보정한다. 2장과 3장은 같은 예, 같은 데이터를 쓴다.</div>
 
     <article class="study">
       <div class="study-num">1</div>
       <div class="study-body">
         <h4 class="study-title">신체활동과 통증 — 움직이면 덜 아픈가, 아파서 덜 움직이는가<span class="pill warn">초고</span></h4>
-        <p class="study-sub">교란과 빠진 변수의 치우침 · 사람 사이와 사람 안의 분해(혼성 모형), 고정효과 · 교차 지연 모형 · 측정오차의 감쇠와 민감도 분석</p>
-        <p class="study-desc">운동치료가 통증을 줄인다는 시험의 근거와, 일상에서 많이 움직이는 사람이 덜 아픈지는 다른 질문이다. 4,500여 명의 사람·방문 관측 2만 9천 개로 PASE 활동 점수와 통증의 연관에 섞여 있는 교란, 사람의 고정된 특성, 역인과, 측정오차의 영향을 하나씩 통제하거나 가늠한다.</p>
+        <p class="study-sub">교란과 빠진 변수의 치우침(omitted variable bias) · 사람 사이와 사람 안의 분해(혼성 모형), 고정효과 · 교차 지연 모형(cross-lagged model) · 측정오차(measurement error)의 감쇠(attenuation)와 민감도 분석(sensitivity analysis)</p>
+        <p class="study-desc">운동치료(exercise therapy)가 통증을 줄인다는 시험의 근거와, 일상에서 많이 움직이는 사람이 덜 아픈지는 다른 질문이다. 4,500여 명의 사람·방문 관측 2만 9천 개로 PASE 활동 점수와 통증의 연관에 섞여 있는 교란, 사람의 고정된 특성, 역인과(reverse causation), 측정오차의 영향을 하나씩 통제하거나 가늠한다.</p>
         <p class="study-lbl">OAI에 적용한 결과</p>
         <ul class="study-points">
-          <li>기준 방문의 단면 연관은 우울과 동반질환을 통제하면 거의 사라진다(PASE 50점당 통증 -0.068점에서 -0.013점으로).</li>
+          <li>기준 방문의 횡단면 연관은 우울과 동반질환을 통제하면 거의 사라진다(PASE 50점당 통증 -0.068점에서 -0.013점으로).</li>
           <li>같은 사람이 평소보다 활동적이었던 방문의 통증 차이(-0.04점)는 사람 사이의 차이(-0.18점)보다 훨씬 작다.</li>
           <li>시간의 순서를 맞추면 통증이 뒤의 활동량을 줄이는 방향이 그 반대보다 2.5배 크다. 많이 움직여서 통증이 늘어난다는 신호는 없다.</li>
         </ul>
@@ -551,12 +551,12 @@
       <div class="study-num">2</div>
       <div class="study-body">
         <h4 class="study-title">성향점수 — 근력운동을 시작하면 통증이 달라지는가<span class="pill warn">초고</span></h4>
-        <p class="study-sub">잠재 결과와 식별 가정 · 회귀 보정 · 성향점수 · 짝짓기와 역확률 가중 · 균형과 겹침의 점검 · 이중 강건 추정 · 음성 대조와 E값</p>
+        <p class="study-sub">잠재 결과(potential outcomes)와 식별 가정(identification assumptions) · 회귀 보정 · 성향점수(propensity score) · 짝짓기(matching)와 역확률 가중(inverse probability weighting) · 균형과 겹침의 점검 · 이중 강건(doubly robust) 추정 · 음성 대조(negative control)와 E값</p>
         <p class="study-desc">무작위 시험이라면 누구와 누구를 비교했을지를 먼저 적고, 관찰 데이터에서 그 비교를 만든다. 기준 방문에 근력운동을 하지 않던 2,077명 가운데 12개월에 시작한 497명을 나머지와 비교해 24개월의 통증을 본다. 같은 데이터에 방법을 하나씩 적용하고 추정치를 표 하나에 모은다.</p>
         <p class="study-lbl">OAI에 적용한 결과</p>
         <ul class="study-points">
           <li>보정하지 않은 통증 차이는 0.01점이고, 회귀 보정, 짝짓기, 역확률 가중, 이중 강건 추정은 0.09~0.27점이다. 95% 신뢰구간은 모두 0을 포함한다(이중 강건 추정 0.20점, -0.08~0.48).</li>
-          <li>표준화 평균 차이는 보정 전 최대 0.18에서 가중한 뒤 0.03으로 줄어든다. 두 집단의 성향점수는 같은 범위에 분포해 겹침이 충분하다.</li>
+          <li>표준화 평균 차이(standardized mean difference)는 보정 전 최대 0.18에서 가중한 뒤 0.03으로 줄어든다. 두 집단의 성향점수는 같은 범위에 분포해 겹침이 충분하다.</li>
           <li>효과가 기대되는 의자 일어서기에서도 차이가 추정되지 않았다. 처치를 지난 7일의 보고 하나로 확인해 두 집단의 실제 운동량 차이가 작았을 가능성과 맞는 결과다.</li>
         </ul>
         <div class="study-figs"><img src="img/ch07_ps_overlap.png" alt="처치군과 비교군의 추정한 성향점수 분포. 두 분포가 0.1에서 0.5 사이의 같은 범위에 겹쳐 있다" loading="lazy"></div>
@@ -571,7 +571,7 @@
       <div class="study-num">3</div>
       <div class="study-body">
         <h4 class="study-title">인과 머신러닝 — 교차 적합과 인과 숲<span class="pill warn">초고</span></h4>
-        <p class="study-sub">랜덤 포레스트 · 과적합과 규제의 치우침 · 교차 적합과 이중 머신러닝 · 조건부 평균 처치 효과 · 인과 숲 · 이질성의 검정(보정 검정, 순위 가중 평균 처치 효과, 최적 선형 투영)</p>
+        <p class="study-sub">랜덤 포레스트(random forest) · 과적합(overfitting)과 규제의 치우침(regularization bias) · 교차 적합(cross-fitting)과 이중 머신러닝(double machine learning) · 조건부 평균 처치 효과(conditional average treatment effect) · 인과 숲(causal forest) · 이질성(heterogeneity)의 검정(보정 검정, 순위 가중 평균 처치 효과, 최적 선형 투영)</p>
         <p class="study-desc">2장의 성향점수와 결과 회귀를 머신러닝에 맡길 때 무엇이 달라지고 무엇을 지켜야 하는지를 다룬다. 같은 2,077명으로 교차 적합의 유무를 비교하고, 인과 숲으로 효과가 사람마다 다른지를 추정한 뒤 그 차이가 실재하는지를 검정한다.</p>
         <p class="study-lbl">OAI에 적용한 결과</p>
         <ul class="study-points">
@@ -597,7 +597,7 @@
       <div class="study-num">1</div>
       <div class="study-body">
         <h4 class="study-title">부분상관 네트워크 — 통증, 기능, 우울은 서로 어떻게 연결되는가<span class="pill warn">초고</span></h4>
-        <p class="study-sub">부분상관 · 정밀도 행렬과 조건부 독립 · 정규 그래프 모형 · 그래프 라쏘와 EBIC · 그래프를 읽는 법 · 노드의 선택 · 순위 기반 추정과 붓스트랩</p>
+        <p class="study-sub">부분상관(partial correlation) · 정밀도 행렬(precision matrix)과 조건부 독립(conditional independence) · 정규 그래프 모형(Gaussian graphical model) · 그래프 라쏘(graphical lasso)와 EBIC · 그래프를 읽는 법 · 노드의 선택 · 순위 기반 추정과 붓스트랩(bootstrap)</p>
         <p class="study-desc">결과 변수 하나를 정하지 않고 여러 변수 사이의 관계를 한꺼번에 본다. 기준 방문의 4,177명에서 증상, 심리, 전반적 건강, 수행, 구조, 나이의 13개 노드를 두고, 두 변수의 상관이 나머지를 조건으로 두어도 남는지를 78쌍 모두에 대해 추정해 그래프로 그린다.</p>
         <p class="study-lbl">OAI에 적용한 결과</p>
         <ul class="study-points">
@@ -618,14 +618,14 @@
   <section role="tabpanel" id="tab-research" aria-labelledby="t-research">
     <h2 class="h">연구</h2>
     <p class="sub lead">교재의 구성에 넣지 않고 따로 진행하는 연구다. 기본 방법의 설명이 아니다.</p>
-    <div class="note"><b>세 장의 관계.</b> 1장은 종단 측정과 사건 시간을 한 모형에 넣는 결합모형으로, 생존 분석 1장이 남긴 문제에서 출발한다. 2장은 그 결합모형을 다른 구조로 다시 세워 무릎 전체로 빠르게 적합한다. 3장은 그래프 모형 1장의 정규 가정을 풀어 같은 그래프를 다시 추정한다.</div>
+    <div class="note"><b>세 장의 관계.</b> 1장은 종단 측정과 사건 시간을 한 모형에 넣는 결합모형(joint model)으로, 생존 분석 1장이 남긴 문제에서 출발한다. 2장은 그 결합모형을 다른 구조로 다시 세워 무릎 전체로 빠르게 적합한다. 3장은 그래프 모형 1장의 정규 가정을 풀어 같은 그래프를 다시 추정한다.</div>
 
     <article class="study">
       <div class="study-num">1</div>
       <div class="study-body">
         <h4 class="study-title">결합모형과 동적 예측 — 기능의 궤적으로 치환술을 예측할 수 있는가<span class="pill warn">초고</span></h4>
-        <p class="study-sub">종단-생존 결합모형(공유 무작위 효과, JMbayes2) · 랜드마크 분석 · 동적 예측 · 시간의존 AUC</p>
-        <p class="study-desc">생존 분석 1장의 시간가변 공변량 모형이 남긴 문제(측정오차, 방문 사이의 변화, 미래의 정보)를 기능 점수의 궤적과 치환술의 위험을 한 모형에 넣어 다룬다. 무작위로 고른 무릎 4,000개로 적합하고, 방문마다 갱신되는 예측을 랜드마크 Cox와 비교한다.</p>
+        <p class="study-sub">종단-생존 결합모형(공유 무작위 효과, JMbayes2) · 랜드마크 분석(landmark analysis) · 동적 예측(dynamic prediction) · 시간의존 AUC(time-dependent AUC)</p>
+        <p class="study-desc">생존 분석 1장의 시간가변 공변량(time-varying covariate) 모형이 남긴 문제(측정오차, 방문 사이의 변화, 미래의 정보)를 기능 점수의 궤적과 치환술(total knee replacement)의 위험을 한 모형에 넣어 다룬다. 무작위로 고른 무릎 4,000개로 적합하고, 방문마다 갱신되는 예측을 랜드마크 Cox와 비교한다.</p>
         <p class="study-lbl">OAI에 적용한 결과</p>
         <ul class="study-points">
           <li>기능의 수준과 함께 악화 속도가 위험과 강하게 관련된다. 같은 수준에서 연 1점 빨리 나빠지면 위험이 2.6배다.</li>
@@ -643,8 +643,8 @@
       <div class="study-num">2</div>
       <div class="study-body">
         <h4 class="study-title">기능 궤적과 치환술 시간의 SU정규 결합모형 — 결합모형을 1분 안에 적합할 수 있는가<span class="pill warn">초고</span></h4>
-        <p class="study-sub">다변량 정규 결합모형(닫힌 형태의 가능도) · 가속수명 모형 · SU정규 분포와 로그정규 · 가능도비 검정 · 시뮬레이션 검증 · 동적 예측</p>
-        <p class="study-desc">종단 측정의 무작위 효과와 변환한 치환술 시간을 함께 다변량 정규로 두면 가능도가 적분 없이 닫힌 형태가 된다. 치환술 시간의 분포로 로그정규를 포함하는 SU정규를 쓰고, 무릎 8,909개 전체로 적합해 1장의 JMbayes2 결합모형과 비교한다.</p>
+        <p class="study-sub">다변량 정규 결합모형(닫힌 형태의 가능도) · 가속수명 모형(accelerated failure time model) · SU정규 분포와 로그정규 · 가능도비 검정(likelihood ratio test) · 시뮬레이션 검증 · 동적 예측</p>
+        <p class="study-desc">종단 측정의 무작위 효과(random effects)와 변환한 치환술 시간을 함께 다변량 정규로 두면 가능도가 적분 없이 닫힌 형태가 된다. 치환술 시간의 분포로 로그정규를 포함하는 SU정규를 쓰고, 무릎 8,909개 전체로 적합해 1장의 JMbayes2 결합모형과 비교한다.</p>
         <p class="study-lbl">OAI에 적용한 결과</p>
         <ul class="study-points">
           <li>무릎 전체의 적합이 1분 남짓이다(무릎 4,000개에서 11초, 같은 무릎의 JMbayes2는 16분).</li>
@@ -664,13 +664,13 @@
       <div class="study-num">3</div>
       <div class="study-body">
         <h4 class="study-title">Nonparanormal 그래프 모형 — 정규 가정을 풀면 증상의 네트워크가 달라지는가<span class="pill warn">초고</span></h4>
-        <p class="study-sub">Nonparanormal(정규 코퓰라) · 절단한 경험분포함수와 정규 점수 · 순위 상관에서 구하는 추정 · 그래프 라쏘와 EBIC · 동점의 한계 · 참 그래프를 아는 시뮬레이션</p>
-        <p class="study-desc">그래프 모형 1장의 정규 그래프 모형을 Liu, Lafferty and Wasserman (2009)의 nonparanormal로 바꾸어 다시 추정한다. 변수마다 단조 변환을 하면 다변량 정규가 된다고 가정하고, 변환은 데이터에서 추정한다. 같은 13개 노드, 같은 4,177명으로 두 그래프를 비교하고, 그 차이가 방법에서 오는지 데이터의 모양에서 오는지를 시뮬레이션으로 가려낸다.</p>
+        <p class="study-sub">Nonparanormal(정규 코퓰라) · 절단한 경험분포함수와 정규 점수 · 순위 상관에서 구하는 추정 · 그래프 라쏘(graphical lasso)와 EBIC · 동점의 한계 · 참 그래프를 아는 시뮬레이션</p>
+        <p class="study-desc">그래프 모형 1장의 정규 그래프 모형(Gaussian graphical model)을 Liu, Lafferty and Wasserman (2009)의 nonparanormal로 바꾸어 다시 추정한다. 변수마다 단조 변환을 하면 다변량 정규가 된다고 가정하고, 변환은 데이터에서 추정한다. 같은 13개 노드, 같은 4,177명으로 두 그래프를 비교하고, 그 차이가 방법에서 오는지 데이터의 모양에서 오는지를 시뮬레이션으로 가려낸다.</p>
         <p class="study-lbl">OAI에 적용한 결과</p>
         <ul class="study-points">
-          <li>세 방법(정규, nonparanormal, 순위 기반)의 그래프가 거의 같다. 부분상관의 일치는 0.99이고, 절대값 0.1 이상인 엣지 24쌍이 모두 남는다.</li>
+          <li>세 방법(정규, nonparanormal, 순위 기반)의 그래프가 거의 같다. 부분상관(partial correlation)의 일치는 0.99이고, 절대값 0.1 이상인 엣지 24쌍이 모두 남는다.</li>
           <li>가장 크게 달라진 엣지는 CES-D와 SF-12 정신 점수(-0.71에서 -0.61)다. 오른쪽 꼬리의 소수에 Pearson 상관이 주는 무게가 정규 점수에서는 줄어든다.</li>
-          <li>시뮬레이션에서 비정규 연속 분포라면 정규 그래프 모형은 200명일 때 참 엣지의 29%만 찾고 nonparanormal은 61%를 찾는다. 바닥 효과와 순서 척도는 두 방법 모두 고치지 못하며, OAI의 증상 점수가 그 경우다.</li>
+          <li>시뮬레이션에서 비정규 연속 분포라면 정규 그래프 모형은 200명일 때 참 엣지의 29%만 찾고 nonparanormal은 61%를 찾는다. 바닥 효과(floor effect)와 순서 척도(ordinal scale)는 두 방법 모두 고치지 못하며, OAI의 증상 점수가 그 경우다.</li>
         </ul>
         <div class="study-figs"><img src="img/ch14_graphs.png" alt="정규 그래프 모형과 nonparanormal의 부분상관 그래프. 두 그래프의 엣지 배치가 거의 같다" loading="lazy"></div>
         <div class="study-links">
