@@ -159,7 +159,7 @@ build_analysis <- function(raw_dir) {
                   by = "ID", all.x = TRUE)
   person[, female := as.numeric(sex == 2)]
 
-  # 무릎 단위 기준 KL. 판독 사업이 여럿이면 15를 먼저 쓴다
+  # 무릎 단위 기준 KL. 판독 사업이 여럿이면 15를 먼저 사용한다
   xr <- read_oai_txt(find_file(raw_dir, "kXR_SQ_BU00.txt"))
   klcol <- require_column(names(xr), "kl")
   xr <- xr[!is.na(get(klcol))]
@@ -336,7 +336,7 @@ cohort_data <- function(raw_dir) {
 }
 
 
-# 무릎의 사건 시간 표. 생존 분석의 장들이 함께 쓴다. cohort_data()의 결과를 받는다.
+# 무릎의 사건 시간 표. 생존 분석의 장들이 함께 사용한다. cohort_data()의 결과를 받는다.
 #   time     사건 또는 중도절단까지의 개월
 #   status   0 중도절단, 1 치환술, 2 사망
 #   year, klf, func10, age10, bmi5, knee   분석에 쓰는 변환
@@ -483,7 +483,7 @@ trial_table <- function(raw_dir, treatment = c("strength", "walk"), direction = 
 
 # ---------------------------------------------------------------- 공용 준비
 
-# data/raw에 OAI 파일이 있으면 그것을, 없으면 시뮬레이션 데이터를 쓴다
+# data/raw에 OAI 파일이 있으면 그것을, 없으면 시뮬레이션 데이터를 사용한다
 pick_data <- function(root) {
   raw <- file.path(root, "data", "raw")
   if (dir.exists(raw) && !is.na(find_file(raw, "AllClinical00.txt")))
@@ -505,7 +505,7 @@ jm_data <- function(knees, long) {
   list(surv = as.data.frame(kj), long = as.data.frame(lj))
 }
 
-# 통증 궤적용 긴 표. lcmm은 정수 대상자 번호(kid)를 쓴다
+# 통증 궤적용 긴 표. lcmm은 정수 대상자 번호(kid)를 사용한다
 pain_long <- function(knees, long) {
   pl <- long[!is.na(womac_pain), .(knee, year = month / 12, womac_pain)]
   pl <- pl[knee %in% knees$knee]

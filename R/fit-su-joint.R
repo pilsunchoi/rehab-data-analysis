@@ -40,7 +40,7 @@ unpack <- function(p, D, su) {
 # 무릎별 조건부 분포의 재료: 무작위 효과의 사후 평균(mb1, mb2), M 행렬, 종단 로그가능도
 long_parts <- function(o, D, rows = NULL) {
   r <- as.vector(D$y - D$X %*% o$beta)
-  if (!is.null(rows)) {                       # 일부 측정만 쓴다(동적 예측)
+  if (!is.null(rows)) {                       # 일부 측정만 사용한다(동적 예측)
     S <- rowsum(cbind(1, D$t, D$t^2, r, D$t * r, r^2)[rows, , drop = FALSE], factor(D$g[rows], levels = seq_len(D$N)))
     n <- S[, 1]; st <- S[, 2]; stt <- S[, 3]; sr <- S[, 4]; str <- S[, 5]; srr <- S[, 6]
   } else {
