@@ -17,7 +17,7 @@ rehab-data-analysis/
 │   ├── 02-structure-and-symptoms.qmd         회귀 1장 원본
 │   ├── 02-structure-and-symptoms.md          회귀 1장 렌더 결과
 │   ├── 02-structure-and-symptoms_files/      회귀 1장 그림
-│   ├── 03-pain-trajectories.qmd              종단 분석 1장 원본(잠재계층 적합은 outputs/lcmm-02.rds를 읽는다)
+│   ├── 03-pain-trajectories.qmd              종단 분석 1장 원본(잠재계층 피팅은 outputs/lcmm-02.rds를 읽는다)
 │   ├── 03-pain-trajectories.md               종단 분석 1장 렌더 결과
 │   ├── 03-pain-trajectories_files/           종단 분석 1장 그림
 │   ├── 04-activity-and-pain.qmd              인과 추론 1장 원본
@@ -25,13 +25,13 @@ rehab-data-analysis/
 │   ├── 05-time-to-replacement.qmd            생존 분석 1장 원본
 │   ├── 05-time-to-replacement.md             생존 분석 1장 렌더 결과
 │   ├── 05-time-to-replacement_files/         생존 분석 1장 그림
-│   ├── 06-su-normal-joint-model.qmd          SU정규 결합모형 장 원본(적합은 outputs/su-joint-06.rds를 읽는다)
+│   ├── 06-su-normal-joint-model.qmd          SU정규 결합모형 장 원본(피팅은 outputs/su-joint-06.rds를 읽는다)
 │   ├── 06-su-normal-joint-model.md           SU정규 결합모형 장 렌더 결과
 │   ├── 06-su-normal-joint-model_files/       SU정규 결합모형 장 그림
 │   ├── 07-propensity-score.qmd               인과 추론 2장 원본(성향점수와 이중 강건 추정)
 │   ├── 07-propensity-score.md                인과 추론 2장 렌더 결과
 │   ├── 07-propensity-score_files/            인과 추론 2장 그림
-│   ├── 08-causal-ml.qmd                      인과 추론 3장 원본(교차 적합과 인과 숲)
+│   ├── 08-causal-ml.qmd                      인과 추론 3장 원본(교차 피팅과 인과 숲)
 │   ├── 08-causal-ml.md                       인과 추론 3장 렌더 결과
 │   ├── 08-causal-ml_files/                   인과 추론 3장 그림
 │   ├── 09-competing-risks.qmd                생존 분석 2장 원본(경쟁 위험)
@@ -57,12 +57,12 @@ rehab-data-analysis/
 ├── R/
 │   ├── oai.R                                 OAI 파일 읽기, 분석용 표, 시뮬레이션 데이터
 │   ├── postrender-md.R                       렌더된 MD를 GitHub용으로 손질(물결 이스케이프)
-│   ├── fit-jm.R                              결합모형 적합(수십 분), 요약을 outputs/에 저장
+│   ├── fit-jm.R                              결합모형 피팅(수십 분), 요약을 outputs/에 저장
 │   ├── fit-causal.R                          운동의 시작·중단을 처치로 쌓은 시험의 평균 효과(13분). 장에서는 쓰지 않는다
-│   ├── fit-su-joint.R                        SU정규 결합모형 장의 적합과 시뮬레이션 검증(25분 안팎)
-│   └── fit-lcmm.R                            통증 궤적 계층 적합(몇 시간), 요약을 outputs/에 저장
+│   ├── fit-su-joint.R                        SU정규 결합모형 장의 피팅과 시뮬레이션 검증(25분 안팎)
+│   └── fit-lcmm.R                            통증 궤적 계층 피팅(몇 시간), 요약을 outputs/에 저장
 ├── references/                               논문 원문 PDF(공개하지 않는다)
-├── outputs/                                  오래 걸리는 적합의 요약(공개하지 않는다)
+├── outputs/                                  오래 걸리는 피팅의 요약(공개하지 않는다)
 └── data/                                     공개하지 않는다
     ├── raw/                                  OAI에서 받은 파일(이름을 바꾸지 않는다)
     └── synthetic/                            시뮬레이션 데이터
@@ -77,7 +77,7 @@ cd chapters
 quarto render 01-data-and-measures.qmd
 ```
 
-종단 분석 1장의 잠재계층 궤적(몇 시간)과 결합모형과 동적 예측 장의 결합모형(무릎 4,000개로 20분 안팎)은 적합이 오래 걸려 장 안에서 하지 않는다. 먼저 `Rscript R/fit-lcmm.R`과 `Rscript R/fit-jm.R`로 적합하면 요약이 `outputs/lcmm-02.rds`와 `outputs/jm-01.rds`에 저장되고, 장은 그 파일을 읽는다. SU정규 결합모형 장은 `Rscript R/fit-su-joint.R`의 요약(`outputs/su-joint-06.rds`)을 읽는다. 적합 자체는 1분 남짓이지만 시뮬레이션 검증 20회가 함께 돈다. 생존 분석 1장과 동일한 무릎으로 예측을 비교하므로 `R/fit-jm.R`을 먼저 돌린다. 파일이 없으면 그 절은 안내만 남기고 나머지는 그대로 돈다.
+종단 분석 1장의 잠재계층 궤적(몇 시간)과 결합모형과 동적 예측 장의 결합모형(무릎 4,000개로 20분 안팎)은 피팅이 오래 걸려 장 안에서 하지 않는다. 먼저 `Rscript R/fit-lcmm.R`과 `Rscript R/fit-jm.R`로 피팅하면 요약이 `outputs/lcmm-02.rds`와 `outputs/jm-01.rds`에 저장되고, 장은 그 파일을 읽는다. SU정규 결합모형 장은 `Rscript R/fit-su-joint.R`의 요약(`outputs/su-joint-06.rds`)을 읽는다. 피팅 자체는 1분 남짓이지만 시뮬레이션 검증 20회가 함께 돈다. 생존 분석 1장과 동일한 무릎으로 예측을 비교하므로 `R/fit-jm.R`을 먼저 돌린다. 파일이 없으면 그 절은 안내만 남기고 나머지는 그대로 돈다.
 
 OAI 데이터가 없어도 장은 끝까지 돈다. `data/raw/`가 비어 있으면 같은 파일·열·부호 형식의 시뮬레이션 데이터를 만들어 읽고, 문서 첫머리에 그 사실을 적는다. 시뮬레이션 데이터의 수치는 해석하지 않는다.
 

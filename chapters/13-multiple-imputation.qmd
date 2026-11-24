@@ -287,7 +287,7 @@ pl <- summary(pool(with(imp, lm(as.formula(deparse1(F_AN))))))
 max_diff <- max(abs(pl$estimate - mi$est), abs(pl$std.error - mi$se))
 ```
 
-대체 `r M_IMP`개를 만들고 각각에 회귀를 적합한 뒤 위의 식으로 직접 합쳤다. `mice` 패키지의 결합 함수가 낸 계수와 표준오차와 `r if (max_diff < 1e-8) "같다" else "조금 다르다"`. 표 5는 완전 사례 분석과 다중 대체의 결과를 함께 제시한 것이다. 마지막 열은 VII장의 결측 정보의 비율이다.
+대체 `r M_IMP`개를 만들고 각각에 회귀를 피팅한 뒤 위의 식으로 직접 합쳤다. `mice` 패키지의 결합 함수가 낸 계수와 표준오차와 `r if (max_diff < 1e-8) "같다" else "조금 다르다"`. 표 5는 완전 사례 분석과 다중 대체의 결과를 함께 제시한 것이다. 마지막 열은 VII장의 결측 정보의 비율이다.
 
 ```{r table5}
 #| output: asis

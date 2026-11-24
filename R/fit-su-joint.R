@@ -1,11 +1,11 @@
-# SU정규 결합모형 장의 다변량 정규 결합모형을 적합하고 요약만 outputs/su-joint-06.rds 에 저장한다.
+# SU정규 결합모형 장의 다변량 정규 결합모형을 피팅하고 요약만 outputs/su-joint-06.rds 에 저장한다.
 # 종단 하위모형의 무작위 효과와 변환한 치환술 시간이 함께 다변량 정규분포를 따른다.
 # 치환술 시간의 주변분포는 로그정규 또는 SU정규(Johnson S_U) 가속수명 모형이다.
 #
-#   Rscript R/fit-su-joint.R        전체: 적합, 분포의 비교, 동적 예측, 시뮬레이션 검증 20회(약 25분)
+#   Rscript R/fit-su-joint.R        전체: 피팅, 분포의 비교, 동적 예측, 시뮬레이션 검증 20회(약 25분)
 #   Rscript R/fit-su-joint.R 0      시뮬레이션 검증 없이(약 5분)
 #
-# 표본은 결합모형과 동적 예측 장 I장의 결합모형과 같은 정의(jm_data)다. 동적 예측은 그 장의 JMbayes2와 같은 무릎으로 적합하고
+# 표본은 결합모형과 동적 예측 장 I장의 결합모형과 같은 정의(jm_data)다. 동적 예측은 그 장의 JMbayes2와 같은 무릎으로 피팅하고
 # 같은 무릎에서 평가한다(outputs/jm-01.rds 가 있을 때).
 
 suppressPackageStartupMessages({library(data.table); library(survival)})
@@ -172,13 +172,13 @@ if (sys.nframe() == 0) {
   tab <- function(f) data.table(term = names(f$par), est = unname(f$par), se = unname(f$se))
   say("표본: 무릎", D$N, "치환술", sum(D$d), "관측", length(D$y))
 
-  # --- 1. 무릎 전체로 적합: 독립(a = 0), 결합 로그정규, 결합 SU정규
+  # --- 1. 무릎 전체로 피팅: 독립(a = 0), 결합 로그정규, 결합 SU정규
   f_ln <- fit(D, su = FALSE)
   f_su <- fit(D, su = TRUE, start = c(f_ln$par, 0, log(0.2)))
   s0 <- f_ln$par; s0[c("a0", "a1")] <- 0; free <- !names(s0) %in% c("a0", "a1")
   f_ind <- optim(s0[free], function(q) { p <- s0; p[free] <- q; negll(p, D, FALSE) },
                  method = "BFGS", control = list(maxit = 2000, reltol = 1e-12))
-  say(sprintf("적합 끝: 로그정규 %.0f초, SU정규 %.0f초", f_ln$sec, f_su$sec))
+  say(sprintf("피팅 끝: 로그정규 %.0f초, SU정규 %.0f초", f_ln$sec, f_su$sec))
   res$fits <- list(
     independent = list(ll = -f_ind$value, k = sum(free)),
     lognormal = c(f_ln[c("ll", "k", "sec", "conv", "pd")], list(coef = tab(f_ln))),
@@ -217,7 +217,7 @@ if (sys.nframe() == 0) {
                             su = dnorm((asinh(u) - o_su$lam) / exp(o_su$lth)) * cosh(o_su$lam) / sqrt(1 + u^2))
   say("주변분포 계산 끝")
 
-  # --- 3. 동적 예측: 결합모형과 동적 예측 장의 JMbayes2와 같은 무릎으로 적합하고, 같은 무릎에서 4년 시점의 2년 위험을 예측한다
+  # --- 3. 동적 예측: 결합모형과 동적 예측 장의 JMbayes2와 같은 무릎으로 피팅하고, 같은 무릎에서 4년 시점의 2년 위험을 예측한다
   jm_path <- file.path(ROOT, "outputs", "jm-01.rds")
   jmr <- if (file.exists(jm_path)) readRDS(jm_path) else NULL
   if (!is.null(jmr) && isTRUE(jmr$real_data == src$real)) {
@@ -251,7 +251,7 @@ if (sys.nframe() == 0) {
                          ll = c(lognormal = g_ln$ll, su = g_su$ll))
   say("동적 예측 끝:", nrow(pred), "무릎")
 
-  # --- 4. 시뮬레이션 검증: SU정규 적합값을 참값으로 두고 데이터를 생성해 다시 추정한다
+  # --- 4. 시뮬레이션 검증: SU정규 추정값을 참값으로 두고 데이터를 생성해 다시 추정한다
   if (N_REP > 0) {
     rec <- rbindlist(lapply(seq_len(N_REP), function(sd) {
       set.seed(1000 + sd)

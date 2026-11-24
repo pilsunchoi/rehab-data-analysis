@@ -1,4 +1,4 @@
-# WOMAC 통증 궤적의 잠재계층 혼합모형(lcmm::hlme)을 계층 수 1~K로 적합하고
+# WOMAC 통증 궤적의 잠재계층 혼합모형(lcmm::hlme)을 계층 수 1~K로 피팅하고
 # 작은 요약만 outputs/lcmm-02.rds에 저장한다. 계층 수가 늘수록 오래 걸려 분석 문서 안에서 돌리지 않는다.
 #
 #   Rscript R/fit-lcmm.R        계층 1~5

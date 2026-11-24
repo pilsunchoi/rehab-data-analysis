@@ -1,12 +1,12 @@
-# 결합모형(JMbayes2)을 적합하고 작은 요약만 outputs/jm-01.rds에 저장한다.
-# 적합에 수십 분이 걸리고 적합 객체가 커서, 분석 문서 안에서 돌리지 않는다.
+# 결합모형(JMbayes2)을 피팅하고 작은 요약만 outputs/jm-01.rds에 저장한다.
+# 피팅에 수십 분이 걸리고 피팅 객체가 커서, 분석 문서 안에서 돌리지 않는다.
 #
 #   Rscript R/fit-jm.R              기본 반복 수
 #   Rscript R/fit-jm.R 20000 4000   반복 수, 버림 수를 바꿔서
 #   Rscript R/fit-jm.R 15000 3000 0 무릎 전체로(메모리 30GB 넘게 필요, 2026-11-21 원데이터에서 멈춤)
 #
-# 원데이터의 무릎 전체(8,900여 개)로 적합하면 준비 단계에서 메모리를 20GB 넘게 써서 진행되지 않았다.
-# 그래서 기본값은 무작위로 고른 무릎 4,000개다. 동적 예측은 적합에 쓰지 않은 무릎에서 한다.
+# 원데이터의 무릎 전체(8,900여 개)로 피팅하면 준비 단계에서 메모리를 20GB 넘게 써서 진행되지 않았다.
+# 그래서 기본값은 무작위로 고른 무릎 4,000개다. 동적 예측은 피팅에 쓰지 않은 무릎에서 한다.
 
 suppressPackageStartupMessages({
   library(data.table); library(survival); library(nlme); library(JMbayes2)
@@ -29,28 +29,28 @@ set.seed(20261121L)
 fit_knees <- if (N_KNEES > 0 && N_KNEES < length(all_knees)) sample(all_knees, N_KNEES) else all_knees
 jf <- list(surv = j$surv[all_knees %in% fit_knees, ], long = j$long[as.character(j$long$knee) %in% fit_knees, ])
 jf$surv$knee <- droplevels(jf$surv$knee); jf$long$knee <- factor(as.character(jf$long$knee), levels = levels(jf$surv$knee))
-say("적합 표본: 무릎", nrow(jf$surv), "치환술", sum(jf$surv$event), "관측", nrow(jf$long))
+say("피팅 표본: 무릎", nrow(jf$surv), "치환술", sum(jf$surv$event), "관측", nrow(jf$long))
 
 t0 <- Sys.time()
 # 종단: KL 등급마다 수준과 기울기가 다르고, 무릎마다 무작위 절편·기울기
 lme_fit <- lme(womac_func ~ year * kl, random = ~ year | knee, data = jf$long,
                control = lmeControl(opt = "optim"))
-say("종단 모형 적합 끝")
+say("종단 모형 피팅 끝")
 # 생존: 기준 공변량 + 그 시점의 참 기능 점수(value)와 변화율(slope)
 cox_fit <- coxph(Surv(time_y, event) ~ age_c + female + bmi_c + kl, data = jf$surv)
-say("결합모형 적합 시작")
+say("결합모형 피팅 시작")
 jm_fit <- jm(cox_fit, lme_fit, time_var = "year",
              functional_forms = ~ value(womac_func) + slope(womac_func),
              n_iter = N_ITER, n_burnin = N_BURNIN, n_chains = 3L, cores = 3L, seed = 20261118L)
 minutes <- as.numeric(difftime(Sys.time(), t0, units = "mins"))
-say("결합모형 적합 끝:", round(minutes), "분")
-# 적합 객체를 먼저 저장한다. 아래의 예측이 실패해도 다시 적합하지 않고 예측만 다시 할 수 있다(outputs/는 공개하지 않는다)
+say("결합모형 피팅 끝:", round(minutes), "분")
+# 피팅 객체를 먼저 저장한다. 아래의 예측이 실패해도 다시 피팅하지 않고 예측만 다시 할 수 있다(outputs/는 공개하지 않는다)
 dir.create(file.path(ROOT, "outputs"), showWarnings = FALSE)
 saveRDS(list(fit = jm_fit, fit_knees = fit_knees), file.path(ROOT, "outputs", "jm-01-fit.rds"))
-say("적합 객체 저장")
+say("피팅 객체 저장")
 
 # 동적 예측: 4년 시점(랜드마크)에 치환술 없이 남은 무릎에서, 그때까지의 기능 점수로 2년 안의 치환술 확률을 예측한다.
-# 적합에 쓰지 않은 무릎 가운데 무작위로 고른 2,500개에서 한다(표본 밖 평가). 결합모형과 동적 예측 장이 같은 무릎으로 랜드마크 Cox와 비교한다.
+# 피팅에 쓰지 않은 무릎 가운데 무작위로 고른 2,500개에서 한다(표본 밖 평가). 결합모형과 동적 예측 장이 같은 무릎으로 랜드마크 Cox와 비교한다.
 LM <- 4; H <- 2
 pred <- tryCatch({
   at_risk <- setdiff(as.character(j$surv$knee[j$surv$time_y > LM]), fit_knees)

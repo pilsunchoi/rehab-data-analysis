@@ -186,7 +186,7 @@
           <tr><td class="r">2</td><td>경쟁 사건, 누적 발생률, 원인별 위험비와 부분분포 위험비</td><td>사망은 치환술의 중도절단인가</td></tr>
           <tr><td class="b" rowspan="3"><a href="#causal" onclick="showTab('causal');return false">인과 추론</a></td><td class="r">1</td><td>교란과 회귀 보정, 고정효과, 시차 모형</td><td>많이 움직이는 사람은 덜 아픈가</td></tr>
           <tr><td class="r">2</td><td>성향점수, 짝짓기와 역확률 가중, 이중 강건 추정</td><td>근력운동을 시작하면 통증이 달라지는가</td></tr>
-          <tr><td class="r">3</td><td>교차 적합, 인과 숲, 효과의 이질성</td><td>그 효과는 사람마다 다른가</td></tr>
+          <tr><td class="r">3</td><td>교차 피팅, 인과 숲, 효과의 이질성</td><td>그 효과는 사람마다 다른가</td></tr>
           <tr><td class="b"><a href="#graph" onclick="showTab('graph');return false">그래프 모형</a></td><td class="r">1</td><td>부분상관, 정규 그래프 모형, 그래프 라쏘</td><td>통증, 기능, 우울, 활동량은 서로 어떻게 연결되는가</td></tr>
         </tbody>
       </table>
@@ -570,12 +570,12 @@
     <article class="study">
       <div class="study-num">3</div>
       <div class="study-body">
-        <h4 class="study-title">인과 머신러닝 — 교차 적합과 인과 숲<span class="pill warn">초고</span></h4>
-        <p class="study-sub">랜덤 포레스트(random forest) · 과적합(overfitting)과 규제의 치우침(regularization bias) · 교차 적합(cross-fitting)과 이중 머신러닝(double machine learning) · 조건부 평균 처치 효과(conditional average treatment effect) · 인과 숲(causal forest) · 이질성(heterogeneity)의 검정(보정 검정, 순위 가중 평균 처치 효과, 최적 선형 투영)</p>
-        <p class="study-desc">2장의 성향점수와 결과 회귀를 머신러닝에 맡길 때 무엇이 달라지고 무엇을 지켜야 하는지를 다룬다. 같은 2,077명으로 교차 적합의 유무를 비교하고, 인과 숲으로 효과가 사람마다 다른지를 추정한 뒤 그 차이가 실재하는지를 검정한다.</p>
+        <h4 class="study-title">인과 머신러닝 — 교차 피팅과 인과 숲<span class="pill warn">초고</span></h4>
+        <p class="study-sub">랜덤 포레스트(random forest) · 과적합(overfitting)과 규제의 치우침(regularization bias) · 교차 피팅(cross-fitting)과 이중 머신러닝(double machine learning) · 조건부 평균 처치 효과(conditional average treatment effect) · 인과 숲(causal forest) · 이질성(heterogeneity)의 검정(보정 검정, 순위 가중 평균 처치 효과, 최적 선형 투영)</p>
+        <p class="study-desc">2장의 성향점수와 결과 회귀를 머신러닝에 맡길 때 무엇이 달라지고 무엇을 지켜야 하는지를 다룬다. 같은 2,077명으로 교차 피팅의 유무를 비교하고, 인과 숲으로 효과가 사람마다 다른지를 추정한 뒤 그 차이가 실재하는지를 검정한다.</p>
         <p class="study-lbl">OAI에 적용한 결과</p>
         <ul class="study-points">
-          <li>교차 적합 없이 랜덤 포레스트를 쓰면 성향점수의 중위값이 처치군 0.63, 비교군 0.13으로 벌어지고 표준오차가 0.06으로 잘못 줄어든다. 교차 적합하면 두 중위값이 0.24로 같아지고 표준오차는 0.13이다.</li>
+          <li>교차 피팅 없이 랜덤 포레스트를 쓰면 성향점수의 중위값이 처치군 0.63, 비교군 0.13으로 벌어지고 표준오차가 0.06으로 잘못 줄어든다. 교차 피팅하면 두 중위값이 0.24로 같아지고 표준오차는 0.13이다.</li>
           <li>인과 숲의 평균 효과는 0.11점(-0.15~0.36)으로 2장의 결론과 같다. 선형 모형의 형태에 대한 가정을 빼도 결과가 달라지지 않는다.</li>
           <li>효과의 이질성은 검출되지 않았다. 세 검정이 같은 결론이며, 예측한 조건부 효과의 퍼짐은 추정의 잡음으로 설명된다.</li>
         </ul>
@@ -618,14 +618,14 @@
   <section role="tabpanel" id="tab-research" aria-labelledby="t-research">
     <h2 class="h">연구</h2>
     <p class="sub lead">교재의 구성에 넣지 않고 따로 진행하는 연구다. 기본 방법의 설명이 아니다.</p>
-    <div class="note"><b>세 장의 관계.</b> 1장은 종단 측정과 사건 시간을 한 모형에 넣는 결합모형(joint model)으로, 생존 분석 1장이 남긴 문제에서 출발한다. 2장은 그 결합모형을 다른 구조로 다시 세워 무릎 전체로 빠르게 적합한다. 3장은 그래프 모형 1장의 정규 가정을 풀어 같은 그래프를 다시 추정한다.</div>
+    <div class="note"><b>세 장의 관계.</b> 1장은 종단 측정과 사건 시간을 한 모형에 넣는 결합모형(joint model)으로, 생존 분석 1장이 남긴 문제에서 출발한다. 2장은 그 결합모형을 다른 구조로 다시 세워 무릎 전체로 빠르게 피팅한다. 3장은 그래프 모형 1장의 정규 가정을 풀어 같은 그래프를 다시 추정한다.</div>
 
     <article class="study">
       <div class="study-num">1</div>
       <div class="study-body">
         <h4 class="study-title">결합모형과 동적 예측 — 기능의 궤적으로 치환술을 예측할 수 있는가<span class="pill warn">초고</span></h4>
         <p class="study-sub">종단-생존 결합모형(공유 무작위 효과, JMbayes2) · 랜드마크 분석(landmark analysis) · 동적 예측(dynamic prediction) · 시간의존 AUC(time-dependent AUC)</p>
-        <p class="study-desc">생존 분석 1장의 시간가변 공변량(time-varying covariate) 모형이 남긴 문제(측정오차, 방문 사이의 변화, 미래의 정보)를 기능 점수의 궤적과 치환술(total knee replacement)의 위험을 한 모형에 넣어 다룬다. 무작위로 고른 무릎 4,000개로 적합하고, 방문마다 갱신되는 예측을 랜드마크 Cox와 비교한다.</p>
+        <p class="study-desc">생존 분석 1장의 시간가변 공변량(time-varying covariate) 모형이 남긴 문제(측정오차, 방문 사이의 변화, 미래의 정보)를 기능 점수의 궤적과 치환술(total knee replacement)의 위험을 한 모형에 넣어 다룬다. 무작위로 고른 무릎 4,000개로 피팅하고, 방문마다 갱신되는 예측을 랜드마크 Cox와 비교한다.</p>
         <p class="study-lbl">OAI에 적용한 결과</p>
         <ul class="study-points">
           <li>기능의 수준과 함께 악화 속도가 위험과 강하게 관련된다. 같은 수준에서 연 1점 빨리 나빠지면 위험이 2.6배다.</li>
@@ -634,7 +634,7 @@
         <div class="study-links">
           <a href="https://github.com/pilsunchoi/rehab-data-analysis/blob/main/chapters/10-joint-model.md" target="_blank" rel="noopener">장 읽기</a>
           <a href="https://github.com/pilsunchoi/rehab-data-analysis/blob/main/chapters/10-joint-model.qmd" target="_blank" rel="noopener">R 문서(원본)</a>
-          <a href="https://github.com/pilsunchoi/rehab-data-analysis/blob/main/R/fit-jm.R" target="_blank" rel="noopener">결합모형 적합</a>
+          <a href="https://github.com/pilsunchoi/rehab-data-analysis/blob/main/R/fit-jm.R" target="_blank" rel="noopener">결합모형 피팅</a>
         </div>
       </div>
     </article>
@@ -642,12 +642,12 @@
     <article class="study">
       <div class="study-num">2</div>
       <div class="study-body">
-        <h4 class="study-title">기능 궤적과 치환술 시간의 SU정규 결합모형 — 결합모형을 1분 안에 적합할 수 있는가<span class="pill warn">초고</span></h4>
+        <h4 class="study-title">기능 궤적과 치환술 시간의 SU정규 결합모형 — 결합모형을 1분 안에 피팅할 수 있는가<span class="pill warn">초고</span></h4>
         <p class="study-sub">다변량 정규 결합모형(닫힌 형태의 가능도) · 가속수명 모형(accelerated failure time model) · SU정규 분포와 로그정규 · 가능도비 검정(likelihood ratio test) · 시뮬레이션 검증 · 동적 예측</p>
-        <p class="study-desc">종단 측정의 무작위 효과(random effects)와 변환한 치환술 시간을 함께 다변량 정규로 두면 가능도가 적분 없이 닫힌 형태가 된다. 치환술 시간의 분포로 로그정규를 포함하는 SU정규를 쓰고, 무릎 8,909개 전체로 적합해 1장의 JMbayes2 결합모형과 비교한다.</p>
+        <p class="study-desc">종단 측정의 무작위 효과(random effects)와 변환한 치환술 시간을 함께 다변량 정규로 두면 가능도가 적분 없이 닫힌 형태가 된다. 치환술 시간의 분포로 로그정규를 포함하는 SU정규를 쓰고, 무릎 8,909개 전체로 피팅해 1장의 JMbayes2 결합모형과 비교한다.</p>
         <p class="study-lbl">OAI에 적용한 결과</p>
         <ul class="study-points">
-          <li>무릎 전체의 적합이 1분 남짓이다(무릎 4,000개에서 11초, 같은 무릎의 JMbayes2는 16분).</li>
+          <li>무릎 전체의 피팅이 1분 남짓이다(무릎 4,000개에서 11초, 같은 무릎의 JMbayes2는 16분).</li>
           <li>기능이 나쁘고 빨리 나빠지는 무릎일수록 치환술이 이르다. 기울기가 연 1점 빠르면 치환술까지의 시간이 0.43배다.</li>
           <li>SU정규가 로그정규보다 데이터에 맞지만(가능도비 통계량 21.0), 관측 범위 안의 누적 치환술과 2년 예측(AUC 0.89)은 같다. 두 분포는 추적 기간 밖의 분위수에서 갈라진다.</li>
         </ul>
@@ -655,7 +655,7 @@
         <div class="study-links">
           <a href="https://github.com/pilsunchoi/rehab-data-analysis/blob/main/chapters/06-su-normal-joint-model.md" target="_blank" rel="noopener">장 읽기</a>
           <a href="https://github.com/pilsunchoi/rehab-data-analysis/blob/main/chapters/06-su-normal-joint-model.qmd" target="_blank" rel="noopener">R 문서(원본)</a>
-          <a href="https://github.com/pilsunchoi/rehab-data-analysis/blob/main/R/fit-su-joint.R" target="_blank" rel="noopener">결합모형 적합</a>
+          <a href="https://github.com/pilsunchoi/rehab-data-analysis/blob/main/R/fit-su-joint.R" target="_blank" rel="noopener">결합모형 피팅</a>
         </div>
       </div>
     </article>
